@@ -88,12 +88,12 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
     <div className="intake-container" ref={formRef}>
       <div className="intake-split">
         <div className="intake-main">
-          {/* Hero panel */}
-          <div className="panel animate-fade-in">
-            <div className="intake-label">Workshop Tool</div>
-            <h1 className="intake-title">Map Your AI Potential & Build Your Change Strategy</h1>
-            <p className="intake-subtitle">Answer seven questions about your role and team. AI will discover use cases tailored to you, then build a personalized change strategy grounded in behavioral science.</p>
-            <p className="intake-step">Step 1 of 4</p>
+          {/* Hero panel -- dark */}
+          <div className="intake-hero animate-fade-in">
+            <div className="intake-label" style={{ color: "rgba(255,255,255,0.6)" }}>Personalized AI Playbook</div>
+            <h1 className="intake-title" style={{ color: C.white }}>Map Your AI Potential & Build Your Change Strategy</h1>
+            <p className="intake-subtitle" style={{ color: "rgba(255,255,255,0.65)" }}>Answer seven questions about your role and team. AI will discover use cases tailored to you, then build a personalized change strategy grounded in behavioral science.</p>
+            <p className="intake-step" style={{ color: "rgba(255,255,255,0.4)" }}>Step 1 of 4</p>
           </div>
 
           {attempted && !ok && (

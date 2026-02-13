@@ -19,15 +19,15 @@ export default function CommitmentView({ state, dispatch }) {
 
   return (
     <div className="commitment-container">
-      <div className="animate-fade-in">
+      <div className="commitment-hero animate-fade-in">
         <div className="no-print">
-          <p className="commitment-step">Step 4 of 4 -- Review</p>
+          <p className="commitment-step" style={{ color: "rgba(255,255,255,0.4)" }}>Step 4 of 4 -- Review</p>
         </div>
         <div className="commitment-header-print">
           <div className="intake-label">AI Playbook</div>
         </div>
-        <h1 className="commitment-title">My AI Journey</h1>
-        <p className="commitment-role" title={intake.role}>{intake.role} &middot; {date}</p>
+        <h1 className="commitment-title" style={{ color: C.white }}>My AI Journey</h1>
+        <p className="commitment-role" style={{ color: "rgba(255,255,255,0.55)" }} title={intake.role}>{intake.role} &middot; {date}</p>
       </div>
 
       {!hasAnything ? (
@@ -55,41 +55,47 @@ export default function CommitmentView({ state, dispatch }) {
             </article>
           </div>
 
-          {/* 2-column review: Use Cases left, Playbook right */}
-          {(starredPrimitives.length > 0 || starredActions.length > 0) && (
-            <div className="review-columns animate-fade-in" style={{ animationDelay: "0.1s" }}>
-              <article className="panel">
-                <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 18, marginBottom: 16 }}>My AI Use Cases</h3>
-                {starredPrimitives.length > 0 ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {starredPrimitives.map((i) => (
-                      <div key={i.id} className="commitment-priority-item">
+          {/* 2-column review: Use Cases left, Playbook right -- shows ALL items */}
+          <div className="review-columns animate-fade-in" style={{ animationDelay: "0.1s" }}>
+            <article className="panel">
+              <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 18, marginBottom: 16 }}>My AI Use Cases</h3>
+              {allPrimitiveIdeas.length > 0 ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {allPrimitiveIdeas.map((i) => (
+                    <div key={i.id} className="commitment-priority-item">
+                      {i.starred ? (
                         <Star size={16} fill={C.accentGlow} color={C.accentGlow} style={{ flexShrink: 0, marginTop: 3 }} />
-                        <span>{i.text} <span className="commitment-rule-ref">-- {i.category.title}</span></span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p style={{ fontSize: 14, color: C.darkGray, fontStyle: "italic" }}>No starred ideas yet</p>
-                )}
-              </article>
-              <article className="panel">
-                <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 18, marginBottom: 16 }}>My Change Playbook</h3>
-                {starredActions.length > 0 ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {starredActions.map((a) => (
-                      <div key={a.id} className="commitment-priority-item">
+                      ) : (
+                        <div className="commitment-bullet"><Check size={12} /></div>
+                      )}
+                      <span>{i.text} <span className="commitment-rule-ref">-- {i.category.title}</span></span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ fontSize: 14, color: C.darkGray, fontStyle: "italic" }}>No ideas yet</p>
+              )}
+            </article>
+            <article className="panel">
+              <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 18, marginBottom: 16 }}>My Change Playbook</h3>
+              {allActions.length > 0 ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {allActions.map((a) => (
+                    <div key={a.id} className="commitment-priority-item">
+                      {a.starred ? (
                         <Star size={16} fill={C.accentGlow} color={C.accentGlow} style={{ flexShrink: 0, marginTop: 3 }} />
-                        <span>{a.text} <span className="commitment-rule-ref">-- Rule {a.rule.number}</span></span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p style={{ fontSize: 14, color: C.darkGray, fontStyle: "italic" }}>No starred actions yet</p>
-                )}
-              </article>
-            </div>
-          )}
+                      ) : (
+                        <div className="commitment-bullet"><Check size={12} /></div>
+                      )}
+                      <span>{a.text} <span className="commitment-rule-ref">-- Rule {a.rule.number}</span></span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ fontSize: 14, color: C.darkGray, fontStyle: "italic" }}>No actions yet</p>
+              )}
+            </article>
+          </div>
 
           {/* -- Full detail: My AI Use Cases -- */}
           <h2 className="commitment-section-title animate-fade-in" style={{ animationDelay: "0.14s" }}>My AI Use Cases</h2>

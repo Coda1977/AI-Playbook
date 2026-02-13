@@ -68,7 +68,7 @@ export default function CategorySection({ category, ideas, dispatch, isActive, o
             <div className="rule-footer-add">
               <AddIdeaInput categoryId={category.id} dispatch={dispatch} />
             </div>
-            <button onClick={() => onGoDeeper(category)} className="btn-go-deeper" style={{ background: category.color || C.accent }}>
+            <button onClick={() => onGoDeeper(category)} className="btn-go-deeper" >
               <MessageCircle size={14} /> Brainstorm with AI
             </button>
           </div>
@@ -83,7 +83,7 @@ export default function CategorySection({ category, ideas, dispatch, isActive, o
               <div className="rule-footer-add">
                 <AddIdeaInput categoryId={category.id} dispatch={dispatch} />
               </div>
-              <button onClick={() => onGoDeeper(category)} className="btn-go-deeper" style={{ background: category.color || C.accent }}>
+              <button onClick={() => onGoDeeper(category)} className="btn-go-deeper" >
                 <MessageCircle size={14} /> Brainstorm with AI
               </button>
             </div>

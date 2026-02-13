@@ -97,7 +97,7 @@ export default function Header({ state, dispatch }) {
           </div>
           <div className="header-actions">
             {phase !== "intake" && phase !== "generating-primitives" && phase !== "generating-playbook" && (
-              <PhaseProgress phase={phase} />
+              <PhaseProgress phase={phase} dispatch={dispatch} />
             )}
             {phase === "primitives" && (
               <>

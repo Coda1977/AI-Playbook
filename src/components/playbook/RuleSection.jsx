@@ -40,7 +40,7 @@ export default function RuleSection({ rule, actions, dispatch, isActive, onGoDee
           </div>
         </div>
         <h2 className="rule-name">{rule.name}</h2>
-        <div className="rule-principle" style={{ borderLeftColor: rule.color || C.accent }}>
+        <div className="rule-principle">
           <p>{rule.principle}</p>
         </div>
 
@@ -62,7 +62,7 @@ export default function RuleSection({ rule, actions, dispatch, isActive, onGoDee
           <div className="rule-footer-add">
             <AddActionInput ruleId={rule.id} dispatch={dispatch} />
           </div>
-          <button onClick={() => onGoDeeper(rule)} className="btn-go-deeper" style={{ background: rule.color || C.accent }}>
+          <button onClick={() => onGoDeeper(rule)} className="btn-go-deeper" >
             <MessageCircle size={14} /> Go Deeper with AI
           </button>
         </div>
