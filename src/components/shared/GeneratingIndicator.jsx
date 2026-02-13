@@ -51,7 +51,7 @@ export default function GeneratingIndicator({ mode, onReady }) {
       {complete ? (
         <div className="ready-beat animate-fade-in">
           <div className="ready-check">
-            <CheckCircle2 size={48} color={C.accent} />
+            <CheckCircle2 size={48} color={C.red} />
           </div>
           <h2 className="generating-title" style={{ marginTop: 20 }}>{readyTitle}</h2>
           <p className="generating-subtitle" style={{ opacity: 0.7 }}>Opening now...</p>
@@ -59,7 +59,7 @@ export default function GeneratingIndicator({ mode, onReady }) {
       ) : (
         <>
           <div className="generating-icon">
-            {isPrimitives ? <Sparkles size={32} color={C.accent} /> : <BookOpen size={32} color={C.accent} />}
+            {isPrimitives ? <Sparkles size={32} color={C.red} /> : <BookOpen size={32} color={C.red} />}
           </div>
           <h2 className="generating-title">{title}</h2>
           <p className="generating-subtitle">
@@ -82,9 +82,9 @@ export default function GeneratingIndicator({ mode, onReady }) {
                 <div key={i} className={`gen-step ${done ? "gen-done" : active ? "gen-active" : "gen-future"}`}>
                   <div className="gen-step-icon">
                     {done ? (
-                      <CheckCircle2 size={18} color={C.accent} />
+                      <CheckCircle2 size={18} color={C.red} />
                     ) : active ? (
-                      <Loader2 size={18} color={C.accent} className="spinning" />
+                      <Loader2 size={18} color={C.red} className="spinning" />
                     ) : (
                       <Circle size={18} color={C.border} />
                     )}
@@ -99,7 +99,7 @@ export default function GeneratingIndicator({ mode, onReady }) {
           </div>
           {stepsFinished && (
             <div className="gen-building animate-fade-in">
-              <Loader2 size={16} color={C.accent} className="spinning" />
+              <Loader2 size={16} color={C.red} className="spinning" />
               <span>{isPrimitives ? "Building your AI use cases..." : "Building your personalized strategy..."}</span>
             </div>
           )}

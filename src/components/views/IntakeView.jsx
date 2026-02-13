@@ -27,7 +27,7 @@ function FluencySelector({ value, onChange, type, hasError }) {
           <button key={o.level} onClick={() => onChange(v)} type="button"
             className={`fluency-option ${sel ? "fluency-selected" : ""}`}>
             <div className="fluency-check">
-              {sel ? <CheckCircle2 size={18} color={C.accent} /> : <Circle size={18} color={C.border} />}
+              {sel ? <CheckCircle2 size={18} color={C.gray900} /> : <Circle size={18} color={C.gray200} />}
             </div>
             <div>
               <div className="fluency-label">{o.label}</div>
@@ -49,7 +49,7 @@ function HelpMultiSelect({ selected, onToggle, hasError }) {
           <button key={o.id} onClick={() => onToggle(o.id)} type="button"
             className={`help-option ${sel ? "help-option-selected" : ""}`}>
             <div className="fluency-check">
-              {sel ? <CheckCircle2 size={18} color={C.accent} /> : <Circle size={18} color={C.border} />}
+              {sel ? <CheckCircle2 size={18} color={C.gray900} /> : <Circle size={18} color={C.gray200} />}
             </div>
             <span>{o.label}</span>
           </button>

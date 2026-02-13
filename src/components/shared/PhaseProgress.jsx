@@ -1,5 +1,4 @@
 import { Check } from "lucide-react";
-import { C } from "../../config/constants";
 
 const PHASES = [
   { id: "intake", label: "Intake" },
@@ -19,7 +18,7 @@ export default function PhaseProgress({ phase }) {
         <div key={p.id} style={{ display: "flex", alignItems: "center" }}>
           {i > 0 && <div className="phase-connector" />}
           <div className={`phase-step ${i === current ? "phase-step-active" : i < current ? "phase-step-done" : ""}`}>
-            {i < current ? <Check size={12} color={C.success} /> : null}
+            {i < current ? <Check size={12} /> : null}
             <span>{p.label}</span>
           </div>
         </div>

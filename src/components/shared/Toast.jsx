@@ -11,7 +11,7 @@ export default function Toast({ message, onClose, duration = 3000 }) {
   return (
     <div className="toast animate-slide-up">
       <div className="toast-icon">
-        <Star size={16} fill={C.accentGlow} color={C.accentGlow} />
+        <Star size={16} fill={C.red} color={C.red} />
       </div>
       <span className="toast-message">{message}</span>
       <button onClick={onClose} className="toast-close" aria-label="Close">
