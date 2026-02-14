@@ -24,26 +24,30 @@
 
 ### Brand Identity
 - **App Name**: "AI Playbook" (not "AI Primitives + Playbook")
-- **Aesthetic**: Warm editorial minimalism (Matemática del Alma inspired)
-- **Typography**: DM Serif Display (headings) + DM Sans (body)
+- **Aesthetic**: Bold modern -- high contrast black/white/red, magazine editorial feel
+- **Typography**: Montserrat (headings, body, and UI -- single font family, weights 400-700)
+- **No Roboto Condensed** -- fully removed as of Feb 2026 redesign
 
 ### Color Palette
 ```css
---color-cream: #F5F0E8        /* Background */
---color-ink: #1A1A1A          /* Primary text */
---color-accent: #D97706       /* Orange accent */
---color-accent-glow: #FBBF24  /* Starred items */
---color-muted: #78716C        /* Secondary text */
---color-card: #FFFDF9         /* Card backgrounds */
---color-border: #DDD6CA       /* Borders */
+--color-black: #000000        /* Primary backgrounds, text */
+--color-charcoal: #222222     /* Secondary dark surfaces */
+--color-white: #ffffff         /* Card backgrounds, main bg */
+--color-red: #e30613          /* Primary accent, CTAs, stars */
+--color-red-hover: #c00510    /* Hover state */
+--color-red-light: #fff2f3    /* Starred item backgrounds */
+--color-electric-blue: #00a3e0 /* Category badges, secondary accent */
+--color-surface: #f5f5f5      /* Subtle backgrounds */
+--color-light-gray: #cccccc   /* Borders */
 ```
 
 ### Design Principles
-- Paper grain texture overlay for warmth
+- High contrast black/white with red accent (no paper grain -- disabled)
 - Generous whitespace and breathing room
 - Smooth fade-in animations (no jarring transitions)
-- Star system for prioritization (⭐ = priorities)
-- Minimal, editorial aesthetic (not generic AI-looking)
+- Star system for prioritization (red stars = priorities)
+- Bold, editorial aesthetic with dark hero sections and card-based layout
+- Sticky navigation elements (header, category nav, gate bar, intake progress)
 
 ## Phase Naming Convention
 
@@ -127,7 +131,9 @@ src/
 - `starPop` - Star button click (0.4s with rotation)
 - `counterPulse` - Number counter update (0.6s scale + color)
 - `bloomBg` - Background flash when starring (0.5s)
-- `glowPulse` - CTA button pulse (2s infinite)
+- `glowPulse` - CTA button pulse (2s infinite), also used on active gen step icons
+- `pillSelect` - Help chip selection bounce (0.25s scale)
+- `scaleIn` - Modal/ready-check entrance (0.4s)
 
 ### Animation Principles
 - **Subtle, not showy** - Enhance UX without being distracting
@@ -143,13 +149,29 @@ src/
 - 🗑️ **Deleting**: Two-click confirmation (3-second timeout)
 - 💬 **Chat drawer**: Slides in from right, backdrop click to close
 
+### Form Controls
+- **Help pills**: Multi-select with check icon + scale animation on selection
+- **Fluency selector**: Custom radio dots (not checkbox icons) with scale-in transition
+- **Loading screen**: Step-by-step progress with percentage bar, active step glow
+
 ### Empty States
 - Show helpful nudges when sections are empty
 - Gate buttons disabled with opacity until requirements met
 - Clear messaging about what's needed to proceed
 
+### Review Page (CommitmentView)
+- Flow: Hero -> Stats -> Priorities box (starred only) -> Full detail by category -> Full detail by rule -> Buttons
+- No redundant 2-column overview -- priorities box replaces it
+
+### Navigation & Progress
+- **Sticky intake progress**: "X of 7 complete" bar at top of intake form with red fill
+- **Sticky category nav**: Horizontal tabs on PrimitivesView, IntersectionObserver tracks active section
+- **Sticky gate bar**: Stays at bottom of viewport with progress text ("2 of 3 starred -- star 1 more")
+- **Regeneration guard**: ConfirmModal warns before replacing existing primitives
+
 ### Validation
-- Real-time feedback with color-coded hints (orange → green)
+- Word-count based feedback (not character count): 0/5/15/16+ word thresholds
+- Color-coded hints (amber for short, green for detailed)
 - Shake animation on invalid submit attempts
 - Scroll to first error field automatically
 
@@ -157,7 +179,10 @@ src/
 
 ### PDF Export
 - Uses browser's `window.print()` function
-- Print-specific CSS in `@media print` block
+- Print-specific CSS in `@media print` block with `@page { margin: 0.75in }`
+- Forces white backgrounds on dark elements (hero, stats, card headers)
+- Global `* { color: black !important }` with exceptions for red stars
+- `page-break-inside: avoid` on rules and priorities
 - Hides UI chrome (buttons, header, `.no-print` class)
 - Shows print-only elements (`.commitment-header-print`)
 
@@ -224,12 +249,19 @@ The 5 rules are grounded in research:
 ❌ **Don't** over-animate or add flashy effects
 ✅ **Do** keep animations subtle and purposeful
 
+❌ **Don't** add `transition: all` to flex containers (breaks layout on chat panel close)
+✅ **Do** transition specific properties only, or omit transition on `.canvas-rules`
+
+❌ **Don't** use Roboto Condensed or any font besides Montserrat
+✅ **Do** use `var(--font-ui)` / `var(--font-heading)` / `var(--font-sans)` (all Montserrat)
+
 ## Git Workflow
 
 - Use clear, concise commit messages (see git history for style)
-- Always include `Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>`
+- Always include `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`
 - Build before committing (`npm run build`)
-- Push to `master` branch (deploys to Vercel automatically)
+- Always work on a feature branch and open a PR -- never push directly to `master`
+- `master` deploys to Vercel automatically
 
 ## Future Enhancements (Ideas)
 
@@ -244,4 +276,4 @@ The 5 rules are grounded in research:
 
 **Last Updated**: February 2026
 **Maintainer**: Yonat
-**AI Assistant**: Claude Sonnet 4.5
+**AI Assistant**: Claude Opus 4.6 (development) / Claude Sonnet 4.5 (API generation)
