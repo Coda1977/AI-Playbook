@@ -63,16 +63,8 @@ export default function GeneratingIndicator({ mode, onReady }) {
               {isPrimitives ? <Sparkles size={32} color={C.red} /> : <BookOpen size={32} color={C.red} />}
             </div>
             <h2 className="generating-title">{title}</h2>
-            <p className="generating-subtitle">
-              {stepsFinished ? subtitle : `Step ${isPrimitives ? "2" : "3"} of 4 -- Generating...`}
-            </p>
+            <p className="generating-subtitle">{subtitle}</p>
             <div className="generating-steps">
-              {isPrimitives && (
-                <p className="gen-phase-label">Step 2 of 4: AI Use Cases</p>
-              )}
-              {!isPrimitives && (
-                <p className="gen-phase-label">Step 3 of 4: Change Strategy</p>
-              )}
               {steps.map((s, i) => {
                 const done = i < step;
                 const active = i === step;

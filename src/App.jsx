@@ -106,28 +106,20 @@ export default function App() {
         <ErrorBanner message={genErr} onDismiss={() => setGenErr(null)} />
       )}
 
-      {phase !== "intake" && phase !== "generating-primitives" && phase !== "generating-playbook" && (
-        <Header state={state} dispatch={dispatch} />
-      )}
+      <Header state={state} dispatch={dispatch} />
 
       <main className="app-main">
         {phase === "intake" && (
           <IntakeView state={state} dispatch={dispatch} onGenerate={handleGenerateRequest} />
         )}
         {phase === "generating-primitives" && (
-          <>
-            <Header state={state} dispatch={dispatch} />
-            <GeneratingIndicator mode="primitives" onReady={primitivesReady ? handlePrimitivesReady : null} />
-          </>
+          <GeneratingIndicator mode="primitives" onReady={primitivesReady ? handlePrimitivesReady : null} />
         )}
         {phase === "primitives" && (
           <PrimitivesView state={state} dispatch={dispatch} onContinue={handleContinueToPlaybook} />
         )}
         {phase === "generating-playbook" && (
-          <>
-            <Header state={state} dispatch={dispatch} />
-            <GeneratingIndicator mode="playbook" onReady={playbookReady ? handlePlaybookReady : null} />
-          </>
+          <GeneratingIndicator mode="playbook" onReady={playbookReady ? handlePlaybookReady : null} />
         )}
         {phase === "playbook" && (
           <PlaybookView state={state} dispatch={dispatch} />

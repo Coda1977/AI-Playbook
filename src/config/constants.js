@@ -12,7 +12,6 @@ export const C = {
   redHover: "#c00510",
   redLight: "#fff2f3",
   electricBlue: "#00a3e0",
-  neonYellow: "#ffff00",
   // Legacy aliases (used by components)
   ink: "#000000",
   accent: "#e30613",

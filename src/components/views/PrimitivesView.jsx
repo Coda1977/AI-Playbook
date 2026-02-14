@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronRight, Star } from "lucide-react";
+import { ChevronRight, Star, Download } from "lucide-react";
 import { CATEGORIES } from "../../config/categories";
 import { MIN_STARS_FOR_PLAYBOOK, C } from "../../config/constants";
 import { FlashProvider } from "../../context/AppContext";
+import { exportPrimitivesDocx } from "../../utils/export";
 import CategorySection from "../primitives/CategorySection";
 import ChatDrawer from "../shared/ChatDrawer";
 
@@ -75,7 +76,7 @@ export default function PrimitivesView({ state, dispatch, onContinue }) {
                 )}
               </div>
               <p className="orientation-hint">
-                Step 2 of 4: AI Use Cases -- Star at least {MIN_STARS_FOR_PLAYBOOK} ideas that matter most to you -- these will shape your change strategy.
+                Star at least {MIN_STARS_FOR_PLAYBOOK} ideas that matter most -- these will shape your change strategy.
               </p>
             </div>
 
@@ -118,13 +119,18 @@ export default function PrimitivesView({ state, dispatch, onContinue }) {
                 <span><strong>{starredCount}</strong> of {MIN_STARS_FOR_PLAYBOOK} starred -- star {MIN_STARS_FOR_PLAYBOOK - starredCount} more to continue</span>
               )}
             </div>
-            <button
-              onClick={canContinue ? onContinue : undefined}
-              className={`btn-gate ${canContinue ? "btn-gate-active" : "btn-gate-disabled"}`}
-              disabled={!canContinue}
-            >
-              Continue to Change Strategy <ChevronRight size={16} />
-            </button>
+            <div className="gate-actions">
+              <button onClick={() => exportPrimitivesDocx(state)} className="btn-ghost btn-sm gate-export-btn">
+                <Download size={14} /> Export
+              </button>
+              <button
+                onClick={canContinue ? onContinue : undefined}
+                className={`btn-gate ${canContinue ? "btn-gate-active" : "btn-gate-disabled"}`}
+                disabled={!canContinue}
+              >
+                Continue to Change Strategy <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
         </div>
 

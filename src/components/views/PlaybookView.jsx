@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ChevronRight } from "lucide-react";
 import { RULES } from "../../config/rules";
 import { FlashProvider } from "../../context/AppContext";
 import RuleSection from "../playbook/RuleSection";
@@ -29,7 +30,7 @@ export default function PlaybookView({ state, dispatch }) {
                   </>
                 )}
               </div>
-              <p className="orientation-hint">Step 3 of 4: Change Strategy -- Star your priorities. Go deeper on any rule. Make this yours.</p>
+              <p className="orientation-hint">Star your priorities. Go deeper on any rule. Make this yours.</p>
             </div>
 
             <div className="rule-list">
@@ -46,6 +47,19 @@ export default function PlaybookView({ state, dispatch }) {
                 />
               ))}
             </div>
+          </div>
+
+          {/* Gate -- sticky bottom bar */}
+          <div className="gate-bar">
+            <div className="gate-counter">
+              <span><strong>{totalActions}</strong> actions across <strong>{rulesWithActions}</strong> rules{starred > 0 && <> &middot; <strong>{starred}</strong> starred</>}</span>
+            </div>
+            <button
+              onClick={() => dispatch({ type: "SET_PHASE", phase: "commitment" })}
+              className="btn-gate btn-gate-active"
+            >
+              Continue to Review <ChevronRight size={16} />
+            </button>
           </div>
         </div>
 

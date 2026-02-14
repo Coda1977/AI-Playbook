@@ -15,7 +15,6 @@
   --color-red-hover: #c00510;
   --color-red-light: #fff2f3;
   --color-electric-blue: #00a3e0;
-  --color-neon-yellow: #ffff00;
 
   /* Legacy aliases for Tailwind utility compat */
   --color-ink: #000000;
@@ -244,18 +243,18 @@ html, body { overflow-x: hidden; max-width: 100%; }
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .header-inner {
-  max-width: 1280px; margin: 0 auto; padding: 14px 20px;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  max-width: 1280px; margin: 0 auto; padding: 16px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
 }
 .header-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
 .header-title {
-  font-family: var(--font-heading); font-size: 18px; font-weight: 700;
+  font-family: var(--font-heading); font-size: 20px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.06em;
   white-space: nowrap; color: white;
 }
 .header-divider { color: rgba(255,255,255,0.2); font-size: 18px; }
 .header-role { color: rgba(255,255,255,0.5); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 280px; }
-.header-actions { display: flex; gap: 6px; flex-shrink: 1; flex-wrap: wrap; align-items: center; }
+.header-actions { display: flex; flex-shrink: 0; align-items: center; }
 @media (max-width: 768px) {
   .phase-step-label { display: none; }
 }
@@ -272,32 +271,52 @@ html, body { overflow-x: hidden; max-width: 100%; }
 .header .btn-primary:hover { background: var(--color-red-hover); }
 
 /* ========================================
-   PHASE PROGRESS (rectangular badges)
+   PHASE PROGRESS (numbered badge stepper)
    ======================================== */
 .phase-progress {
-  display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500;
+  display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600;
   font-family: var(--font-ui); text-transform: uppercase; letter-spacing: 0.04em;
 }
 .phase-step {
-  display: flex; align-items: center; gap: 5px;
-  padding: 6px 12px; border-radius: 4px;
-  transition: all 0.2s;
-  border: 1.5px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 14px 6px 7px; border-radius: 6px;
+  transition: all 0.2s; border: none; background: none;
   color: rgba(255,255,255,0.35);
 }
+.phase-step-number {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; flex-shrink: 0;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.35); background: transparent;
+  transition: all 0.2s;
+}
 .phase-step-active {
-  border-color: var(--color-electric-blue);
   color: white;
-  background: var(--color-electric-blue);
+}
+.phase-step-active .phase-step-number {
+  background: var(--color-red); border-color: var(--color-red); color: white;
 }
 .phase-step-done {
-  border-color: var(--color-neon-yellow);
-  color: var(--color-neon-yellow);
-  background: transparent;
+  color: rgba(255,255,255,0.7);
+}
+.phase-step-done .phase-step-number {
+  background: var(--color-black); border-color: rgba(255,255,255,0.3); color: white;
+}
+.phase-step-generating {
+  color: var(--color-red);
+}
+.phase-step-generating .phase-step-number {
+  background: transparent; border: 1.5px solid var(--color-red); color: var(--color-red);
+}
+.phase-step-pulse {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--color-red);
+  animation: pulseDot 1.2s ease-in-out infinite; flex-shrink: 0;
 }
 .phase-step-clickable { cursor: pointer !important; }
-.phase-step-clickable:hover { background: rgba(255,255,0,0.1); border-color: var(--color-neon-yellow); }
-.phase-connector { width: 6px; height: 1px; background: rgba(255,255,255,0.15); }
+.phase-step-clickable:hover { background: rgba(255,255,255,0.06); }
+.phase-step-clickable:hover .phase-step-number { border-color: rgba(255,255,255,0.5); }
+.phase-connector { width: 10px; height: 1.5px; background: rgba(255,255,255,0.15); }
 
 /* ========================================
    MODAL
@@ -397,20 +416,42 @@ html, body { overflow-x: hidden; max-width: 100%; }
   color: var(--color-dark-gray); text-transform: uppercase; letter-spacing: 0.06em;
   margin-bottom: 12px;
 }
-.intake-progress-sticky {
-  position: sticky; top: 57px; z-index: 20;
-  background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
-  padding: 12px 0 10px; margin-bottom: 8px;
+/* Vertical progress rail (intake) */
+.intake-rail {
+  position: fixed; left: max(12px, calc((100vw - 1280px) / 2 - 48px));
+  top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; align-items: center;
+  z-index: 20; gap: 0;
 }
-.intake-progress-text {
-  font-size: 13px; font-weight: 600; color: var(--color-dark-gray); margin-bottom: 8px;
+.rail-segment {
+  display: flex; flex-direction: column; align-items: center; position: relative;
 }
-.intake-progress-bar {
-  width: 100%; height: 3px; background: var(--color-light-gray); border-radius: 3px; overflow: hidden;
+.rail-line {
+  width: 2px; height: 20px; background: var(--color-light-gray);
+  transition: background 0.3s;
 }
-.intake-progress-fill {
-  height: 100%; background: var(--color-red); border-radius: 3px;
-  transition: width 0.3s ease;
+.rail-dot {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid var(--color-light-gray);
+  background: var(--color-white);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s; cursor: default;
+  flex-shrink: 0;
+}
+.rail-dot-done {
+  background: var(--color-red); border-color: var(--color-red); color: white;
+}
+.rail-label {
+  position: absolute; left: 26px; top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-ui); font-size: 11px; font-weight: 600;
+  color: var(--color-dark-gray); text-transform: uppercase; letter-spacing: 0.04em;
+  white-space: nowrap; opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.rail-segment:hover .rail-label { opacity: 1; }
+@media (max-width: 992px) {
+  .intake-rail { display: none; }
 }
 
 .intake-fields { display: flex; flex-direction: column; gap: 20px; }
@@ -518,11 +559,6 @@ html, body { overflow-x: hidden; max-width: 100%; }
   margin-bottom: 36px;
 }
 .generating-steps { max-width: 400px; width: 100%; margin: 0 auto; text-align: left; }
-.gen-phase-label {
-  font-family: var(--font-ui); font-size: 12px; font-weight: 700;
-  color: var(--color-red); text-transform: uppercase; letter-spacing: 0.1em;
-  margin-bottom: 16px; text-align: center;
-}
 .gen-step {
   display: flex; gap: 14px; align-items: flex-start; padding: 10px 0;
   transition: opacity 0.5s ease, transform 0.3s ease;
@@ -861,6 +897,8 @@ html, body { overflow-x: hidden; max-width: 100%; }
 .btn-gate-disabled:hover { background: var(--color-black); }
 .btn-gate-active { animation: glowPulse 2s ease-in-out infinite; background: var(--color-red); }
 .btn-gate-active:hover { background: var(--color-red-hover); }
+.gate-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.gate-export-btn { border-color: rgba(0,0,0,0.15) !important; }
 
 /* ========================================
    CHAT PANEL
@@ -1075,6 +1113,16 @@ html, body { overflow-x: hidden; max-width: 100%; }
 .commitment-reflection p { font-size: 15px; font-style: italic; color: var(--color-dark-gray); margin: 0; line-height: 1.55; }
 .commitment-footer-print { display: none; }
 .commitment-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+.commitment-reset {
+  text-align: center; padding: 24px 0 0;
+}
+.btn-reset-link {
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font-ui); font-size: 13px; font-weight: 500;
+  color: var(--color-dark-gray); display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 6px; transition: all 0.15s;
+}
+.btn-reset-link:hover { color: var(--color-red); background: var(--color-red-light); }
 
 /* ========================================
    PRINT STYLES
@@ -1089,7 +1137,6 @@ html, body { overflow-x: hidden; max-width: 100%; }
   * { color: black !important; }
   .star-btn svg, .commitment-action svg { color: var(--color-red) !important; }
   .commitment-container { padding: 24px 20px; }
-  .commitment-step { display: none; }
   .commitment-header-print { display: block !important; margin-bottom: 8px; }
   .commitment-hero { background: white !important; border-color: var(--color-light-gray) !important; }
   .commitment-hero * { color: black !important; }

@@ -1,9 +1,14 @@
-import { Star, ArrowLeft, Download, Check } from "lucide-react";
+import { useState } from "react";
+import { Star, ArrowLeft, Download, Check, RotateCcw } from "lucide-react";
 import { CATEGORIES } from "../../config/categories";
 import { RULES } from "../../config/rules";
 import { C } from "../../config/constants";
+import { exportPrimitivesDocx, exportPlaybookDocx } from "../../utils/export";
+import { clearState } from "../../utils/storage";
+import ConfirmModal from "../shared/ConfirmModal";
 
 export default function CommitmentView({ state, dispatch }) {
+  const [showConfirm, setShowConfirm] = useState(false);
   const { primitives, plan, intake } = state;
   const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
@@ -20,9 +25,6 @@ export default function CommitmentView({ state, dispatch }) {
   return (
     <div className="commitment-container">
       <div className="commitment-hero animate-fade-in">
-        <div className="no-print">
-          <p className="commitment-step" style={{ color: "rgba(255,255,255,0.4)" }}>Step 4 of 4 -- Review</p>
-        </div>
         <div className="commitment-header-print">
           <div className="intake-label">AI Playbook</div>
         </div>
@@ -141,14 +143,39 @@ export default function CommitmentView({ state, dispatch }) {
 
           <div className="commitment-buttons no-print animate-fade-in" style={{ animationDelay: "0.5s" }}>
             <button onClick={() => dispatch({ type: "SET_PHASE", phase: "playbook" })} className="btn-ghost btn-lg">
-              <ArrowLeft size={15} /> Back to Edit Strategy
+              <ArrowLeft size={15} /> Back to Edit
+            </button>
+            <button onClick={() => exportPrimitivesDocx(state)} className="btn-ghost btn-lg">
+              <Download size={15} /> Use Cases (.docx)
+            </button>
+            <button onClick={() => exportPlaybookDocx(state)} className="btn-ghost btn-lg">
+              <Download size={15} /> Strategy (.docx)
             </button>
             <button onClick={() => window.print()} className="btn-primary btn-lg">
               <Download size={15} /> Download as PDF
             </button>
           </div>
+
+          <div className="commitment-reset no-print animate-fade-in" style={{ animationDelay: "0.55s" }}>
+            <button onClick={() => setShowConfirm(true)} className="btn-reset-link">
+              <RotateCcw size={13} /> Start over with new intake
+            </button>
+          </div>
         </>
       )}
+
+      <ConfirmModal
+        open={showConfirm}
+        title="Start fresh?"
+        message="This will clear everything -- all ideas, actions, stars, and conversations. You can't undo this."
+        confirmLabel="Yes, start fresh"
+        onConfirm={() => {
+          setShowConfirm(false);
+          clearState();
+          dispatch({ type: "RESET" });
+        }}
+        onCancel={() => setShowConfirm(false)}
+      />
     </div>
   );
 }

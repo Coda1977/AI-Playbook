@@ -72,7 +72,17 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
   const toggleHelp = (id) => setF((p) => ({ ...p, helpWith: p.helpWith.includes(id) ? p.helpWith.filter((h) => h !== id) : [...p.helpWith, id] }));
 
   const ok = f.role && f.helpWith.length > 0 && f.responsibilities && f.managerFluency && f.teamFluency && f.failureRisks && f.successVision;
-  const completedCount = [f.role, f.helpWith.length > 0, f.responsibilities, f.managerFluency, f.teamFluency, f.failureRisks, f.successVision].filter(Boolean).length;
+
+  const RAIL_FIELDS = [
+    { key: "role", label: "Role" },
+    { key: "helpWith", label: "Focus", isArray: true },
+    { key: "responsibilities", label: "Tasks" },
+    { key: "managerFluency", label: "Your AI" },
+    { key: "teamFluency", label: "Team AI" },
+    { key: "failureRisks", label: "Risks" },
+    { key: "successVision", label: "Vision" },
+  ];
+  const fieldDone = (field) => field.isArray ? f[field.key]?.length > 0 : !!f[field.key];
 
   const missing = (field) => attempted && !f[field];
   const missingArray = (field) => attempted && (!f[field] || f[field].length === 0);
@@ -90,21 +100,24 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
 
   return (
     <div className="intake-container" ref={formRef}>
+      <nav className="intake-rail" aria-label="Form progress">
+        {RAIL_FIELDS.map((field, i) => (
+          <div key={field.key} className="rail-segment">
+            {i > 0 && <div className="rail-line" />}
+            <div className={`rail-dot ${fieldDone(field) ? "rail-dot-done" : ""}`} title={field.label}>
+              {fieldDone(field) && <Check size={10} strokeWidth={3} />}
+            </div>
+            <span className="rail-label">{field.label}</span>
+          </div>
+        ))}
+      </nav>
       <div className="intake-split">
         <div className="intake-main">
-          <div className="intake-progress-sticky">
-            <div className="intake-progress-text">{completedCount} of 7 complete</div>
-            <div className="intake-progress-bar">
-              <div className="intake-progress-fill" style={{ width: `${(completedCount / 7) * 100}%` }} />
-            </div>
-          </div>
-
           {/* Hero panel -- dark */}
           <div className="intake-hero animate-fade-in">
             <div className="intake-label" style={{ color: "rgba(255,255,255,0.6)" }}>Personalized AI Playbook</div>
             <h1 className="intake-title" style={{ color: C.white }}>Map Your AI Potential & Build Your Change Strategy</h1>
             <p className="intake-subtitle" style={{ color: "rgba(255,255,255,0.65)" }}>Answer seven questions about your role and team. AI will discover use cases tailored to you, then build a personalized change strategy grounded in behavioral science.</p>
-            <p className="intake-step" style={{ color: "rgba(255,255,255,0.4)" }}>Step 1 of 4</p>
           </div>
 
           {attempted && !ok && (
