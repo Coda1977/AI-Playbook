@@ -56,23 +56,32 @@ api/                        # primitives-generate.js, playbook-generate.js, chat
 - `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`
 - `master` auto-deploys to Vercel.
 
-## Current Branch: `improving-ai`
+## AI Behavior (merged from `improving-ai` branch)
 
-AI chat and recommendation quality improvements. Merge into master via PR when ready.
+### How the AI works
 
-### Changes made
+Three API endpoints in `api/`:
+- **`primitives-generate.js`** -- Initial use case generation (Phase 2). One-shot, no chat. Generates 2-3 ideas per 6 categories. max_tokens 2048.
+- **`playbook-generate.js`** -- Initial strategy generation (Phase 3). One-shot, no chat. Generates 2-3 actions per 5 rules. max_tokens 2048. Has quality check #5 (anti-hallucination).
+- **`chat.js`** -- Ongoing chat for both phases. Two system prompt builders: `buildPrimitivesSystem()` for use cases, `buildPlaybookSystem()` for strategy. max_tokens 250.
 
-- **max_tokens reduced** -- `chat.js` max_tokens dropped from 512 to 200. Hard physical ceiling the model can't ignore. Prompt-based word limits alone don't work.
-- **Static chat openers** -- ChatDrawer no longer fires an API call on open. Shows a static greeting ("Let's explore [topic]. What would be most useful to dig into?") instantly. User speaks first.
-- **Chat angle diversity** -- Closing questions now instruct the AI to pivot to a different angle, not drill deeper into the same direction.
-- **Anti-hallucination constraint** -- Added to both `chat.js` (both prompt builders) and `playbook-generate.js` (quality check #5). AI must never fabricate experiences, metrics, or outcomes for the manager. If suggesting they share a story, script the format, not the content.
-- **Mission context** -- Both chat system prompts now open with a one-line workshop context so the AI understands the bigger journey (intake -> use cases -> strategy).
+Chat responses use a dual format: prose text + `---IDEAS---` separator + JSON array of ideas/actions. The separator is parsed server-side to split conversational text from addable suggestions.
 
-### Key learnings
+### Changes made (Feb 2025)
 
-- Prompt instructions ("be brief!") are unreliable for length control. max_tokens is the only hard enforcement.
-- Long system prompts cause verbose responses -- the model mirrors input energy. Trim prompts rather than adding style instructions.
-- The AI fabricates personal anecdotes when the prompt asks for specificity but the intake data doesn't include actual experiences. Fix by constraining output, not by adding more intake fields.
+- **max_tokens tuned to 250** -- Dropped from 512. Tested at 200 (too tight, cuts off JSON ideas), 250 is the sweet spot. This is the only reliable brevity control -- prompt instructions alone don't work.
+- **Static chat openers** -- `ChatDrawer.jsx` no longer fires an API call on open. Shows instant static greeting ("Let's explore [topic]. What would be most useful to dig into?"). User speaks first, zero latency.
+- **Chat angle diversity** -- Closing questions in both `buildPrimitivesSystem` and `buildPlaybookSystem` instruct the AI to pivot to a different angle, not drill deeper into the same direction.
+- **Anti-hallucination constraint** -- Added to `chat.js` (both prompt builders, instruction #5) and `playbook-generate.js` (quality check #5). AI must never fabricate experiences, metrics, or outcomes. If suggesting they share a story, script the format ("share your experience"), not the content ("explain how automating X saved Y hours").
+- **Mission context** -- Both chat system prompts open with a one-line workshop context so the AI understands the bigger journey (intake -> use cases -> strategy).
+
+### Key learnings for future AI work
+
+- **max_tokens is the only hard brevity control.** Prompt instructions ("60 words max! Count them!") are unreliable. The model estimates, doesn't count.
+- **Long system prompts cause verbose responses.** The model mirrors input energy. To get shorter answers, trim the prompt rather than adding "be brief" instructions on top.
+- **The AI fabricates personal anecdotes** when the prompt asks for specificity but the intake data doesn't include actual experiences. Fix by constraining output ("never invent"), not by adding more intake fields.
+- **200 max_tokens is too tight** for the dual-format response (prose + JSON). The model writes good 60-word prose but runs out of tokens before the ideas JSON. 250 works. 512 gives too much runway.
+- **Static openers > auto-generated first messages.** Removing the initial API call on chat open eliminates 4-6 seconds of latency and lets the user drive the conversation direction.
 
 ## Design History
 
