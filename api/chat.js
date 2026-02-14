@@ -137,7 +137,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-5-20250929",
-        max_tokens: 200,
+        max_tokens: 250,
         system: sys,
         messages,
       }),
