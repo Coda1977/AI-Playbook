@@ -9,6 +9,7 @@ export default function IdeaCard({ idea, categoryId, dispatch, isNew }) {
   const [text, setText] = useState(idea.text);
   const [removing, setRemoving] = useState(false);
   const [blooming, setBlooming] = useState(false);
+  const [popping, setPopping] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const ref = useRef(null);
   const confirmTimer = useRef(null);
@@ -33,18 +34,20 @@ export default function IdeaCard({ idea, categoryId, dispatch, isNew }) {
   };
   const handleStar = () => {
     setBlooming(true);
+    setPopping(true);
     dispatch({ type: "TOGGLE_PRIMITIVE_STAR", categoryId, ideaId: idea.id });
     if (!idea.starred) {
       showToast("Added to your priorities");
     }
     setTimeout(() => setBlooming(false), 500);
+    setTimeout(() => setPopping(false), 500);
   };
 
   const isStarred = idea.starred;
 
   return (
     <div className={`action-card ${isStarred ? "action-starred" : ""} ${removing ? "action-removing" : ""} ${blooming ? "action-blooming" : ""} ${isNew ? "action-entering" : ""}`}>
-      <button onClick={handleStar} className="star-btn" aria-label={isStarred ? "Unstar" : "Star"}>
+      <button onClick={handleStar} className={`star-btn ${popping ? "star-popping" : ""}`} aria-label={isStarred ? "Unstar" : "Star"}>
         <Star size={18} fill={isStarred ? C.accentGlow : "none"} color={isStarred ? C.accentGlow : C.muted} />
       </button>
       <div className="action-text-area">
@@ -74,10 +77,10 @@ export default function IdeaCard({ idea, categoryId, dispatch, isNew }) {
           ) : (
             <>
               <button onClick={() => setEditing(true)} className="action-inline-btn" aria-label="Edit">
-                <Pencil size={14} />
+                <Pencil size={16} />
               </button>
               <button onClick={handleDelete} className="action-inline-btn action-inline-delete" aria-label="Delete">
-                <Trash2 size={14} />
+                <Trash2 size={16} />
               </button>
             </>
           )}

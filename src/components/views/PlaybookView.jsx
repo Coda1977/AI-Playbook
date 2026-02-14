@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { ChevronRight, RotateCcw } from "lucide-react";
 import { RULES } from "../../config/rules";
 import { FlashProvider } from "../../context/AppContext";
 import RuleSection from "../playbook/RuleSection";
 import ChatDrawer from "../shared/ChatDrawer";
 
-export default function PlaybookView({ state, dispatch }) {
+export default function PlaybookView({ state, dispatch, onStartOver }) {
   const [activeRule, setActiveRule] = useState(null);
   const chatOpen = activeRule !== null;
 
@@ -15,7 +16,7 @@ export default function PlaybookView({ state, dispatch }) {
   return (
     <FlashProvider>
       <div className="canvas-layout">
-        <div className="canvas-rules" style={{ flex: chatOpen ? "1 1 0" : "1 1 auto" }}>
+        <div className="canvas-rules">
           <div className="canvas-inner">
             <div className="canvas-orientation animate-fade-in">
               <div className="orientation-stats">
@@ -29,21 +30,41 @@ export default function PlaybookView({ state, dispatch }) {
                   </>
                 )}
               </div>
-              <p className="orientation-hint">Step 3 of 4: Change Strategy -- Star your priorities. Go deeper on any rule. Make this yours.</p>
+              <p className="orientation-hint">Star your priorities. Go deeper on any rule. Make this yours.</p>
             </div>
 
-            {RULES.map((r, i) => (
-              <RuleSection
-                key={r.id}
-                rule={r}
-                actions={state.plan[r.id] || []}
-                dispatch={dispatch}
-                isActive={activeRule?.id === r.id}
-                onGoDeeper={setActiveRule}
-                delay={i * 0.05}
-                isLast={i === RULES.length - 1}
-              />
-            ))}
+            <div className="rule-list">
+              {RULES.map((r, i) => (
+                <RuleSection
+                  key={r.id}
+                  rule={r}
+                  actions={state.plan[r.id] || []}
+                  dispatch={dispatch}
+                  isActive={activeRule?.id === r.id}
+                  onGoDeeper={setActiveRule}
+                  delay={i * 0.05}
+                  isLast={i === RULES.length - 1}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Gate -- sticky bottom bar */}
+          <div className="gate-bar">
+            <div className="gate-left">
+              <button onClick={onStartOver} className="btn-ghost btn-sm">
+                <RotateCcw size={12} /> Start over
+              </button>
+              <div className="gate-counter">
+                <span><strong>{totalActions}</strong> actions across <strong>{rulesWithActions}</strong> rules{starred > 0 && <> &middot; <strong>{starred}</strong> starred</>}</span>
+              </div>
+            </div>
+            <button
+              onClick={() => dispatch({ type: "SET_PHASE", phase: "commitment" })}
+              className="btn-gate btn-gate-active"
+            >
+              Continue to Review <ChevronRight size={16} />
+            </button>
           </div>
         </div>
 

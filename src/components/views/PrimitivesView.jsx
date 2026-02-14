@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef } from "react";
-import { ChevronRight, Star } from "lucide-react";
+import { ChevronRight, Star, Download, RotateCcw } from "lucide-react";
 import { CATEGORIES } from "../../config/categories";
 import { MIN_STARS_FOR_PLAYBOOK, C } from "../../config/constants";
 import { FlashProvider } from "../../context/AppContext";
+import { exportPrimitivesDocx } from "../../utils/export";
 import CategorySection from "../primitives/CategorySection";
 import ChatDrawer from "../shared/ChatDrawer";
 
-export default function PrimitivesView({ state, dispatch, onContinue }) {
+export default function PrimitivesView({ state, dispatch, onContinue, onStartOver }) {
   const [activeCategory, setActiveCategory] = useState(null);
   const [counterPulse, setCounterPulse] = useState(false);
   const prevStarredRef = useRef(0);
+  const scrollRef = useRef(null);
   const chatOpen = activeCategory !== null;
 
   const totalIdeas = CATEGORIES.reduce((sum, c) => sum + (state.primitives[c.id] || []).length, 0);
@@ -28,7 +30,7 @@ export default function PrimitivesView({ state, dispatch, onContinue }) {
   return (
     <FlashProvider>
       <div className="canvas-layout">
-        <div className="canvas-rules" style={{ flex: chatOpen ? "1 1 0" : "1 1 auto" }}>
+        <div className="canvas-rules" ref={scrollRef}>
           <div className="canvas-inner">
             <div className="canvas-orientation animate-fade-in">
               <div className="orientation-stats">
@@ -46,34 +48,48 @@ export default function PrimitivesView({ state, dispatch, onContinue }) {
                 )}
               </div>
               <p className="orientation-hint">
-                Step 2 of 4: AI Use Cases -- Star at least {MIN_STARS_FOR_PLAYBOOK} ideas that matter most to you -- these will shape your change strategy.
+                Star every idea that resonates. The more you star, the richer your change strategy.
               </p>
             </div>
 
-            {CATEGORIES.map((c, i) => (
-              <CategorySection
-                key={c.id}
-                category={c}
-                ideas={state.primitives[c.id] || []}
-                dispatch={dispatch}
-                isActive={activeCategory?.id === c.id}
-                onGoDeeper={setActiveCategory}
-                delay={i * 0.05}
-                isLast={i === CATEGORIES.length - 1}
-              />
-            ))}
+            <div className="card-stack">
+              {CATEGORIES.map((c, i) => (
+                <CategorySection
+                  key={c.id}
+                  category={c}
+                  ideas={state.primitives[c.id] || []}
+                  dispatch={dispatch}
+                  isActive={activeCategory?.id === c.id}
+                  onGoDeeper={setActiveCategory}
+                  delay={i * 0.05}
+                  isLast={i === CATEGORIES.length - 1}
+                />
+              ))}
+            </div>
+          </div>
 
-            {/* Gate */}
-            <div className="gate-bar">
+          {/* Gate - direct child of canvas-rules for sticky to work */}
+          <div className="gate-bar">
+            <div className="gate-left">
+              <button onClick={onStartOver} className="btn-ghost btn-sm">
+                <RotateCcw size={12} /> Start over
+              </button>
               <div className={`gate-counter ${counterPulse ? "counter-pulse" : ""}`}>
-                {canContinue ? (
-                  <span><Star size={14} fill={C.accentGlow} color={C.accentGlow} style={{ verticalAlign: "text-bottom" }} /> <strong>{starredCount}</strong> starred -- ready to build your strategy</span>
-                ) : starredCount === 0 ? (
-                  <span>Star ideas that matter most to you to continue</span>
+                {starredCount === 0 ? (
+                  <span>Star the ideas that matter to you</span>
+                ) : starredCount < MIN_STARS_FOR_PLAYBOOK ? (
+                  <span>Keep going - star at least <strong>{MIN_STARS_FOR_PLAYBOOK}</strong> to continue</span>
+                ) : starredCount <= 5 ? (
+                  <span><Star size={14} fill={C.accentGlow} color={C.accentGlow} style={{ verticalAlign: "text-bottom" }} /> <strong>{starredCount}</strong> starred so far - keep going or continue when ready</span>
                 ) : (
-                  <span><strong>{starredCount}</strong> of {MIN_STARS_FOR_PLAYBOOK} required stars</span>
+                  <span><Star size={14} fill={C.accentGlow} color={C.accentGlow} style={{ verticalAlign: "text-bottom" }} /> <strong>{starredCount}</strong> starred - great coverage!</span>
                 )}
               </div>
+            </div>
+            <div className="gate-actions">
+              <button onClick={() => exportPrimitivesDocx(state)} className="btn-ghost btn-sm gate-export-btn">
+                <Download size={14} /> Export
+              </button>
               <button
                 onClick={canContinue ? onContinue : undefined}
                 className={`btn-gate ${canContinue ? "btn-gate-active" : "btn-gate-disabled"}`}

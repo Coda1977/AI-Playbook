@@ -48,63 +48,61 @@ export default function GeneratingIndicator({ mode, onReady }) {
 
   return (
     <div className={`generating-container ${complete ? "generating-complete" : ""}`}>
-      {complete ? (
-        <div className="ready-beat animate-fade-in">
-          <div className="ready-check">
-            <CheckCircle2 size={48} color={C.accent} />
-          </div>
-          <h2 className="generating-title" style={{ marginTop: 20 }}>{readyTitle}</h2>
-          <p className="generating-subtitle" style={{ opacity: 0.7 }}>Opening now...</p>
-        </div>
-      ) : (
-        <>
-          <div className="generating-icon">
-            {isPrimitives ? <Sparkles size={32} color={C.accent} /> : <BookOpen size={32} color={C.accent} />}
-          </div>
-          <h2 className="generating-title">{title}</h2>
-          <p className="generating-subtitle">
-            {stepsFinished ? subtitle : `Step ${isPrimitives ? "2" : "3"} of 4 -- Generating...`}
-          </p>
-          <div className="generating-steps">
-            {isPrimitives && (
-              <p className="gen-phase-label">Step 2 of 4: AI Use Cases</p>
-            )}
-            {!isPrimitives && (
-              <p className="gen-phase-label">Step 3 of 4: Change Strategy</p>
-            )}
-            {steps.map((s, i) => {
-              const done = i < step;
-              const active = i === step;
-              const name = isPrimitives
-                ? `${items[i].title}`
-                : `Rule ${s.rule}: ${items[i].name}`;
-              return (
-                <div key={i} className={`gen-step ${done ? "gen-done" : active ? "gen-active" : "gen-future"}`}>
-                  <div className="gen-step-icon">
-                    {done ? (
-                      <CheckCircle2 size={18} color={C.accent} />
-                    ) : active ? (
-                      <Loader2 size={18} color={C.accent} className="spinning" />
-                    ) : (
-                      <Circle size={18} color={C.border} />
-                    )}
-                  </div>
-                  <div>
-                    <div className="gen-step-name">{name}</div>
-                    {(done || active) && <div className="gen-step-tip animate-fade-in">{s.tip}</div>}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          {stepsFinished && (
-            <div className="gen-building animate-fade-in">
-              <Loader2 size={16} color={C.accent} className="spinning" />
-              <span>{isPrimitives ? "Building your AI use cases..." : "Building your personalized strategy..."}</span>
+      <div className="gen-card">
+        {complete ? (
+          <div className="ready-beat animate-fade-in">
+            <div className="ready-check">
+              <CheckCircle2 size={48} color={C.red} />
             </div>
-          )}
-        </>
-      )}
+            <h2 className="generating-title" style={{ marginTop: 20 }}>{readyTitle}</h2>
+            <p className="generating-subtitle" style={{ opacity: 0.7 }}>Opening now...</p>
+          </div>
+        ) : (
+          <>
+            <div className="generating-icon">
+              {isPrimitives ? <Sparkles size={32} color={C.red} /> : <BookOpen size={32} color={C.red} />}
+            </div>
+            <h2 className="generating-title">{title}</h2>
+            <p className="generating-subtitle">{subtitle}</p>
+            <div className="generating-steps">
+              {steps.map((s, i) => {
+                const done = i < step;
+                const active = i === step;
+                const name = isPrimitives
+                  ? `${items[i].title}`
+                  : `Rule ${s.rule}: ${items[i].name}`;
+                return (
+                  <div key={i} className={`gen-step ${done ? "gen-done" : active ? "gen-active" : "gen-future"}`}>
+                    <div className={`gen-step-icon ${active ? "gen-step-icon-active" : ""}`}>
+                      {done ? (
+                        <CheckCircle2 size={18} color={C.red} />
+                      ) : active ? (
+                        <Loader2 size={18} color={C.red} className="spinning" />
+                      ) : (
+                        <Circle size={18} color={C.border} />
+                      )}
+                    </div>
+                    <div>
+                      <div className="gen-step-name">{name}</div>
+                      {(done || active) && <div className="gen-step-tip animate-fade-in">{s.tip}</div>}
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="gen-progress-bar">
+                <div className="gen-progress-fill" style={{ width: `${Math.min(Math.round((step / steps.length) * 100), 100)}%` }} />
+              </div>
+              <div className="gen-progress-label">{Math.min(Math.round((step / steps.length) * 100), 100)}%</div>
+            </div>
+            {stepsFinished && (
+              <div className="gen-building animate-fade-in">
+                <Loader2 size={16} color={C.red} className="spinning" />
+                <span>{isPrimitives ? "Building your AI use cases..." : "Building your personalized strategy..."}</span>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

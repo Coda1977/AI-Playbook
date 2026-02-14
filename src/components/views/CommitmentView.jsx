@@ -1,9 +1,10 @@
-import { Star, ArrowLeft, Download, Check } from "lucide-react";
+import { Star, ArrowLeft, Download, Check, RotateCcw } from "lucide-react";
 import { CATEGORIES } from "../../config/categories";
 import { RULES } from "../../config/rules";
 import { C } from "../../config/constants";
+import { exportPrimitivesDocx, exportPlaybookDocx } from "../../utils/export";
 
-export default function CommitmentView({ state, dispatch }) {
+export default function CommitmentView({ state, dispatch, onStartOver }) {
   const { primitives, plan, intake } = state;
   const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
@@ -19,15 +20,12 @@ export default function CommitmentView({ state, dispatch }) {
 
   return (
     <div className="commitment-container">
-      <div className="animate-fade-in">
-        <div className="no-print">
-          <p className="commitment-step">Step 4 of 4 -- Review</p>
-        </div>
+      <div className="commitment-hero animate-fade-in">
         <div className="commitment-header-print">
           <div className="intake-label">AI Playbook</div>
         </div>
-        <h1 className="commitment-title">My AI Journey</h1>
-        <p className="commitment-role" title={intake.role}>{intake.role} &middot; {date}</p>
+        <h1 className="commitment-title" style={{ color: C.white }}>My AI Journey</h1>
+        <p className="commitment-role" style={{ color: "rgba(255,255,255,0.55)" }} title={intake.role}>{intake.role} &middot; {date}</p>
       </div>
 
       {!hasAnything ? (
@@ -39,40 +37,51 @@ export default function CommitmentView({ state, dispatch }) {
         </div>
       ) : (
         <>
-          {/* Stats */}
-          <div className="commitment-stats no-print animate-fade-in" style={{ animationDelay: "0.06s" }}>
-            {[
-              { n: allPrimitiveIdeas.length, label: "AI ideas" },
-              { n: allActions.length, label: allActions.length === 1 ? "action" : "actions" },
-              { n: starredPrimitives.length + starredActions.length, label: "starred priorities", tooltip: "Ideas and actions you marked as most important" },
-            ].map((s, i) => (
-              <div key={i} className="commitment-stat-card" title={s.tooltip || ""}>
-                <div className="commitment-stat-number">{s.n}</div>
-                <div className="commitment-stat-label">{s.label}</div>
-              </div>
-            ))}
+          {/* 3-column stat grid */}
+          <div className="summary-grid no-print animate-fade-in" style={{ animationDelay: "0.06s" }}>
+            <article className="stat">
+              <strong>{allPrimitiveIdeas.length}</strong>
+              <span>AI ideas</span>
+            </article>
+            <article className="stat">
+              <strong>{allActions.length}</strong>
+              <span>{allActions.length === 1 ? "action" : "actions"}</span>
+            </article>
+            <article className="stat">
+              <strong>{starredPrimitives.length + starredActions.length}</strong>
+              <span>starred priorities</span>
+            </article>
           </div>
 
-          {/* -- My AI Use Cases -- */}
-          <h2 className="commitment-section-title animate-fade-in" style={{ animationDelay: "0.08s" }}>My AI Use Cases</h2>
-
-          {starredPrimitives.length > 0 && (
+          {/* Priorities box -- starred items only */}
+          {(starredPrimitives.length > 0 || starredActions.length > 0) && (
             <div className="commitment-priorities animate-fade-in" style={{ animationDelay: "0.1s" }}>
-              <div className="commitment-priorities-label">* Priority Ideas</div>
-              {starredPrimitives.map((i) => (
-                <div key={i.id} className="commitment-priority-item">
-                  <Star size={16} fill={C.accentGlow} color={C.accentGlow} style={{ flexShrink: 0, marginTop: 3 }} />
-                  <span>{i.text} <span className="commitment-rule-ref">-- {i.category.title}</span></span>
-                </div>
-              ))}
+              <div className="commitment-priorities-label">Your Priorities</div>
+              <div className="commitment-actions">
+                {starredPrimitives.map((i) => (
+                  <div key={i.id} className="commitment-priority-item">
+                    <Star size={16} fill={C.accentGlow} color={C.accentGlow} style={{ flexShrink: 0, marginTop: 3 }} />
+                    <span>{i.text} <span className="commitment-rule-ref">-- {i.category.title}</span></span>
+                  </div>
+                ))}
+                {starredActions.map((a) => (
+                  <div key={a.id} className="commitment-priority-item">
+                    <Star size={16} fill={C.accentGlow} color={C.accentGlow} style={{ flexShrink: 0, marginTop: 3 }} />
+                    <span>{a.text} <span className="commitment-rule-ref">-- Rule {a.rule.number}</span></span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
+
+          {/* -- Full detail: My AI Use Cases -- */}
+          <h2 className="commitment-section-title animate-fade-in" style={{ animationDelay: "0.14s" }}>My AI Use Cases</h2>
 
           {CATEGORIES.map((c, idx) => {
             const ideas = primitives[c.id] || [];
             if (ideas.length === 0) return null;
             return (
-              <div key={c.id} className="commitment-rule animate-fade-in" style={{ animationDelay: `${0.14 + idx * 0.03}s` }}>
+              <div key={c.id} className="commitment-rule animate-fade-in" style={{ animationDelay: `${0.16 + idx * 0.03}s` }}>
                 <div className="commitment-rule-number" style={{ color: c.color || C.accent }}>Category {c.number}</div>
                 <h3 className="commitment-rule-name">{c.title}</h3>
                 <div className="commitment-actions">
@@ -91,27 +100,15 @@ export default function CommitmentView({ state, dispatch }) {
             );
           })}
 
-          {/* -- My Change Playbook -- */}
+          {/* -- Full detail: My Change Playbook -- */}
           {allActions.length > 0 && (
             <>
               <h2 className="commitment-section-title animate-fade-in" style={{ animationDelay: "0.3s" }}>My Change Playbook</h2>
 
-              {starredActions.length > 0 && (
-                <div className="commitment-priorities animate-fade-in" style={{ animationDelay: "0.32s" }}>
-                  <div className="commitment-priorities-label">* Priority Actions</div>
-                  {starredActions.map((a) => (
-                    <div key={a.id} className="commitment-priority-item">
-                      <Star size={16} fill={C.accentGlow} color={C.accentGlow} style={{ flexShrink: 0, marginTop: 3 }} />
-                      <span>{a.text} <span className="commitment-rule-ref">-- Rule {a.rule.number}</span></span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
               {RULES.map((r, i) => {
                 const acts = plan[r.id] || [];
                 return (
-                  <div key={r.id} className="commitment-rule animate-fade-in" style={{ animationDelay: `${0.36 + i * 0.04}s` }}>
+                  <div key={r.id} className="commitment-rule animate-fade-in" style={{ animationDelay: `${0.32 + i * 0.04}s` }}>
                     <div className="commitment-rule-number" style={{ color: r.color || C.accent }}>Rule {r.number}</div>
                     <h3 className="commitment-rule-name">{r.name}</h3>
                     {acts.length === 0 ? (
@@ -142,10 +139,22 @@ export default function CommitmentView({ state, dispatch }) {
 
           <div className="commitment-buttons no-print animate-fade-in" style={{ animationDelay: "0.5s" }}>
             <button onClick={() => dispatch({ type: "SET_PHASE", phase: "playbook" })} className="btn-ghost btn-lg">
-              <ArrowLeft size={15} /> Back to Edit Strategy
+              <ArrowLeft size={15} /> Back to Edit
+            </button>
+            <button onClick={() => exportPrimitivesDocx(state)} className="btn-ghost btn-lg">
+              <Download size={15} /> Use Cases (.docx)
+            </button>
+            <button onClick={() => exportPlaybookDocx(state)} className="btn-ghost btn-lg">
+              <Download size={15} /> Strategy (.docx)
             </button>
             <button onClick={() => window.print()} className="btn-primary btn-lg">
               <Download size={15} /> Download as PDF
+            </button>
+          </div>
+
+          <div className="commitment-reset no-print animate-fade-in" style={{ animationDelay: "0.55s" }}>
+            <button onClick={onStartOver} className="btn-reset-link">
+              <RotateCcw size={13} /> Start over with new intake
             </button>
           </div>
         </>
