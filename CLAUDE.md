@@ -56,33 +56,9 @@ api/                        # primitives-generate.js, playbook-generate.js, chat
 - `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`
 - `master` auto-deploys to Vercel.
 
-## Current Branch: `redesign/new-look`
+## Design History
 
-Navigation and layout redesign. Merged into master via PR when ready.
-
-### What's done
-
-- **Unified header stepper** - Header always visible across all 4 phases. PhaseProgress shows 3 numbered steps (Intake, AI Use Cases, Change Strategy). Review removed from stepper. Backward-click navigation on completed steps. Pulse animation during generation.
-- **Header stripped to nav only** - No export/action buttons in header. Fixes position-shifting issue. Header shows title + role + stepper only.
-- **Sticky gate bars** - AI Use Cases has a bottom bar with star count, export, and "Continue to Change Strategy". Change Strategy has a bottom bar with stats and "Continue to Review". Export buttons only appear contextually (gate bars + Review page).
-- **Vertical category nav** - AI Use Cases categories displayed as vertical sidebar (left) instead of horizontal tabs. IntersectionObserver tracks active category. Mobile falls back to horizontal. Canvas-inner widened to 1080px.
-- **Intake vertical rail** - Replaced horizontal sticky progress bar with vertical dot rail (7 dots for 7 fields). Fills red on completion. Hidden on mobile.
-- **Star nudging reworked** - No numeric anchoring. Open-ended encouragement: "Star every idea that resonates." Progressive messaging as users star more. Gate unlocks at 3 but encourages continuing.
-- **Text cleanup** - All double dashes (`--`) replaced with single dashes across UI text.
-- **Neon yellow removed** - `neonYellow` dropped from constants and CSS theme. Done steps use black fill.
-- **Export extracted** - `src/utils/export.js` created. Shared by PrimitivesView gate bar and CommitmentView.
-
-### Still needs verification
-
-- Full end-to-end visual QA with live AI API (phases 2-4 not yet tested visually in this branch)
-- Mobile responsiveness for vertical category nav and gate bars
-- Print/PDF layout after header changes
-
-### Key architectural decisions
-
-- Header owns phase indication (stepper). Views own their action buttons (export, continue, reset).
-- PhaseProgress accepts `isGenerating` prop - shows pulse animation, disables clicks.
-- Gate bars are per-view, not shared components (each view has different stats/actions).
+Current design is bold-modern (black/white/red editorial). The original design is preserved at tag `v1-original-design`.
 
 ---
 
