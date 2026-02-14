@@ -73,7 +73,7 @@ export default function ChatDrawer({ type, item, state, dispatch, onClose }) {
       sentInit.current = true;
       const initMsg = isPrimitive
         ? `I'm exploring ${item.title} ideas for my role. Here are my current ideas for this category. Help me brainstorm more specific use cases, and suggest ideas I haven't thought of.`
-        : `I'm working on Rule ${item.number}: ${item.name} -- "${item.principle}". Here are my current actions for this rule. Help me make them more specific to my situation, and challenge me on anything that feels too generic.`;
+        : `I'm working on Rule ${item.number}: ${item.name} - "${item.principle}". Here are my current actions for this rule. Help me make them more specific to my situation, and challenge me on anything that feels too generic.`;
       doSend(initMsg, true);
     }
   }, [itemId]); // eslint-disable-line react-hooks/exhaustive-deps

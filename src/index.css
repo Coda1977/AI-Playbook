@@ -602,7 +602,7 @@ html, body { overflow-x: hidden; max-width: 100%; }
 .canvas-layout { display: flex; height: calc(100vh - 57px); overflow: hidden; }
 .canvas-rules { flex: 1; overflow-y: auto; min-width: 0; }
 .canvas-inner {
-  width: min(100% - 24px, 900px);
+  width: min(100% - 24px, 1080px);
   margin: 0 auto;
   padding: 0 0 96px;
 }
@@ -677,25 +677,46 @@ html, body { overflow-x: hidden; max-width: 100%; }
 .use-card-empty-title { font-weight: 600; font-size: 14px; margin: 0 0 6px; color: var(--color-black); }
 .use-card-empty-hint { font-size: 13px; color: var(--color-dark-gray); margin: 0; line-height: 1.5; }
 
-/* Category navigation */
-.category-nav {
-  position: sticky; top: 57px; z-index: 10;
-  background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
-  display: flex; gap: 4px; padding: 10px 0;
-  overflow-x: auto; scrollbar-width: none;
-  border-bottom: 1px solid var(--color-light-gray);
-  margin-bottom: 20px;
+/* Primitives content grid (sidebar nav + cards) */
+.primitives-content {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 20px;
 }
-.category-nav::-webkit-scrollbar { display: none; }
+
+/* Category navigation - vertical sidebar */
+.category-nav {
+  position: sticky; top: 16px; z-index: 10;
+  align-self: start;
+  display: flex; flex-direction: column; gap: 2px;
+}
 .category-nav-item {
-  padding: 6px 12px; font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+  padding: 8px 12px; font-family: var(--font-ui); font-size: 12px; font-weight: 600;
   text-transform: uppercase; letter-spacing: 0.04em;
   color: var(--color-dark-gray); background: none; border: none;
-  cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent;
+  cursor: pointer; white-space: nowrap; text-align: left;
+  border-left: 2px solid transparent; border-radius: 0 4px 4px 0;
   transition: all 0.2s;
 }
-.category-nav-item:hover { color: var(--color-black); }
-.category-nav-item.active { color: var(--color-red); border-bottom-color: var(--color-red); }
+.category-nav-item:hover { color: var(--color-black); background: var(--color-surface); }
+.category-nav-item.active { color: var(--color-red); border-left-color: var(--color-red); background: var(--color-red-light); }
+
+@media (max-width: 992px) {
+  .primitives-content { display: block; }
+  .category-nav {
+    position: sticky; top: 57px;
+    flex-direction: row; overflow-x: auto; scrollbar-width: none;
+    background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+    padding: 10px 0; margin-bottom: 20px;
+    border-bottom: 1px solid var(--color-light-gray);
+  }
+  .category-nav::-webkit-scrollbar { display: none; }
+  .category-nav-item {
+    border-left: none; border-bottom: 2px solid transparent; border-radius: 0;
+    padding: 6px 12px;
+  }
+  .category-nav-item.active { border-left-color: transparent; border-bottom-color: var(--color-red); background: none; }
+}
 
 /* Card stack */
 .card-stack { display: flex; flex-direction: column; gap: 24px; }

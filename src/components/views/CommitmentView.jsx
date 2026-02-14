@@ -167,7 +167,7 @@ export default function CommitmentView({ state, dispatch }) {
       <ConfirmModal
         open={showConfirm}
         title="Start fresh?"
-        message="This will clear everything -- all ideas, actions, stars, and conversations. You can't undo this."
+        message="This will clear everything - all ideas, actions, stars, and conversations. You can't undo this."
         confirmLabel="Yes, start fresh"
         onConfirm={() => {
           setShowConfirm(false);

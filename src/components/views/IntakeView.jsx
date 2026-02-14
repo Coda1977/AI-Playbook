@@ -6,7 +6,7 @@ import { C } from "../../config/constants";
 
 function TextareaWithGuide({ value, onChange, placeholder, rows = 3, hasError }) {
   const words = value.trim() ? value.trim().split(/\s+/).length : 0;
-  const hint = words === 0 ? null : words <= 5 ? "Add more detail for better personalization." : words <= 15 ? "Good start -- keep going for best results." : "Great detail -- this will help create a strong plan.";
+  const hint = words === 0 ? null : words <= 5 ? "Add more detail for better personalization." : words <= 15 ? "Good start - keep going for best results." : "Great detail - this will help create a strong plan.";
   const hintColor = words <= 15 ? "#b45309" : "#059669";
   return (
     <div>
@@ -135,7 +135,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
             {/* 2. Help With -- Pill buttons */}
             <article className="panel animate-fade-in" style={{ animationDelay: "0.1s" }}>
               <label className="field-label">What would help you most?</label>
-              <p className="field-desc">Select all that apply -- these shape the AI use cases we'll discover.</p>
+              <p className="field-desc">Select all that apply - these shape the AI use cases we'll discover.</p>
               <HelpPills selected={f.helpWith} onToggle={toggleHelp} hasError={missingArray("helpWith")} />
             </article>
 

@@ -76,47 +76,51 @@ export default function PrimitivesView({ state, dispatch, onContinue }) {
                 )}
               </div>
               <p className="orientation-hint">
-                Star at least {MIN_STARS_FOR_PLAYBOOK} ideas that matter most -- these will shape your change strategy.
+                Star every idea that resonates. The more you star, the richer your change strategy.
               </p>
             </div>
 
-            <div className="category-nav">
-              {CATEGORIES.filter((c) => (state.primitives[c.id] || []).length > 0).map((c) => (
-                <button
-                  key={c.id}
-                  className={`category-nav-item ${activeCatId === c.id ? "active" : ""}`}
-                  onClick={() => scrollToCategory(c.id)}
-                >
-                  {c.title}
-                </button>
-              ))}
-            </div>
+            <div className="primitives-content">
+              <nav className="category-nav">
+                {CATEGORIES.filter((c) => (state.primitives[c.id] || []).length > 0).map((c) => (
+                  <button
+                    key={c.id}
+                    className={`category-nav-item ${activeCatId === c.id ? "active" : ""}`}
+                    onClick={() => scrollToCategory(c.id)}
+                  >
+                    {c.title}
+                  </button>
+                ))}
+              </nav>
 
-            <div className="card-stack">
-              {CATEGORIES.map((c, i) => (
-                <CategorySection
-                  key={c.id}
-                  category={c}
-                  ideas={state.primitives[c.id] || []}
-                  dispatch={dispatch}
-                  isActive={activeCategory?.id === c.id}
-                  onGoDeeper={setActiveCategory}
-                  delay={i * 0.05}
-                  isLast={i === CATEGORIES.length - 1}
-                />
-              ))}
+              <div className="card-stack">
+                {CATEGORIES.map((c, i) => (
+                  <CategorySection
+                    key={c.id}
+                    category={c}
+                    ideas={state.primitives[c.id] || []}
+                    dispatch={dispatch}
+                    isActive={activeCategory?.id === c.id}
+                    onGoDeeper={setActiveCategory}
+                    delay={i * 0.05}
+                    isLast={i === CATEGORIES.length - 1}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Gate -- direct child of canvas-rules for sticky to work */}
+          {/* Gate - direct child of canvas-rules for sticky to work */}
           <div className="gate-bar">
             <div className={`gate-counter ${counterPulse ? "counter-pulse" : ""}`}>
-              {canContinue ? (
-                <span><Star size={14} fill={C.accentGlow} color={C.accentGlow} style={{ verticalAlign: "text-bottom" }} /> <strong>{starredCount}</strong> starred -- ready to build your strategy</span>
-              ) : starredCount === 0 ? (
-                <span>Star ideas that matter most to you to continue</span>
+              {starredCount === 0 ? (
+                <span>Star the ideas that matter to you</span>
+              ) : starredCount < MIN_STARS_FOR_PLAYBOOK ? (
+                <span>Keep going - star at least <strong>{MIN_STARS_FOR_PLAYBOOK}</strong> to continue</span>
+              ) : starredCount <= 5 ? (
+                <span><Star size={14} fill={C.accentGlow} color={C.accentGlow} style={{ verticalAlign: "text-bottom" }} /> <strong>{starredCount}</strong> starred so far - keep going or continue when ready</span>
               ) : (
-                <span><strong>{starredCount}</strong> of {MIN_STARS_FOR_PLAYBOOK} starred -- star {MIN_STARS_FOR_PLAYBOOK - starredCount} more to continue</span>
+                <span><Star size={14} fill={C.accentGlow} color={C.accentGlow} style={{ verticalAlign: "text-bottom" }} /> <strong>{starredCount}</strong> starred - great coverage!</span>
               )}
             </div>
             <div className="gate-actions">
