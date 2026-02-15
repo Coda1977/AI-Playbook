@@ -100,33 +100,36 @@ export default function CommitmentView({ state, dispatch, onStartOver }) {
             );
           })}
 
-          {/* -- Full detail: My Change Playbook -- */}
+          {/* -- Rule-anchored Change Playbook -- */}
           {allActions.length > 0 && (
             <>
-              <h2 className="commitment-section-title animate-fade-in" style={{ animationDelay: "0.3s" }}>My Change Playbook</h2>
+              <div className="commitment-divider" />
+              <h2 className="commitment-section-title animate-fade-in" style={{ animationDelay: "0.3s", marginTop: 0 }}>My Change Playbook</h2>
 
               {RULES.map((r, i) => {
                 const acts = plan[r.id] || [];
+                if (acts.length === 0) return null;
                 return (
-                  <div key={r.id} className="commitment-rule animate-fade-in" style={{ animationDelay: `${0.32 + i * 0.04}s` }}>
-                    <div className="commitment-rule-number" style={{ color: r.color || C.accent }}>Rule {r.number}</div>
-                    <h3 className="commitment-rule-name">{r.name}</h3>
-                    {acts.length === 0 ? (
-                      <p className="commitment-no-actions">No actions added</p>
-                    ) : (
-                      <div className="commitment-actions">
-                        {acts.map((a) => (
-                          <div key={a.id} className="commitment-action">
-                            {a.starred ? (
-                              <Star size={16} fill={C.accentGlow} color={C.accentGlow} style={{ flexShrink: 0, marginTop: 3 }} />
-                            ) : (
-                              <div className="commitment-bullet"><Check size={12} /></div>
-                            )}
-                            <span>{a.text}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                  <div key={r.id} className="commitment-rule-block animate-fade-in" style={{ animationDelay: `${0.32 + i * 0.04}s` }}>
+                    <div className="commitment-rule-anchor">
+                      <span className="commitment-rule-num" style={{ color: r.color || C.accent }}>
+                        {String(r.number).padStart(2, "0")}
+                      </span>
+                      <span style={{ color: C.darkGray, fontSize: 18 }}>&mdash;</span>
+                      <span className="commitment-rule-anchor-name">{r.name}</span>
+                    </div>
+                    <div className="commitment-rule-actions">
+                      {acts.map((a) => (
+                        <div key={a.id} className="commitment-action">
+                          {a.starred ? (
+                            <Star size={16} fill={C.accentGlow} color={C.accentGlow} style={{ flexShrink: 0, marginTop: 3 }} />
+                          ) : (
+                            <div className="commitment-bullet"><Check size={12} /></div>
+                          )}
+                          <span>{a.text}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 );
               })}

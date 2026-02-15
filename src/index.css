@@ -863,9 +863,10 @@ html, body { overflow-x: hidden; max-width: 100%; }
   position: sticky; bottom: 0; z-index: 10;
   margin-top: 24px;
   border: 1px solid var(--color-charcoal); border-radius: 8px 8px 0 0;
-  padding: 20px 24px;
+  padding: 0 24px;
+  height: 60px;
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  flex-wrap: wrap; background: var(--color-white);
+  background: var(--color-white);
   box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
 }
 .gate-counter { font-size: 13px; color: var(--color-dark-gray); transition: all 0.3s; }
@@ -1110,6 +1111,35 @@ html, body { overflow-x: hidden; max-width: 100%; }
   padding: 8px 16px; border-radius: 6px; transition: all 0.15s;
 }
 .btn-reset-link:hover { color: var(--color-red); background: var(--color-red-light); }
+
+/* -- Commitment: section divider -- */
+.commitment-divider {
+  height: 1px; background: var(--color-light-gray);
+  margin: 32px 0;
+}
+
+/* -- Commitment: rule-anchored flat list -- */
+.commitment-rule-block {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--color-light-gray);
+}
+.commitment-rule-block:last-child { border-bottom: none; }
+.commitment-rule-anchor {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-bottom: 10px;
+}
+.commitment-rule-num {
+  font-family: var(--font-heading); font-size: 15px; font-weight: 700;
+  color: var(--color-dark-gray); white-space: nowrap;
+}
+.commitment-rule-anchor-name {
+  font-family: var(--font-heading); font-size: 18px; font-weight: 700;
+  color: var(--color-black);
+}
+.commitment-rule-actions {
+  display: flex; flex-direction: column; gap: 6px;
+  padding-left: 44px;
+}
 
 /* ========================================
    PRINT STYLES
