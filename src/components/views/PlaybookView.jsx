@@ -16,7 +16,7 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
   return (
     <FlashProvider>
       <div className="canvas-layout">
-        <div className="canvas-rules">
+        <div className="canvas-rules playbook-canvas">
           <div className="canvas-inner">
             <div className="canvas-orientation animate-fade-in">
               <div className="orientation-stats">

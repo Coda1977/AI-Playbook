@@ -607,6 +607,8 @@ html, body { overflow-x: hidden; max-width: 100%; }
    ======================================== */
 .canvas-layout { display: flex; height: calc(100vh - 57px); overflow: hidden; }
 .canvas-rules { flex: 1; overflow-y: auto; min-width: 0; }
+.playbook-canvas { background: #f7f8fa; }
+.playbook-canvas .gate-bar { background: #f5f6f9; }
 .canvas-inner {
   width: min(100% - 24px, 900px);
   margin: 0 auto;
