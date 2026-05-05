@@ -41,7 +41,7 @@ Each idea should be specific to their role, under 40 words, and immediately acti
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5-20250929",
+        model: "claude-sonnet-4-6",
         max_tokens: 2048,
         messages: [{ role: "user", content: prompt }],
       }),
@@ -50,7 +50,9 @@ Each idea should be specific to their role, under 40 words, and immediately acti
     if (!response.ok) {
       const errText = await response.text();
       console.error("Claude API error:", response.status, errText);
-      return res.status(502).json({ error: `Claude API returned ${response.status}` });
+      return res
+        .status(502)
+        .json({ error: `Claude API returned ${response.status}` });
     }
 
     const data = await response.json();

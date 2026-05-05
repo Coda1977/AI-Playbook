@@ -6,7 +6,7 @@ Workshop tool: managers answer 7 intake questions, AI discovers personalized use
 
 ## Tech Stack
 
-React 19 + Vite 7 + Tailwind CSS 4 + Vercel Serverless Functions. Claude Sonnet 4.5 API for generation. `docx` + `file-saver` for Word export. localStorage for persistence.
+React 19 + Vite 7 + Tailwind CSS 4 + Vercel Serverless Functions. Claude Sonnet 4.6 API for generation. `docx` + `file-saver` for Word export. localStorage for persistence.
 
 ## Design System
 

@@ -1,9 +1,47 @@
 const RULES = [
-  { id: "destination", number: 1, name: "Start at the End", principle: "Show the destination and create emotional resonance. People can't move toward something they can't picture \u2014 and they won't move toward something they don't feel.", promptHint: "Generate actions to help this manager paint a vivid, concrete destination for their team's AI adoption \u2014 and connect it to something the team actually cares about. The destination must be specific ('by June, we generate first drafts in 10 minutes instead of 2 hours') not vague ('we're adopting AI'). Two key techniques: (1) The Magic Question \u2014 ask the manager to imagine waking up after the change has happened overnight, what clues would they see and hear? This forces concrete specificity. (2) Definition of Done \u2014 once the destination is clear, write it as a testable statement the whole team can point to. Critically, the manager must try AI first themselves before asking anyone else to \u2014 if they haven't used it yet, that's action #1. Help them explain the 'why' in local terms (what this means for this specific team's daily work, not 'the CEO said so'), and find the emotional angle that resonates with their people: easier work, better customer outcomes, professional growth, not being left behind \u2014 whatever fits. Passion sustains change longer than fear." },
-  { id: "safe", number: 2, name: "Make It Safe", principle: "People won't try what they can't afford to fail at. Protect the stumbling, respect the loss, and celebrate experiments.", promptHint: "Generate actions that address three dimensions of safety: (1) Go first and show mistakes \u2014 the manager shares their own fumbling attempts ('here's what I tried, here's where I got stuck, here's what finally worked') to give permission to struggle. A single leader demo can nearly double adoption. (2) Acknowledge what's being lost \u2014 the old way had real value (speed, familiarity, expertise, identity). Two anxieties drive resistance (Schein): survival anxiety (if I don't change, bad things happen) and learning anxiety (fear of incompetence, identity loss, group exclusion, loss of power). Decrease learning anxiety rather than increasing fear \u2014 naming specific fears must come before selling AI's benefits. The five learning fears to probe: temporary incompetence, punishment for incompetence, loss of personal identity, loss of group membership, loss of power/position. Include direct conversations (1:1s, not town halls) where people feel heard. (3) Don't punish early failure \u2014 when someone tries and it doesn't work, respond with 'what did you learn?' not 'why didn't that work?' (4) Train the group, not just the individual \u2014 resistance embeds in group norms, training whole teams together supports new norms emerging. (5) Create practice fields \u2014 dedicated time and space where people can experiment with AI without organizational consequences (sandbox projects, AI lab hours, hackathon time). Include actions for asking and actually listening, and celebrating both wins and losses from AI experiments publicly." },
-  { id: "script", number: 3, name: "Script the Steps", principle: "Don't ask people to \"embrace change.\" Tell them what to do on Monday morning.", promptHint: "Generate actions that give people specific, concrete instructions rather than inspirational mandates. Not 'start using AI' but 'tomorrow, take one email thread and ask AI to summarize it \u2014 just one.' Help the manager: (1) Find the bright spots \u2014 someone on the team has probably figured something out already. Find that person, learn exactly what they do, and help them show others. (2) Remove friction \u2014 when someone says 'I would, but...' fix that specific blocker (access issue, time issue, skill issue). (3) Make the new way the easy way \u2014 embed AI into what people already do rather than adding it on top. Defaults beat willpower: look for where AI can become the path of least resistance in existing workflows, templates, tools, and standard operating procedures." },
-  { id: "small", number: 4, name: "Start Small, to go Big", principle: "Begin contained, expand with proof.", promptHint: "Generate actions to help this manager start with one focused experiment \u2014 not five things at once. Key principles: (1) Pick one use case, one team, one workflow and nail it before expanding. (2) Start with people who want to try it \u2014 don't waste energy converting skeptics first; let enthusiasts succeed, then use those successes to bring along the middle. (3) Set clear 'expand when' criteria upfront \u2014 specific markers of success, not vague feelings. (4) Protect the pilot from pressure to scale too fast \u2014 when leadership asks 'why aren't we doing this everywhere?' hold the line until the pilot actually works. Help them build a small wins ladder \u2014 3-6 sequential wins, each explicitly setting up the next. Not isolated experiments, but a visible staircase." },
-  { id: "visible", number: 5, name: "Make Progress Visible", principle: "Communicate relentlessly. Show wins. Sustain the narrative.", promptHint: "Generate actions to make progress visible and sustain momentum through communication. Most change efforts under-communicate by 10x or more \u2014 progress that isn't visible doesn't build momentum, convert skeptics, or sustain energy. Help the manager: (1) Share what's working \u2014 when someone figures something out, don't let it stay private ('Sarah found a way to do X \u2014 I asked her to show the team Thursday'). (2) Talk about it regularly \u2014 not one announcement and done, but in team meetings, 1:1s, casual conversation. Keep the change visible by simply mentioning it. (3) Connect progress to outcomes people care about \u2014 not 'adoption is at 60%' but 'the team saved 12 hours last week' or 'we got the proposal out a day early.' (4) Follow up \u2014 if they said they'd find an answer, come back with it. If they asked someone to try something, ask how it went." },
+  {
+    id: "destination",
+    number: 1,
+    name: "Start at the End",
+    principle:
+      "Show the destination and create emotional resonance. People can't move toward something they can't picture \u2014 and they won't move toward something they don't feel.",
+    promptHint:
+      "Generate actions to help this manager paint a vivid, concrete destination for their team's AI adoption \u2014 and connect it to something the team actually cares about. The destination must be specific ('by June, we generate first drafts in 10 minutes instead of 2 hours') not vague ('we're adopting AI'). Two key techniques: (1) The Magic Question \u2014 ask the manager to imagine waking up after the change has happened overnight, what clues would they see and hear? This forces concrete specificity. (2) Definition of Done \u2014 once the destination is clear, write it as a testable statement the whole team can point to. Critically, the manager must try AI first themselves before asking anyone else to \u2014 if they haven't used it yet, that's action #1. Help them explain the 'why' in local terms (what this means for this specific team's daily work, not 'the CEO said so'), and find the emotional angle that resonates with their people: easier work, better customer outcomes, professional growth, not being left behind \u2014 whatever fits. Passion sustains change longer than fear.",
+  },
+  {
+    id: "safe",
+    number: 2,
+    name: "Make It Safe",
+    principle:
+      "People won't try what they can't afford to fail at. Protect the stumbling, respect the loss, and celebrate experiments.",
+    promptHint:
+      "Generate actions that address three dimensions of safety: (1) Go first and show mistakes \u2014 the manager shares their own fumbling attempts ('here's what I tried, here's where I got stuck, here's what finally worked') to give permission to struggle. A single leader demo can nearly double adoption. (2) Acknowledge what's being lost \u2014 the old way had real value (speed, familiarity, expertise, identity). Two anxieties drive resistance (Schein): survival anxiety (if I don't change, bad things happen) and learning anxiety (fear of incompetence, identity loss, group exclusion, loss of power). Decrease learning anxiety rather than increasing fear \u2014 naming specific fears must come before selling AI's benefits. The five learning fears to probe: temporary incompetence, punishment for incompetence, loss of personal identity, loss of group membership, loss of power/position. Include direct conversations (1:1s, not town halls) where people feel heard. (3) Don't punish early failure \u2014 when someone tries and it doesn't work, respond with 'what did you learn?' not 'why didn't that work?' (4) Train the group, not just the individual \u2014 resistance embeds in group norms, training whole teams together supports new norms emerging. (5) Create practice fields \u2014 dedicated time and space where people can experiment with AI without organizational consequences (sandbox projects, AI lab hours, hackathon time). Include actions for asking and actually listening, and celebrating both wins and losses from AI experiments publicly.",
+  },
+  {
+    id: "script",
+    number: 3,
+    name: "Script the Steps",
+    principle:
+      'Don\'t ask people to "embrace change." Tell them what to do on Monday morning.',
+    promptHint:
+      "Generate actions that give people specific, concrete instructions rather than inspirational mandates. Not 'start using AI' but 'tomorrow, take one email thread and ask AI to summarize it \u2014 just one.' Help the manager: (1) Find the bright spots \u2014 someone on the team has probably figured something out already. Find that person, learn exactly what they do, and help them show others. (2) Remove friction \u2014 when someone says 'I would, but...' fix that specific blocker (access issue, time issue, skill issue). (3) Make the new way the easy way \u2014 embed AI into what people already do rather than adding it on top. Defaults beat willpower: look for where AI can become the path of least resistance in existing workflows, templates, tools, and standard operating procedures.",
+  },
+  {
+    id: "small",
+    number: 4,
+    name: "Start Small, to go Big",
+    principle: "Begin contained, expand with proof.",
+    promptHint:
+      "Generate actions to help this manager start with one focused experiment \u2014 not five things at once. Key principles: (1) Pick one use case, one team, one workflow and nail it before expanding. (2) Start with people who want to try it \u2014 don't waste energy converting skeptics first; let enthusiasts succeed, then use those successes to bring along the middle. (3) Set clear 'expand when' criteria upfront \u2014 specific markers of success, not vague feelings. (4) Protect the pilot from pressure to scale too fast \u2014 when leadership asks 'why aren't we doing this everywhere?' hold the line until the pilot actually works. Help them build a small wins ladder \u2014 3-6 sequential wins, each explicitly setting up the next. Not isolated experiments, but a visible staircase.",
+  },
+  {
+    id: "visible",
+    number: 5,
+    name: "Make Progress Visible",
+    principle: "Communicate relentlessly. Show wins. Sustain the narrative.",
+    promptHint:
+      "Generate actions to make progress visible and sustain momentum through communication. Most change efforts under-communicate by 10x or more \u2014 progress that isn't visible doesn't build momentum, convert skeptics, or sustain energy. Help the manager: (1) Share what's working \u2014 when someone figures something out, don't let it stay private ('Sarah found a way to do X \u2014 I asked her to show the team Thursday'). (2) Talk about it regularly \u2014 not one announcement and done, but in team meetings, 1:1s, casual conversation. Keep the change visible by simply mentioning it. (3) Connect progress to outcomes people care about \u2014 not 'adoption is at 60%' but 'the team saved 12 hours last week' or 'we got the proposal out a day early.' (4) Follow up \u2014 if they said they'd find an answer, come back with it. If they asked someone to try something, ask how it went.",
+  },
 ];
 
 export default async function handler(req, res) {
@@ -17,12 +55,14 @@ export default async function handler(req, res) {
   }
 
   const rulesBlock = RULES.map(
-    (r) => `Rule ${r.number} (id: "${r.id}"): ${r.name}\nPrinciple: "${r.principle}"\n${r.promptHint}`
+    (r) =>
+      `Rule ${r.number} (id: "${r.id}"): ${r.name}\nPrinciple: "${r.principle}"\n${r.promptHint}`,
   ).join("\n\n");
 
-  const starredBlock = starredPrimitives && starredPrimitives.length > 0
-    ? `\n\nSTARRED AI USE CASES (the manager chose these as most important):\n${starredPrimitives.map((p) => `- ${p.category}: ${p.text}`).join("\n")}\n\nIMPORTANT: Reference these specific AI use cases in your actions where natural. For example, if they starred a content creation idea, Rule 3 (Script the Steps) actions should mention that specific use case as a concrete starting point. Make the playbook connect to the AI use cases they actually care about.`
-    : "";
+  const starredBlock =
+    starredPrimitives && starredPrimitives.length > 0
+      ? `\n\nSTARRED AI USE CASES (the manager chose these as most important):\n${starredPrimitives.map((p) => `- ${p.category}: ${p.text}`).join("\n")}\n\nIMPORTANT: Reference these specific AI use cases in your actions where natural. For example, if they starred a content creation idea, Rule 3 (Script the Steps) actions should mention that specific use case as a concrete starting point. Make the playbook connect to the AI use cases they actually care about.`
+      : "";
 
   const prompt = `You are a practical leadership coach helping a manager create a personalized AI change playbook. You generate specific, actionable steps grounded in behavioral science \u2014 not generic corporate advice.
 
@@ -81,7 +121,7 @@ Respond with ONLY a JSON object (no markdown, no explanation):
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5-20250929",
+        model: "claude-sonnet-4-6",
         max_tokens: 2048,
         messages: [{ role: "user", content: prompt }],
       }),
@@ -90,7 +130,9 @@ Respond with ONLY a JSON object (no markdown, no explanation):
     if (!response.ok) {
       const errText = await response.text();
       console.error("Claude API error:", response.status, errText);
-      return res.status(502).json({ error: `Claude API returned ${response.status}` });
+      return res
+        .status(502)
+        .json({ error: `Claude API returned ${response.status}` });
     }
 
     const data = await response.json();

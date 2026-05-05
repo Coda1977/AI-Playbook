@@ -8,9 +8,10 @@ const rulesList = [
 
 function buildPrimitivesSystem({ intake, category, currentItems }) {
   const helpLabels = (intake.helpWith || []).join(", ");
-  const currentBlock = currentItems && currentItems.length
-    ? currentItems.map((a) => `- ${a}`).join("\n")
-    : "(no ideas yet)";
+  const currentBlock =
+    currentItems && currentItems.length
+      ? currentItems.map((a) => `- ${a}`).join("\n")
+      : "(no ideas yet)";
 
   return `This is a workshop helping managers drive AI adoption with their teams. The manager has completed intake and is now exploring use cases.
 
@@ -40,10 +41,17 @@ Then write a JSON array of suggested ideas (no markdown fences):
 BREVITY IS MANDATORY. NEVER write more than 60 words before ---IDEAS---. Count them.`;
 }
 
-function buildPlaybookSystem({ intake, rule, currentItems, allPlan, starredPrimitives }) {
-  const actBlock = currentItems && currentItems.length
-    ? currentItems.map((a) => `- ${a}`).join("\n")
-    : "(no actions yet)";
+function buildPlaybookSystem({
+  intake,
+  rule,
+  currentItems,
+  allPlan,
+  starredPrimitives,
+}) {
+  const actBlock =
+    currentItems && currentItems.length
+      ? currentItems.map((a) => `- ${a}`).join("\n")
+      : "(no actions yet)";
 
   const allBlock = rulesList
     .map((r) => {
@@ -52,9 +60,10 @@ function buildPlaybookSystem({ intake, rule, currentItems, allPlan, starredPrimi
     })
     .join("\n");
 
-  const starredBlock = starredPrimitives && starredPrimitives.length > 0
-    ? `\nSTARRED AI USE CASES:\n${starredPrimitives.map((p) => `- ${p.category}: ${p.text}`).join("\n")}`
-    : "";
+  const starredBlock =
+    starredPrimitives && starredPrimitives.length > 0
+      ? `\nSTARRED AI USE CASES:\n${starredPrimitives.map((p) => `- ${p.category}: ${p.text}`).join("\n")}`
+      : "";
 
   return `This is a workshop helping managers drive AI adoption with their teams. The manager has completed intake, explored AI use cases, and is now building their change strategy.
 
@@ -114,14 +123,32 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { mode, intake, category, rule, currentItems, allPrimitives, allPlan, starredPrimitives, chatHistory, userMessage } = req.body;
+  const {
+    mode,
+    intake,
+    category,
+    rule,
+    currentItems,
+    allPrimitives,
+    allPlan,
+    starredPrimitives,
+    chatHistory,
+    userMessage,
+  } = req.body;
   if (!intake || !userMessage) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  const sys = mode === "primitives"
-    ? buildPrimitivesSystem({ intake, category, currentItems, allPrimitives })
-    : buildPlaybookSystem({ intake, rule, currentItems, allPlan, starredPrimitives });
+  const sys =
+    mode === "primitives"
+      ? buildPrimitivesSystem({ intake, category, currentItems, allPrimitives })
+      : buildPlaybookSystem({
+          intake,
+          rule,
+          currentItems,
+          allPlan,
+          starredPrimitives,
+        });
 
   const messages = [
     ...(chatHistory || []).map((m) => ({ role: m.role, content: m.content })),
@@ -137,7 +164,7 @@ export default async function handler(req, res) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5-20250929",
+        model: "claude-sonnet-4-6",
         max_tokens: 250,
         system: sys,
         messages,
@@ -147,7 +174,9 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const errText = await response.text();
       console.error("Claude API error:", response.status, errText);
-      return res.status(502).json({ error: `Claude API returned ${response.status}` });
+      return res
+        .status(502)
+        .json({ error: `Claude API returned ${response.status}` });
     }
 
     const data = await response.json();
@@ -162,7 +191,12 @@ export default async function handler(req, res) {
     if (sep !== -1) {
       content = full.slice(0, sep).trim();
       try {
-        ideas = JSON.parse(full.slice(sep + 11).replace(/```json|```/g, "").trim());
+        ideas = JSON.parse(
+          full
+            .slice(sep + 11)
+            .replace(/```json|```/g, "")
+            .trim(),
+        );
       } catch {}
     }
 
