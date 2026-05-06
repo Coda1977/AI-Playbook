@@ -9,7 +9,10 @@ function truncateRole(role, maxLen = 50) {
 
 export default function Header({ state, dispatch }) {
   const { phase, intake } = state;
-  const isGenerating = phase === "generating-primitives" || phase === "generating-playbook";
+  const isGenerating =
+    phase === "generating-primitives" ||
+    phase === "generating-playbook" ||
+    phase === "generating-synthesis";
   const showRole = intake.role && phase !== "intake" && !isGenerating;
 
   return (
