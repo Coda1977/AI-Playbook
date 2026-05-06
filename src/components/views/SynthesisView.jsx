@@ -43,7 +43,7 @@ export default function SynthesisView({ state, dispatch }) {
         {synthesis.lede}
       </div>
 
-      {synthesis.storylines.map((s, i) => (
+      {(synthesis.storylines || []).map((s, i) => (
         <div key={i} className="synthesis-story animate-fade-in" style={{ animationDelay: `${0.1 + i * 0.06}s` }}>
           <div className="synthesis-story-eyebrow">
             <span className="synthesis-story-num">{String(i + 1).padStart(2, "0")}</span>
