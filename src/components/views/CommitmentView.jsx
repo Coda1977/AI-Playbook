@@ -1,10 +1,10 @@
-import { Star, ArrowLeft, Download, Check, RotateCcw } from "lucide-react";
+import { Star, ArrowLeft, Download, Check, RotateCcw, Sparkles, FileText } from "lucide-react";
 import { CATEGORIES } from "../../config/categories";
 import { RULES } from "../../config/rules";
 import { C } from "../../config/constants";
 import { exportPrimitivesDocx, exportPlaybookDocx } from "../../utils/export";
 
-export default function CommitmentView({ state, dispatch, onStartOver }) {
+export default function CommitmentView({ state, dispatch, onStartOver, onGenerateSynthesis }) {
   const { primitives, plan, intake } = state;
   const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
@@ -15,6 +15,15 @@ export default function CommitmentView({ state, dispatch, onStartOver }) {
   // Playbook
   const allActions = RULES.flatMap((r) => (plan[r.id] || []).map((a) => ({ ...a, rule: r })));
   const starredActions = allActions.filter((a) => a.starred);
+
+  const hasSynthesis = !!state.synthesis;
+  const handleSynthesisClick = () => {
+    if (hasSynthesis) {
+      dispatch({ type: "SET_PHASE", phase: "synthesis" });
+    } else if (onGenerateSynthesis) {
+      onGenerateSynthesis();
+    }
+  };
 
   const hasAnything = allPrimitiveIdeas.length > 0 || allActions.length > 0;
 
@@ -27,6 +36,33 @@ export default function CommitmentView({ state, dispatch, onStartOver }) {
         <h1 className="commitment-title" style={{ color: C.white }}>My AI Journey</h1>
         <p className="commitment-role" style={{ color: "rgba(255,255,255,0.55)" }} title={intake.role}>{intake.role} &middot; {date}</p>
       </div>
+
+      {hasAnything && (
+        <div className="synthesis-cta no-print animate-fade-in" style={{ animationDelay: "0.04s" }}>
+          <div className="synthesis-cta-text">
+            <div className="synthesis-cta-eyebrow">{hasSynthesis ? "Your One-Page Plan" : "New"}</div>
+            <h2 className="synthesis-cta-title">
+              {hasSynthesis ? "View your one-page plan" : "Synthesize this into one plan"}
+            </h2>
+            <p className="synthesis-cta-desc">
+              {hasSynthesis
+                ? "Open the narrative the AI synthesized from your starred priorities."
+                : "Get a one-page narrative that clusters your starred priorities into one or two storylines you can read in two minutes."}
+            </p>
+          </div>
+          <button onClick={handleSynthesisClick} className="btn-primary btn-lg synthesis-cta-btn">
+            {hasSynthesis ? (
+              <>
+                <FileText size={16} /> View My Plan
+              </>
+            ) : (
+              <>
+                <Sparkles size={16} /> Generate My Plan <span className="synthesis-cta-experimental">(Experimental)</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
 
       {!hasAnything ? (
         <div className="commitment-empty animate-fade-in" style={{ animationDelay: "0.08s" }}>
@@ -149,6 +185,10 @@ export default function CommitmentView({ state, dispatch, onStartOver }) {
             </button>
             <button onClick={() => exportPlaybookDocx(state)} className="btn-ghost btn-lg">
               <Download size={15} /> Strategy (.docx)
+            </button>
+            <button onClick={handleSynthesisClick} className="btn-ghost btn-lg">
+              {hasSynthesis ? <FileText size={15} /> : <Sparkles size={15} />}
+              {hasSynthesis ? " View Plan" : " Generate Plan"}
             </button>
             <button onClick={() => window.print()} className="btn-primary btn-lg">
               <Download size={15} /> Download as PDF
