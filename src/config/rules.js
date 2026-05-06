@@ -60,3 +60,11 @@ export const PLAYBOOK_GEN_STEPS = [
   { rule: 4, tip: "Small wins build patterns that attract allies and deter opponents." },
   { rule: 5, tip: "Most change efforts under-communicate by 10x or more." },
 ];
+
+export const SYNTHESIS_GEN_STEPS = [
+  { step: 1, name: "Reading your intake", tip: "Understanding your role, team, and what success looks like." },
+  { step: 2, name: "Mapping your use cases", tip: "Looking for themes across what you starred." },
+  { step: 3, name: "Mapping your change actions", tip: "Identifying the moves that matter most." },
+  { step: 4, name: "Finding the storylines", tip: "One or two narratives that hold your plan together." },
+  { step: 5, name: "Writing your one-page plan", tip: "Turning fragments into a story." },
+];
