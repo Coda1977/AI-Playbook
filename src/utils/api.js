@@ -38,3 +38,17 @@ export async function sendChat({ mode, intake, category, rule, currentItems, all
   }
   return await res.json();
 }
+
+export async function generateSynthesis(intake, primitives, plan) {
+  const res = await fetch("/api/synthesis-generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ intake, primitives, plan }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `API returned ${res.status}`);
+  }
+  const data = await res.json();
+  return data.synthesis;
+}
