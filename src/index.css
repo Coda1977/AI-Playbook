@@ -21,14 +21,14 @@
   --color-ink-light: #222222;
   --color-accent: #e30613;
   --color-accent-hover: #c00510;
-  --color-accent-glow: #e30613;
+  --color-accent-glow: #F5B700;
   --color-accent-faint: rgba(227,6,19,0.06);
   --color-muted: #333333;
   --color-card: #ffffff;
   --color-border: #cccccc;
   --color-border-strong: #999999;
-  --color-starred-bg: #fff2f3;
-  --color-starred-border: #e30613;
+  --color-starred-bg: #FFF8E1;
+  --color-starred-border: #F5B700;
   --color-success: #00a3e0;
 
   /* Neutrals (legacy) */
@@ -56,7 +56,7 @@ html, body { overflow-x: hidden; max-width: 100%; }
 @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes slideInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes fadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.96); } }
-@keyframes bloomBg { 0% { box-shadow: inset 0 0 0 0 rgba(227,6,19,0); } 50% { box-shadow: inset 0 0 20px 4px rgba(227,6,19,0.08); } 100% { box-shadow: none; } }
+@keyframes bloomBg { 0% { box-shadow: inset 0 0 0 0 rgba(245,183,0,0); } 50% { box-shadow: inset 0 0 20px 4px rgba(245,183,0,0.14); } 100% { box-shadow: none; } }
 @keyframes pulseDot { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes pulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
@@ -767,9 +767,9 @@ html, body { overflow-x: hidden; max-width: 100%; }
 }
 .action-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-3px); border-color: var(--color-gray-300); }
 .action-starred {
-  background: var(--color-red-light); border-color: var(--color-red);
-  border-left: 3px solid var(--color-red);
-  box-shadow: -3px 0 12px rgba(227,6,19,0.12), 0 1px 3px rgba(0,0,0,0.04);
+  background: var(--color-starred-bg); border-color: var(--color-starred-border);
+  border-left: 3px solid var(--color-starred-border);
+  box-shadow: -3px 0 12px rgba(245,183,0,0.18), 0 1px 3px rgba(0,0,0,0.04);
 }
 .action-blooming { animation: bloomBg 0.5s ease-out; }
 .action-entering { animation: fadeInUp 0.4s ease-out both; }
@@ -780,8 +780,8 @@ html, body { overflow-x: hidden; max-width: 100%; }
   background: var(--color-surface); border-color: var(--color-light-gray);
 }
 .use-card-body .action-starred {
-  background: var(--color-red-light); border-color: var(--color-red);
-  border-left: 3px solid var(--color-red);
+  background: var(--color-starred-bg); border-color: var(--color-starred-border);
+  border-left: 3px solid var(--color-starred-border);
 }
 
 .star-btn {
@@ -1154,7 +1154,7 @@ html, body { overflow-x: hidden; max-width: 100%; }
   body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .app-root { background: white !important; min-height: auto; }
   * { color: black !important; }
-  .star-btn svg, .commitment-action svg { color: var(--color-red) !important; }
+  .star-btn svg, .commitment-action svg { color: #A77A00 !important; fill: #A77A00 !important; }
   .commitment-container { padding: 24px 20px; }
   .commitment-header-print { display: block !important; margin-bottom: 8px; }
   .commitment-hero { background: white !important; border-color: var(--color-light-gray) !important; }
