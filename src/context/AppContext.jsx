@@ -19,6 +19,7 @@ const INIT = {
   primitivesChat: {},
   plan: { destination: [], safe: [], script: [], small: [], visible: [] },
   playbookChat: {},
+  synthesis: null,
 };
 
 function reducer(state, action) {
@@ -160,6 +161,8 @@ function reducer(state, action) {
       return { ...state, playbookChat: { ...state.playbookChat, [action.ruleId]: msgs } };
     }
 
+    case "SET_SYNTHESIS":
+      return { ...state, synthesis: action.synthesis, phase: "synthesis" };
     case "RESET":
       return { ...INIT };
     default:

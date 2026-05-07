@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useApp } from "./context/AppContext";
-import { generatePrimitives, generatePlaybook } from "./utils/api";
+import { generatePrimitives, generatePlaybook, generateSynthesis } from "./utils/api";
 import { clearState } from "./utils/storage";
 import { CATEGORIES } from "./config/categories";
 import { RULES } from "./config/rules";
@@ -13,6 +13,7 @@ import IntakeView from "./components/views/IntakeView";
 import PrimitivesView from "./components/views/PrimitivesView";
 import PlaybookView from "./components/views/PlaybookView";
 import CommitmentView from "./components/views/CommitmentView";
+import SynthesisView from "./components/views/SynthesisView";
 
 export default function App() {
   const { state, dispatch } = useApp();
@@ -25,6 +26,10 @@ export default function App() {
   // Playbook generation
   const [playbookReady, setPlaybookReady] = useState(false);
   const [pendingPlan, setPendingPlan] = useState(null);
+
+  // Synthesis generation
+  const [synthesisReady, setSynthesisReady] = useState(false);
+  const [pendingSynthesis, setPendingSynthesis] = useState(null);
 
   // Regeneration confirmation
   const [showRegenConfirm, setShowRegenConfirm] = useState(false);
@@ -114,13 +119,36 @@ export default function App() {
     }
   }, [pendingPlan, dispatch]);
 
+  const handleGenerateSynthesis = async () => {
+    setGenErr(null);
+    setSynthesisReady(false);
+    setPendingSynthesis(null);
+    dispatch({ type: "SET_PHASE", phase: "generating-synthesis" });
+    try {
+      const synthesis = await generateSynthesis(state.intake, state.primitives, state.plan);
+      setPendingSynthesis(synthesis);
+      setSynthesisReady(true);
+    } catch (err) {
+      console.error("Synthesis generation failed:", err);
+      setGenErr("Something went wrong while writing your plan. This usually means a connection issue.");
+      dispatch({ type: "SET_PHASE", phase: "commitment" });
+    }
+  };
+
+  const handleSynthesisReady = useCallback(() => {
+    if (pendingSynthesis) {
+      dispatch({ type: "SET_SYNTHESIS", synthesis: pendingSynthesis });
+      setPendingSynthesis(null);
+    }
+  }, [pendingSynthesis, dispatch]);
+
   const { phase } = state;
 
   return (
     <div className="app-root">
       <PaperGrain />
 
-      {genErr && (phase === "intake" || phase === "primitives") && (
+      {genErr && (phase === "intake" || phase === "primitives" || phase === "commitment") && (
         <ErrorBanner message={genErr} onDismiss={() => setGenErr(null)} />
       )}
 
@@ -143,7 +171,18 @@ export default function App() {
           <PlaybookView state={state} dispatch={dispatch} onStartOver={() => setShowStartOver(true)} />
         )}
         {phase === "commitment" && (
-          <CommitmentView state={state} dispatch={dispatch} onStartOver={() => setShowStartOver(true)} />
+          <CommitmentView
+            state={state}
+            dispatch={dispatch}
+            onStartOver={() => setShowStartOver(true)}
+            onGenerateSynthesis={handleGenerateSynthesis}
+          />
+        )}
+        {phase === "generating-synthesis" && (
+          <GeneratingIndicator mode="synthesis" onReady={synthesisReady ? handleSynthesisReady : null} />
+        )}
+        {phase === "synthesis" && (
+          <SynthesisView state={state} dispatch={dispatch} />
         )}
       </main>
 

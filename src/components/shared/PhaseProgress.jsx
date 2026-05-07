@@ -7,7 +7,16 @@ const PHASES = [
 ];
 
 // commitment maps to 3 (past all steps) so all 3 show as done on Review
-const ORDER = { intake: 0, "generating-primitives": 0, primitives: 1, "generating-playbook": 1, playbook: 2, commitment: 3 };
+const ORDER = {
+  intake: 0,
+  "generating-primitives": 0,
+  primitives: 1,
+  "generating-playbook": 1,
+  playbook: 2,
+  commitment: 3,
+  "generating-synthesis": 3,
+  synthesis: 3,
+};
 
 export default function PhaseProgress({ phase, dispatch, isGenerating }) {
   const current = ORDER[phase] ?? 0;
