@@ -165,7 +165,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 250,
+        max_tokens: 400,
         system: sys,
         messages,
       }),
@@ -190,14 +190,24 @@ export default async function handler(req, res) {
     let ideas = [];
     if (sep !== -1) {
       content = full.slice(0, sep).trim();
+      const jsonText = full.slice(sep + 11).replace(/```json|```/g, "").trim();
       try {
-        ideas = JSON.parse(
-          full
-            .slice(sep + 11)
-            .replace(/```json|```/g, "")
-            .trim(),
-        );
-      } catch {}
+        ideas = JSON.parse(jsonText);
+      } catch (e) {
+        console.warn("Chat JSON parse failed:", e.message, "raw:", jsonText.slice(0, 300));
+      }
+    } else {
+      const match = full.match(/\[\s*\{[\s\S]*?\}\s*\]/);
+      if (match) {
+        try {
+          ideas = JSON.parse(match[0]);
+          content = full.slice(0, full.indexOf(match[0])).trim();
+        } catch {
+          console.warn("Chat fallback JSON parse failed:", "raw:", full.slice(0, 300));
+        }
+      } else {
+        console.warn("Chat response missing IDEAS separator and no JSON found:", "raw:", full.slice(0, 300));
+      }
     }
 
     return res.status(200).json({
