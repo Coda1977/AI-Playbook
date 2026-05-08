@@ -80,6 +80,7 @@ CRITICAL RULES:
 - Each storyline's thesis must be distinct from the lede and from any other storyline's thesis. Generic statements like "AI helps your team work better" are forbidden.
 - Never invent experiences, metrics, outcomes, or stories for this manager. The plan must be specific to their actual situation.
 - NO EM DASHES anywhere in the output. Use periods, commas, colons, semicolons, or parentheses instead.
+- NO "isn't X, it's Y" or "not just X, it's Y" parallelism in titles, ledes, or theses. State the affirmative directly. Bad: "Your real risk isn't speed, it's safety." Good: "Your real risk is psychological safety."
 - Item text in useCases and actions arrays should preserve the original wording from the inputs above.
 
 QUALITY CHECKS (verify before returning):
@@ -123,7 +124,9 @@ Respond with ONLY a JSON object (no markdown fences, no explanation):
     if (!response.ok) {
       const errText = await response.text();
       console.error("Claude API error:", response.status, errText);
-      return res.status(502).json({ error: `Claude API returned ${response.status}` });
+      return res
+        .status(502)
+        .json({ error: `Claude API returned ${response.status}` });
     }
 
     const data = await response.json();

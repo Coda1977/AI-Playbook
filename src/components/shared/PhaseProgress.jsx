@@ -4,9 +4,9 @@ const PHASES = [
   { id: "intake", label: "Intake", phase: "intake" },
   { id: "primitives", label: "AI Use Cases", phase: "primitives" },
   { id: "playbook", label: "Change Strategy", phase: "playbook" },
+  { id: "commitment", label: "Review", phase: "commitment" },
 ];
 
-// commitment maps to 3 (past all steps) so all 3 show as done on Review
 const ORDER = {
   intake: 0,
   "generating-primitives": 0,
@@ -47,7 +47,7 @@ export default function PhaseProgress({ phase, dispatch, isGenerating }) {
               aria-label={`${p.label}${isDone ? " (completed - click to return)" : isActive ? " (current)" : ""}`}
             >
               <span className="phase-step-number">
-                {isDone ? <Check size={11} strokeWidth={3} /> : (i + 1)}
+                {isDone ? <Check size={11} strokeWidth={3} /> : i + 1}
               </span>
               {isGen && <span className="phase-step-pulse" />}
               <span className="phase-step-label">{p.label}</span>

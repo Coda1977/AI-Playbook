@@ -1,8 +1,19 @@
 import { useState, useEffect, useRef } from "react";
-import { BookOpen, Sparkles, CheckCircle2, Loader2, Circle, FileText } from "lucide-react";
+import {
+  BookOpen,
+  Sparkles,
+  CheckCircle2,
+  Loader2,
+  Circle,
+  FileText,
+} from "lucide-react";
 import { C } from "../../config/constants";
 import { CATEGORIES, PRIMITIVES_GEN_STEPS } from "../../config/categories";
-import { RULES, PLAYBOOK_GEN_STEPS, SYNTHESIS_GEN_STEPS } from "../../config/rules";
+import {
+  RULES,
+  PLAYBOOK_GEN_STEPS,
+  SYNTHESIS_GEN_STEPS,
+} from "../../config/rules";
 
 const MODES = {
   primitives: {
@@ -39,7 +50,16 @@ const MODES = {
 
 export default function GeneratingIndicator({ mode, onReady }) {
   const config = MODES[mode] || MODES.primitives;
-  const { steps, items, title, subtitle, readyTitle, icon: Icon, nameFor, buildingLabel } = config;
+  const {
+    steps,
+    items,
+    title,
+    subtitle,
+    readyTitle,
+    icon: Icon,
+    nameFor,
+    buildingLabel,
+  } = config;
 
   const [step, setStep] = useState(0);
   const [stepsFinished, setStepsFinished] = useState(false);
@@ -49,7 +69,10 @@ export default function GeneratingIndicator({ mode, onReady }) {
   useEffect(() => {
     const iv = setInterval(() => {
       setStep((s) => {
-        if (s >= steps.length) { clearInterval(iv); return s; }
+        if (s >= steps.length) {
+          clearInterval(iv);
+          return s;
+        }
         return s + 1;
       });
     }, 2200);
@@ -76,15 +99,21 @@ export default function GeneratingIndicator({ mode, onReady }) {
   }, [complete, onReady]);
 
   return (
-    <div className={`generating-container ${complete ? "generating-complete" : ""}`}>
+    <div
+      className={`generating-container ${complete ? "generating-complete" : ""}`}
+    >
       <div className="gen-card">
         {complete ? (
           <div className="ready-beat animate-fade-in">
             <div className="ready-check">
               <CheckCircle2 size={48} color={C.red} />
             </div>
-            <h2 className="generating-title" style={{ marginTop: 20 }}>{readyTitle}</h2>
-            <p className="generating-subtitle" style={{ opacity: 0.7 }}>Opening now...</p>
+            <h2 className="generating-title" style={{ marginTop: 20 }}>
+              {readyTitle}
+            </h2>
+            <p className="generating-subtitle" style={{ opacity: 0.7 }}>
+              Opening now...
+            </p>
           </div>
         ) : (
           <>
@@ -98,8 +127,13 @@ export default function GeneratingIndicator({ mode, onReady }) {
                 const done = i < step;
                 const active = i === step;
                 return (
-                  <div key={i} className={`gen-step ${done ? "gen-done" : active ? "gen-active" : "gen-future"}`}>
-                    <div className={`gen-step-icon ${active ? "gen-step-icon-active" : ""}`}>
+                  <div
+                    key={i}
+                    className={`gen-step ${done ? "gen-done" : active ? "gen-active" : "gen-future"}`}
+                  >
+                    <div
+                      className={`gen-step-icon ${active ? "gen-step-icon-active" : ""}`}
+                    >
                       {done ? (
                         <CheckCircle2 size={18} color={C.red} />
                       ) : active ? (
@@ -109,16 +143,27 @@ export default function GeneratingIndicator({ mode, onReady }) {
                       )}
                     </div>
                     <div>
-                      <div className="gen-step-name">{nameFor(i, items, s)}</div>
-                      {(done || active) && <div className="gen-step-tip animate-fade-in">{s.tip}</div>}
+                      <div className="gen-step-name">
+                        {nameFor(i, items, s)}
+                      </div>
+                      {(done || active) && (
+                        <div className="gen-step-tip animate-fade-in">
+                          {s.tip}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
               })}
               <div className="gen-progress-bar">
-                <div className="gen-progress-fill" style={{ width: `${Math.min(Math.round((step / steps.length) * 100), 100)}%` }} />
+                <div
+                  className="gen-progress-fill"
+                  style={{ "--progress": Math.min(step / steps.length, 1) }}
+                />
               </div>
-              <div className="gen-progress-label">{Math.min(Math.round((step / steps.length) * 100), 100)}%</div>
+              <div className="gen-progress-label">
+                {Math.min(Math.round((step / steps.length) * 100), 100)}%
+              </div>
             </div>
             {stepsFinished && (
               <div className="gen-building animate-fade-in">
