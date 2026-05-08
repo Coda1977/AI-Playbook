@@ -30,7 +30,12 @@ Respond in this exact JSON format:
   "ideation": ["idea 1", "idea 2"]
 }
 
-Each idea should be specific to their role, under 40 words, and immediately actionable. No generic suggestions.`;
+Each idea should be specific to their role, under 40 words, and immediately actionable. No generic suggestions.
+
+STYLE RULES (strict):
+- NO em dashes anywhere. Use commas, semicolons, periods, colons, or parentheses.
+- NO "isn't X, it's Y" or "not just X, it's Y" parallelism. State the affirmative thesis directly.
+- No filler ("It's worth noting", "Importantly").`;
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {

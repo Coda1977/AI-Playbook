@@ -23,13 +23,19 @@ export default function Header({ state, dispatch }) {
           {showRole && (
             <>
               <span className="header-divider">|</span>
-              <span className="header-role" title={intake.role}>{truncateRole(intake.role)}</span>
+              <span className="header-role" title={intake.role}>
+                {truncateRole(intake.role)}
+              </span>
             </>
           )}
         </div>
-        <div className="header-actions">
-          <PhaseProgress phase={phase} dispatch={dispatch} isGenerating={isGenerating} />
-        </div>
+        <nav className="header-actions" aria-label="Workshop progress">
+          <PhaseProgress
+            phase={phase}
+            dispatch={dispatch}
+            isGenerating={isGenerating}
+          />
+        </nav>
       </div>
     </header>
   );

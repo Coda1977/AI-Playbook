@@ -9,9 +9,17 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
   const [activeRule, setActiveRule] = useState(null);
   const chatOpen = activeRule !== null;
 
-  const totalActions = RULES.reduce((sum, r) => sum + (state.plan[r.id] || []).length, 0);
-  const rulesWithActions = RULES.filter((r) => (state.plan[r.id] || []).length > 0).length;
-  const starred = RULES.reduce((sum, r) => sum + (state.plan[r.id] || []).filter((a) => a.starred).length, 0);
+  const totalActions = RULES.reduce(
+    (sum, r) => sum + (state.plan[r.id] || []).length,
+    0,
+  );
+  const rulesWithActions = RULES.filter(
+    (r) => (state.plan[r.id] || []).length > 0,
+  ).length;
+  const starred = RULES.reduce(
+    (sum, r) => sum + (state.plan[r.id] || []).filter((a) => a.starred).length,
+    0,
+  );
 
   return (
     <FlashProvider>
@@ -20,17 +28,25 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
           <div className="canvas-inner">
             <div className="canvas-orientation animate-fade-in">
               <div className="orientation-stats">
-                <span className="orientation-stat"><strong>{totalActions}</strong> actions</span>
+                <span className="orientation-stat">
+                  <strong>{totalActions}</strong> actions
+                </span>
                 <span className="orientation-dot">&middot;</span>
-                <span className="orientation-stat"><strong>{rulesWithActions}</strong> of 5 rules</span>
+                <span className="orientation-stat">
+                  <strong>{rulesWithActions}</strong> of 5 rules
+                </span>
                 {starred > 0 && (
                   <>
                     <span className="orientation-dot">&middot;</span>
-                    <span className="orientation-stat"><strong>{starred}</strong> starred</span>
+                    <span className="orientation-stat">
+                      <strong>{starred}</strong> starred
+                    </span>
                   </>
                 )}
               </div>
-              <p className="orientation-hint">Star your priorities. Go deeper on any rule. Make this yours.</p>
+              <p className="orientation-hint">
+                Star your priorities. Go deeper on any rule. Make this yours.
+              </p>
             </div>
 
             <div className="rule-list">
@@ -50,32 +66,51 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
           </div>
 
           {/* Gate -- sticky bottom bar */}
-          <div className="gate-bar">
+          <footer className="gate-bar" aria-label="Phase progress and actions">
             <div className="gate-left">
               <div className="gate-counter">
-                <strong>{totalActions}</strong> actions, <strong>{rulesWithActions}</strong> rules{starred > 0 && <>, <strong>{starred}</strong> starred</>}
+                <strong>{totalActions}</strong> actions,{" "}
+                <strong>{rulesWithActions}</strong> rules
+                {starred > 0 && (
+                  <>
+                    , <strong>{starred}</strong> starred
+                  </>
+                )}
               </div>
             </div>
-            <div style={{ fontSize: 13, color: "var(--color-dark-gray)", textAlign: "center" }}>
-              Star your priorities, then continue
+            <div
+              style={{
+                fontSize: 13,
+                color: "var(--color-dark-gray)",
+                textAlign: "center",
+              }}
+            >
+              {starred === 0
+                ? "Star your priorities, then continue"
+                : "Ready when you are"}
             </div>
             <div className="gate-actions">
               <button onClick={onStartOver} className="btn-ghost btn-sm">
                 <RotateCcw size={12} /> Start over
               </button>
               <button
-                onClick={() => dispatch({ type: "SET_PHASE", phase: "commitment" })}
+                onClick={() =>
+                  dispatch({ type: "SET_PHASE", phase: "commitment" })
+                }
                 className="btn-gate btn-gate-active"
               >
                 Continue to Review <ChevronRight size={16} />
               </button>
             </div>
-          </div>
+          </footer>
         </div>
 
         {chatOpen && (
           <>
-            <div onClick={() => setActiveRule(null)} className="chat-backdrop" />
+            <div
+              onClick={() => setActiveRule(null)}
+              className="chat-backdrop"
+            />
             <div className="chat-panel">
               <ChatDrawer
                 key={activeRule.id}
