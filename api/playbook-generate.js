@@ -142,8 +142,23 @@ Respond with ONLY a JSON object (no markdown, no explanation):
       .map((b) => b.text)
       .join("");
 
-    const plan = JSON.parse(raw.replace(/```json|```/g, "").trim()).plan;
-    return res.status(200).json({ plan });
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error(
+        "No JSON found in playbook response. First 500 chars:",
+        raw.slice(0, 500),
+      );
+      return res.status(500).json({ error: "Could not parse AI response" });
+    }
+    const parsed = JSON.parse(jsonMatch[0]);
+    if (!parsed.plan) {
+      console.error(
+        "Plan key missing in parsed response:",
+        jsonMatch[0].slice(0, 500),
+      );
+      return res.status(500).json({ error: "Plan structure missing" });
+    }
+    return res.status(200).json({ plan: parsed.plan });
   } catch (err) {
     console.error("Generation error:", err);
     return res.status(500).json({ error: "Failed to generate plan" });
