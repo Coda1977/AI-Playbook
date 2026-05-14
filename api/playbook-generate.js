@@ -123,7 +123,7 @@ Respond with ONLY a JSON object (no markdown, no explanation):
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 2048,
+        max_tokens: 4096,
         messages: [{ role: "user", content: prompt }],
       }),
     });
@@ -142,18 +142,40 @@ Respond with ONLY a JSON object (no markdown, no explanation):
       .map((b) => b.text)
       .join("");
 
+    const stopReason = data.stop_reason;
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       console.error(
-        "No JSON found in playbook response. First 500 chars:",
+        "No JSON found in playbook response. stop_reason:",
+        stopReason,
+        "| First 500 chars:",
         raw.slice(0, 500),
       );
       return res.status(500).json({ error: "Could not parse AI response" });
     }
-    const parsed = JSON.parse(jsonMatch[0]);
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonMatch[0]);
+    } catch (parseErr) {
+      console.error(
+        "JSON.parse failed. stop_reason:",
+        stopReason,
+        "| reason:",
+        parseErr.message,
+        "| Raw length:",
+        raw.length,
+        "| Raw first 800 chars:",
+        raw.slice(0, 800),
+        "| Raw last 400 chars:",
+        raw.slice(-400),
+      );
+      return res.status(500).json({ error: "Malformed AI response" });
+    }
     if (!parsed.plan) {
       console.error(
-        "Plan key missing in parsed response:",
+        "Plan key missing in parsed response. stop_reason:",
+        stopReason,
+        "| First 500 chars:",
         jsonMatch[0].slice(0, 500),
       );
       return res.status(500).json({ error: "Plan structure missing" });
