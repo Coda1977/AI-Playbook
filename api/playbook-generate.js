@@ -110,8 +110,54 @@ QUALITY CHECK BEFORE RETURNING, VERIFY EACH ACTION:
 RULES:
 ${rulesBlock}
 
-Respond with ONLY a JSON object (no markdown, no explanation):
-{"plan":{"destination":["action 1","action 2"],"safe":["action 1","action 2"],"script":["action 1","action 2"],"small":["action 1","action 2"],"visible":["action 1","action 2"]}}`;
+Use the submit_change_plan tool to return your actions for each rule.`;
+
+  const planTool = {
+    name: "submit_change_plan",
+    description:
+      "Submit the personalized change strategy. Each field is an array of 2 to 3 action sentences, each under 25 words, each starting with a concrete verb.",
+    input_schema: {
+      type: "object",
+      required: ["destination", "safe", "script", "small", "visible"],
+      properties: {
+        destination: {
+          type: "array",
+          minItems: 2,
+          maxItems: 3,
+          items: { type: "string" },
+          description: "Rule 1: Start at the End",
+        },
+        safe: {
+          type: "array",
+          minItems: 2,
+          maxItems: 3,
+          items: { type: "string" },
+          description: "Rule 2: Make It Safe",
+        },
+        script: {
+          type: "array",
+          minItems: 2,
+          maxItems: 3,
+          items: { type: "string" },
+          description: "Rule 3: Script the Steps",
+        },
+        small: {
+          type: "array",
+          minItems: 2,
+          maxItems: 3,
+          items: { type: "string" },
+          description: "Rule 4: Start Small, to go Big",
+        },
+        visible: {
+          type: "array",
+          minItems: 2,
+          maxItems: 3,
+          items: { type: "string" },
+          description: "Rule 5: Make Progress Visible",
+        },
+      },
+    },
+  };
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -124,6 +170,8 @@ Respond with ONLY a JSON object (no markdown, no explanation):
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
         max_tokens: 4096,
+        tools: [planTool],
+        tool_choice: { type: "tool", name: planTool.name },
         messages: [{ role: "user", content: prompt }],
       }),
     });
@@ -137,50 +185,21 @@ Respond with ONLY a JSON object (no markdown, no explanation):
     }
 
     const data = await response.json();
-    const raw = data.content
-      .filter((b) => b.type === "text")
-      .map((b) => b.text)
-      .join("");
-
-    const stopReason = data.stop_reason;
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
+    const toolBlock = data.content?.find((b) => b.type === "tool_use");
+    if (!toolBlock?.input) {
       console.error(
-        "No JSON found in playbook response. stop_reason:",
-        stopReason,
-        "| First 500 chars:",
-        raw.slice(0, 500),
+        "Expected tool_use block missing. stop_reason:",
+        data.stop_reason,
+        "| content types:",
+        data.content?.map((b) => b.type).join(",") || "none",
+        "| raw response:",
+        JSON.stringify(data).slice(0, 1000),
       );
-      return res.status(500).json({ error: "Could not parse AI response" });
+      return res
+        .status(500)
+        .json({ error: "Model did not return structured plan" });
     }
-    let parsed;
-    try {
-      parsed = JSON.parse(jsonMatch[0]);
-    } catch (parseErr) {
-      console.error(
-        "JSON.parse failed. stop_reason:",
-        stopReason,
-        "| reason:",
-        parseErr.message,
-        "| Raw length:",
-        raw.length,
-        "| Raw first 800 chars:",
-        raw.slice(0, 800),
-        "| Raw last 400 chars:",
-        raw.slice(-400),
-      );
-      return res.status(500).json({ error: "Malformed AI response" });
-    }
-    if (!parsed.plan) {
-      console.error(
-        "Plan key missing in parsed response. stop_reason:",
-        stopReason,
-        "| First 500 chars:",
-        jsonMatch[0].slice(0, 500),
-      );
-      return res.status(500).json({ error: "Plan structure missing" });
-    }
-    return res.status(200).json({ plan: parsed.plan });
+    return res.status(200).json({ plan: toolBlock.input });
   } catch (err) {
     console.error("Generation error:", err);
     return res.status(500).json({ error: "Failed to generate plan" });
