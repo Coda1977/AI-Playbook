@@ -1,3 +1,7 @@
+// Slightly longer than the Vercel function maxDuration (90s) so the server
+// has a chance to return a clean 5xx before the client aborts.
+const REQUEST_TIMEOUT_MS = 105_000;
+
 async function postJson(path, body) {
   let res;
   try {
@@ -5,6 +9,7 @@ async function postJson(path, body) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
   } catch (e) {
     const err = new Error(e?.message || "Network request failed");

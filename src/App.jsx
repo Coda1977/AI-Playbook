@@ -10,7 +10,6 @@ import {
 import { clearState, STORAGE_QUOTA_EVENT } from "./utils/storage";
 import { CATEGORIES } from "./config/categories";
 import { RULES } from "./config/rules";
-import PaperGrain from "./components/shared/PaperGrain";
 import ErrorBanner from "./components/shared/ErrorBanner";
 import Header from "./components/shared/Header";
 import GeneratingIndicator from "./components/shared/GeneratingIndicator";
@@ -202,8 +201,6 @@ export default function App() {
 
   return (
     <div className="app-root">
-      <PaperGrain />
-
       {genErr &&
         (phase === "intake" ||
           phase === "primitives" ||
