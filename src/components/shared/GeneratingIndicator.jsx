@@ -64,6 +64,7 @@ export default function GeneratingIndicator({ mode, onReady }) {
   const [step, setStep] = useState(0);
   const [stepsFinished, setStepsFinished] = useState(false);
   const [complete, setComplete] = useState(false);
+  const [slow, setSlow] = useState(false);
   const calledRef = useRef(false);
 
   useEffect(() => {
@@ -78,6 +79,14 @@ export default function GeneratingIndicator({ mode, onReady }) {
     }, 2200);
     return () => clearInterval(iv);
   }, [steps.length]);
+
+  // Surface a passive "this is taking longer than usual" note after 45s.
+  // The fetch itself times out at 75s (see utils/api.js), at which point
+  // App.jsx catches and reverts the phase + shows the retry banner.
+  useEffect(() => {
+    const t = setTimeout(() => setSlow(true), 45_000);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     if (step >= steps.length && !stepsFinished) {
@@ -169,6 +178,16 @@ export default function GeneratingIndicator({ mode, onReady }) {
               <div className="gen-building animate-fade-in">
                 <Loader2 size={16} color={C.red} className="spinning" />
                 <span>{buildingLabel}</span>
+              </div>
+            )}
+            {slow && !complete && (
+              <div
+                className="gen-slow animate-fade-in"
+                role="status"
+                aria-live="polite"
+              >
+                Taking longer than usual. Hang tight, we'll either finish or
+                show a retry option soon.
               </div>
             )}
           </>

@@ -206,6 +206,15 @@ export default async function handler(req, res) {
           "raw:",
           jsonText.slice(0, 300),
         );
+        console.log(
+          JSON.stringify({
+            event: "chat_parse_fail",
+            reason: "json_parse_after_separator",
+            mode,
+            rawLength: full.length,
+            snippet: jsonText.slice(0, 200),
+          }),
+        );
       }
     } else {
       const match = full.match(/\[\s*\{[\s\S]*?\}\s*\]/);
@@ -219,12 +228,30 @@ export default async function handler(req, res) {
             "raw:",
             full.slice(0, 300),
           );
+          console.log(
+            JSON.stringify({
+              event: "chat_parse_fail",
+              reason: "fallback_regex_parse",
+              mode,
+              rawLength: full.length,
+              snippet: full.slice(0, 200),
+            }),
+          );
         }
       } else {
         console.warn(
           "Chat response missing IDEAS separator and no JSON found:",
           "raw:",
           full.slice(0, 300),
+        );
+        console.log(
+          JSON.stringify({
+            event: "chat_parse_fail",
+            reason: "no_separator_no_json",
+            mode,
+            rawLength: full.length,
+            snippet: full.slice(0, 200),
+          }),
         );
       }
     }
