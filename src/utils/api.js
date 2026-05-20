@@ -1,54 +1,90 @@
-export async function generatePrimitives(intake) {
-  const res = await fetch("/api/primitives-generate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ intake }),
-  });
+async function postJson(path, body) {
+  let res;
+  try {
+    res = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    const err = new Error(e?.message || "Network request failed");
+    err.kind = e?.name === "TimeoutError" ? "timeout" : "network";
+    throw err;
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `API returned ${res.status}`);
+    const msg = err.error || `API returned ${res.status}`;
+    const e = new Error(msg);
+    e.status = res.status;
+    e.kind = res.status >= 500 ? "server" : "client";
+    throw e;
   }
-  const data = await res.json();
+  return res.json();
+}
+
+export async function generatePrimitives(intake) {
+  const data = await postJson("/api/primitives-generate", { intake });
   return data.primitives;
 }
 
 export async function generatePlaybook(intake, starredPrimitives) {
-  const res = await fetch("/api/playbook-generate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ intake, starredPrimitives }),
+  const data = await postJson("/api/playbook-generate", {
+    intake,
+    starredPrimitives,
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `API returned ${res.status}`);
-  }
-  const data = await res.json();
   return data.plan;
 }
 
-export async function sendChat({ mode, intake, category, rule, currentItems, allPrimitives, allPlan, starredPrimitives, chatHistory, userMessage }) {
-  const res = await fetch("/api/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mode, intake, category, rule, currentItems, allPrimitives, allPlan, starredPrimitives, chatHistory, userMessage }),
+export async function sendChat({
+  mode,
+  intake,
+  category,
+  rule,
+  currentItems,
+  allPrimitives,
+  allPlan,
+  starredPrimitives,
+  chatHistory,
+  userMessage,
+}) {
+  return postJson("/api/chat", {
+    mode,
+    intake,
+    category,
+    rule,
+    currentItems,
+    allPrimitives,
+    allPlan,
+    starredPrimitives,
+    chatHistory,
+    userMessage,
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `API returned ${res.status}`);
-  }
-  return await res.json();
 }
 
 export async function generateSynthesis(intake, primitives, plan) {
-  const res = await fetch("/api/synthesis-generate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ intake, primitives, plan }),
+  const data = await postJson("/api/synthesis-generate", {
+    intake,
+    primitives,
+    plan,
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `API returned ${res.status}`);
-  }
-  const data = await res.json();
   return data.synthesis;
+}
+
+// Human-readable copy for a thrown error from postJson. Keeps the wire
+// taxonomy (timeout / network / server / client) out of view text.
+export function describeApiError(err, fallback) {
+  if (!err) return fallback;
+  if (err.kind === "timeout") {
+    return "The request took too long. Check your network and try again.";
+  }
+  if (err.kind === "network") {
+    return "Connection issue. Check your network and try again.";
+  }
+  if (err.kind === "server") {
+    return "The AI service is temporarily unavailable. Try again in a moment.";
+  }
+  if (err.kind === "client") {
+    return "We couldn't process that request. Please review your inputs and try again.";
+  }
+  return fallback || err.message || "Something went wrong.";
 }
