@@ -1,5 +1,15 @@
 import { useState, useEffect, useRef } from "react";
-import { Check, Sparkles, MessageCircle, FileText, Zap, Search, BarChart3, Code2, Lightbulb } from "lucide-react";
+import {
+  Check,
+  Sparkles,
+  MessageCircle,
+  FileText,
+  Zap,
+  Search,
+  BarChart3,
+  Code2,
+  Lightbulb,
+} from "lucide-react";
 import { C } from "../../config/constants";
 import { useFlash } from "../../context/AppContext";
 import IdeaCard from "./IdeaCard";
@@ -14,7 +24,13 @@ const CATEGORY_ICONS = {
   ideation: Lightbulb,
 };
 
-export default function CategorySection({ category, ideas, dispatch, isActive, onGoDeeper, delay, isLast }) {
+export default function CategorySection({
+  category,
+  ideas,
+  dispatch,
+  onGoDeeper,
+  delay,
+}) {
   const { flash } = useFlash();
   const isFlashing = flash === category.id;
   const hasIdeas = ideas.length > 0;
@@ -35,7 +51,10 @@ export default function CategorySection({ category, ideas, dispatch, isActive, o
   return (
     <div
       className={`use-card ${isFlashing ? "rule-flashing" : ""}`}
-      style={{ animationDelay: `${delay}s`, "--cat-color": category.color || C.electricBlue }}
+      style={{
+        animationDelay: `${delay}s`,
+        "--cat-color": category.color || C.electricBlue,
+      }}
       id={`category-${category.id}`}
       data-category-id={category.id}
     >
@@ -44,7 +63,13 @@ export default function CategorySection({ category, ideas, dispatch, isActive, o
         <div className="use-card-number">
           Category {category.number}
           {hasIdeas && (
-            <span className="rule-check" style={{ background: "rgba(0,163,224,0.15)", color: C.electricBlue }}>
+            <span
+              className="rule-check"
+              style={{
+                background: "rgba(0,163,224,0.15)",
+                color: C.electricBlue,
+              }}
+            >
               <Check size={12} />
             </span>
           )}
@@ -62,21 +87,34 @@ export default function CategorySection({ category, ideas, dispatch, isActive, o
         <div className="use-card-body">
           <div className="rule-actions">
             {ideas.map((idea) => (
-              <IdeaCard key={idea.id} idea={idea} categoryId={category.id} dispatch={dispatch} isNew={newIds.has(idea.id)} />
+              <IdeaCard
+                key={idea.id}
+                idea={idea}
+                categoryId={category.id}
+                dispatch={dispatch}
+                isNew={newIds.has(idea.id)}
+              />
             ))}
           </div>
           <div className="rule-footer">
             <div className="rule-footer-add">
               <AddIdeaInput categoryId={category.id} dispatch={dispatch} />
             </div>
-            <button onClick={() => onGoDeeper(category)} className="btn-go-deeper" >
+            <button
+              onClick={() => onGoDeeper(category)}
+              className="btn-go-deeper"
+            >
               <MessageCircle size={14} /> Brainstorm with AI
             </button>
           </div>
         </div>
       ) : (
         <div className="use-card-empty">
-          <Sparkles size={22} color={category.color || C.accent} style={{ opacity: 0.5, marginBottom: 10 }} />
+          <Sparkles
+            size={22}
+            color={category.color || C.accent}
+            style={{ opacity: 0.5, marginBottom: 10 }}
+          />
           <p className="use-card-empty-title">No ideas yet</p>
           <p className="use-card-empty-hint">{category.emptyNudge}</p>
           <div style={{ marginTop: 16 }}>
@@ -84,7 +122,10 @@ export default function CategorySection({ category, ideas, dispatch, isActive, o
               <div className="rule-footer-add">
                 <AddIdeaInput categoryId={category.id} dispatch={dispatch} />
               </div>
-              <button onClick={() => onGoDeeper(category)} className="btn-go-deeper" >
+              <button
+                onClick={() => onGoDeeper(category)}
+                className="btn-go-deeper"
+              >
                 <MessageCircle size={14} /> Brainstorm with AI
               </button>
             </div>

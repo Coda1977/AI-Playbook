@@ -4,6 +4,19 @@ import { uid } from "../config/constants";
 import { loadState, saveState } from "../utils/storage";
 export { FlashProvider, useFlash } from "./FlashContext";
 
+// Hard ceiling on per-chat message history. Anything older than this is pruned
+// from the tail to keep localStorage well under quota. We always preserve the
+// first message (the static opener dispatched on chat mount) so the thread
+// reads naturally on rehydrate.
+const MAX_CHAT_MESSAGES = 30;
+function capChatHistory(arr, next) {
+  const appended = [...(arr || []), next];
+  if (appended.length <= MAX_CHAT_MESSAGES) return appended;
+  const opener = appended[0];
+  const tail = appended.slice(-(MAX_CHAT_MESSAGES - 1));
+  return [opener, ...tail];
+}
+
 const INIT = {
   phase: "intake",
   intake: {
@@ -15,7 +28,14 @@ const INIT = {
     failureRisks: "",
     successVision: "",
   },
-  primitives: { content: [], automation: [], research: [], data: [], coding: [], ideation: [] },
+  primitives: {
+    content: [],
+    automation: [],
+    research: [],
+    data: [],
+    coding: [],
+    ideation: [],
+  },
   primitivesChat: {},
   plan: { destination: [], safe: [], script: [], small: [], visible: [] },
   playbookChat: {},
@@ -35,7 +55,12 @@ function reducer(state, action) {
     case "SET_PRIMITIVES": {
       const primitives = {};
       for (const [k, v] of Object.entries(action.primitives)) {
-        primitives[k] = v.map((t) => ({ id: uid(), text: t, starred: false, source: "ai" }));
+        primitives[k] = v.map((t) => ({
+          id: uid(),
+          text: t,
+          starred: false,
+          source: "ai",
+        }));
       }
       return { ...state, primitives, phase: "primitives" };
     }
@@ -46,7 +71,12 @@ function reducer(state, action) {
           ...state.primitives,
           [action.categoryId]: [
             ...(state.primitives[action.categoryId] || []),
-            { id: uid(), text: action.text, starred: false, source: action.source || "manual" },
+            {
+              id: uid(),
+              text: action.text,
+              starred: false,
+              source: action.source || "manual",
+            },
           ],
         },
       };
@@ -55,8 +85,8 @@ function reducer(state, action) {
         ...state,
         primitives: {
           ...state.primitives,
-          [action.categoryId]: (state.primitives[action.categoryId] || []).map((x) =>
-            x.id === action.ideaId ? { ...x, text: action.text } : x
+          [action.categoryId]: (state.primitives[action.categoryId] || []).map(
+            (x) => (x.id === action.ideaId ? { ...x, text: action.text } : x),
           ),
         },
       };
@@ -65,7 +95,9 @@ function reducer(state, action) {
         ...state,
         primitives: {
           ...state.primitives,
-          [action.categoryId]: (state.primitives[action.categoryId] || []).filter((x) => x.id !== action.ideaId),
+          [action.categoryId]: (
+            state.primitives[action.categoryId] || []
+          ).filter((x) => x.id !== action.ideaId),
         },
       };
     case "TOGGLE_PRIMITIVE_STAR":
@@ -73,8 +105,8 @@ function reducer(state, action) {
         ...state,
         primitives: {
           ...state.primitives,
-          [action.categoryId]: (state.primitives[action.categoryId] || []).map((x) =>
-            x.id === action.ideaId ? { ...x, starred: !x.starred } : x
+          [action.categoryId]: (state.primitives[action.categoryId] || []).map(
+            (x) => (x.id === action.ideaId ? { ...x, starred: !x.starred } : x),
           ),
         },
       };
@@ -83,7 +115,10 @@ function reducer(state, action) {
         ...state,
         primitivesChat: {
           ...state.primitivesChat,
-          [action.categoryId]: [...(state.primitivesChat[action.categoryId] || []), action.message],
+          [action.categoryId]: capChatHistory(
+            state.primitivesChat[action.categoryId],
+            action.message,
+          ),
         },
       };
     case "MARK_PRIMITIVE_IDEA_ADDED": {
@@ -93,14 +128,22 @@ function reducer(state, action) {
       ideas[action.ideaIdx] = { ...ideas[action.ideaIdx], added: true };
       m.ideas = ideas;
       msgs[action.msgIdx] = m;
-      return { ...state, primitivesChat: { ...state.primitivesChat, [action.categoryId]: msgs } };
+      return {
+        ...state,
+        primitivesChat: { ...state.primitivesChat, [action.categoryId]: msgs },
+      };
     }
 
     // --- Playbook ---
     case "SET_PLAN": {
       const plan = {};
       for (const [k, v] of Object.entries(action.plan)) {
-        plan[k] = v.map((t) => ({ id: uid(), text: t, starred: false, source: "ai" }));
+        plan[k] = v.map((t) => ({
+          id: uid(),
+          text: t,
+          starred: false,
+          source: "ai",
+        }));
       }
       return { ...state, plan, phase: "playbook" };
     }
@@ -111,7 +154,12 @@ function reducer(state, action) {
           ...state.plan,
           [action.ruleId]: [
             ...(state.plan[action.ruleId] || []),
-            { id: uid(), text: action.text, starred: false, source: action.source || "manual" },
+            {
+              id: uid(),
+              text: action.text,
+              starred: false,
+              source: action.source || "manual",
+            },
           ],
         },
       };
@@ -121,7 +169,7 @@ function reducer(state, action) {
         plan: {
           ...state.plan,
           [action.ruleId]: (state.plan[action.ruleId] || []).map((x) =>
-            x.id === action.actionId ? { ...x, text: action.text } : x
+            x.id === action.actionId ? { ...x, text: action.text } : x,
           ),
         },
       };
@@ -130,7 +178,9 @@ function reducer(state, action) {
         ...state,
         plan: {
           ...state.plan,
-          [action.ruleId]: (state.plan[action.ruleId] || []).filter((x) => x.id !== action.actionId),
+          [action.ruleId]: (state.plan[action.ruleId] || []).filter(
+            (x) => x.id !== action.actionId,
+          ),
         },
       };
     case "TOGGLE_STAR":
@@ -139,7 +189,7 @@ function reducer(state, action) {
         plan: {
           ...state.plan,
           [action.ruleId]: (state.plan[action.ruleId] || []).map((x) =>
-            x.id === action.actionId ? { ...x, starred: !x.starred } : x
+            x.id === action.actionId ? { ...x, starred: !x.starred } : x,
           ),
         },
       };
@@ -148,7 +198,10 @@ function reducer(state, action) {
         ...state,
         playbookChat: {
           ...state.playbookChat,
-          [action.ruleId]: [...(state.playbookChat[action.ruleId] || []), action.message],
+          [action.ruleId]: capChatHistory(
+            state.playbookChat[action.ruleId],
+            action.message,
+          ),
         },
       };
     case "MARK_IDEA_ADDED": {
@@ -158,7 +211,10 @@ function reducer(state, action) {
       ideas[action.ideaIdx] = { ...ideas[action.ideaIdx], added: true };
       m.ideas = ideas;
       msgs[action.msgIdx] = m;
-      return { ...state, playbookChat: { ...state.playbookChat, [action.ruleId]: msgs } };
+      return {
+        ...state,
+        playbookChat: { ...state.playbookChat, [action.ruleId]: msgs },
+      };
     }
 
     case "SET_SYNTHESIS":

@@ -89,22 +89,89 @@ QUALITY CHECKS (verify before returning):
 - Does each storyline include both prose AND source items?
 - Are all thisWeek actions concrete enough that the manager knows what to do Monday morning?
 
-Respond with ONLY a JSON object (no markdown fences, no explanation):
-{
-  "title": "...",
-  "lede": "...",
-  "storylines": [
-    {
-      "eyebrowName": "...",
-      "headline": "...",
-      "thesis": "...",
-      "prose": ["paragraph 1", "paragraph 2"],
-      "useCases": ["...", "..."],
-      "actions": ["...", "..."]
-    }
-  ],
-  "thisWeek": ["...", "...", "..."]
-}`;
+Use the submit_one_page_plan tool to return your one-page plan.`;
+
+  const planTool = {
+    name: "submit_one_page_plan",
+    description:
+      "Submit the manager's one-page plan. Title is one sentence; lede is 60-100 words; storylines is 1 or 2 items; thisWeek is exactly 3 imperative starting actions.",
+    input_schema: {
+      type: "object",
+      required: ["title", "lede", "storylines", "thisWeek"],
+      properties: {
+        title: {
+          type: "string",
+          description:
+            "Single sentence that names the manager's central tension or wedge.",
+        },
+        lede: {
+          type: "string",
+          description:
+            "60 to 100 words framing the plan's central thesis, synthesizing intake and items.",
+        },
+        storylines: {
+          type: "array",
+          minItems: 1,
+          maxItems: 2,
+          items: {
+            type: "object",
+            required: [
+              "eyebrowName",
+              "headline",
+              "thesis",
+              "prose",
+              "useCases",
+              "actions",
+            ],
+            properties: {
+              eyebrowName: {
+                type: "string",
+                description: "Short theme name, 2 to 4 words.",
+              },
+              headline: {
+                type: "string",
+                description:
+                  "The storyline's central claim, written as a sentence.",
+              },
+              thesis: {
+                type: "string",
+                description:
+                  "1 to 2 sentences stating the bet this storyline represents.",
+              },
+              prose: {
+                type: "array",
+                minItems: 2,
+                maxItems: 2,
+                items: { type: "string" },
+                description:
+                  "Exactly 2 short paragraphs synthesizing the manager's items into argument.",
+              },
+              useCases: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Use cases that genuinely support this storyline, original wording preserved.",
+              },
+              actions: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "Change actions that genuinely support this storyline, original wording preserved.",
+              },
+            },
+          },
+        },
+        thisWeek: {
+          type: "array",
+          minItems: 3,
+          maxItems: 3,
+          items: { type: "string" },
+          description:
+            "Exactly 3 concrete starting actions, each starting with a verb in imperative mood.",
+        },
+      },
+    },
+  };
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -116,7 +183,9 @@ Respond with ONLY a JSON object (no markdown fences, no explanation):
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 3000,
+        max_tokens: 4096,
+        tools: [planTool],
+        tool_choice: { type: "tool", name: planTool.name },
         messages: [{ role: "user", content: prompt }],
       }),
     });
@@ -130,20 +199,25 @@ Respond with ONLY a JSON object (no markdown fences, no explanation):
     }
 
     const data = await response.json();
-    const raw = data.content
-      .filter((b) => b.type === "text")
-      .map((b) => b.text)
-      .join("");
-
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error("Could not parse synthesis JSON:", raw);
-      return res.status(500).json({ error: "Could not parse AI response" });
+    const toolBlock = data.content?.find((b) => b.type === "tool_use");
+    if (!toolBlock?.input) {
+      console.error(
+        "Expected tool_use block missing. stop_reason:",
+        data.stop_reason,
+        "| content types:",
+        data.content?.map((b) => b.type).join(",") || "none",
+        "| raw response:",
+        JSON.stringify(data).slice(0, 1000),
+      );
+      return res
+        .status(500)
+        .json({ error: "Model did not return structured plan" });
     }
 
-    const synthesis = JSON.parse(jsonMatch[0]);
-    synthesis.generatedAt = new Date().toISOString();
-
+    const synthesis = {
+      ...toolBlock.input,
+      generatedAt: new Date().toISOString(),
+    };
     return res.status(200).json({ synthesis });
   } catch (err) {
     console.error("Synthesis generation error:", err);

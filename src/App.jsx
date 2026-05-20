@@ -1,7 +1,13 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useApp } from "./context/AppContext";
-import { generatePrimitives, generatePlaybook, generateSynthesis } from "./utils/api";
-import { clearState } from "./utils/storage";
+import { useToast } from "./context/ToastContext";
+import {
+  generatePrimitives,
+  generatePlaybook,
+  generateSynthesis,
+  describeApiError,
+} from "./utils/api";
+import { clearState, STORAGE_QUOTA_EVENT } from "./utils/storage";
 import { CATEGORIES } from "./config/categories";
 import { RULES } from "./config/rules";
 import PaperGrain from "./components/shared/PaperGrain";
@@ -17,7 +23,22 @@ import SynthesisView from "./components/views/SynthesisView";
 
 export default function App() {
   const { state, dispatch } = useApp();
+  const { showToast } = useToast();
   const [genErr, setGenErr] = useState(null);
+  const quotaWarnedRef = useRef(false);
+  const lastFailureRef = useRef(null);
+
+  useEffect(() => {
+    const onQuota = () => {
+      if (quotaWarnedRef.current) return;
+      quotaWarnedRef.current = true;
+      showToast(
+        "We couldn't save your latest changes. Export your Word doc to capture this work.",
+      );
+    };
+    window.addEventListener(STORAGE_QUOTA_EVENT, onQuota);
+    return () => window.removeEventListener(STORAGE_QUOTA_EVENT, onQuota);
+  }, [showToast]);
 
   // Primitives generation
   const [primitivesReady, setPrimitivesReady] = useState(false);
@@ -41,7 +62,9 @@ export default function App() {
   // Playbook re-generation confirmation (when going back then forward)
   const [showPlaybookRegen, setShowPlaybookRegen] = useState(false);
 
-  const hasExistingPrimitives = CATEGORIES.some((c) => (state.primitives[c.id] || []).length > 0);
+  const hasExistingPrimitives = CATEGORIES.some(
+    (c) => (state.primitives[c.id] || []).length > 0,
+  );
 
   const handleGenerateRequest = (intake) => {
     if (hasExistingPrimitives) {
@@ -59,11 +82,18 @@ export default function App() {
     dispatch({ type: "SET_PHASE", phase: "generating-primitives" });
     try {
       const primitives = await generatePrimitives(intake);
+      lastFailureRef.current = null;
       setPendingPrimitives(primitives);
       setPrimitivesReady(true);
     } catch (err) {
       console.error("Primitives generation failed:", err);
-      setGenErr("Something went wrong while discovering AI use cases. This usually means a connection issue.");
+      lastFailureRef.current = { kind: "primitives", args: intake };
+      setGenErr(
+        describeApiError(
+          err,
+          "Something went wrong while discovering AI use cases.",
+        ),
+      );
       dispatch({ type: "SET_PHASE", phase: "intake" });
     }
   };
@@ -85,7 +115,9 @@ export default function App() {
     return starred;
   };
 
-  const hasExistingPlan = RULES.some((r) => (state.plan[r.id] || []).length > 0);
+  const hasExistingPlan = RULES.some(
+    (r) => (state.plan[r.id] || []).length > 0,
+  );
 
   const handleContinueToPlaybook = () => {
     if (hasExistingPlan) {
@@ -103,11 +135,18 @@ export default function App() {
     try {
       const starredPrimitives = getStarredPrimitives();
       const plan = await generatePlaybook(state.intake, starredPrimitives);
+      lastFailureRef.current = null;
       setPendingPlan(plan);
       setPlaybookReady(true);
     } catch (err) {
       console.error("Playbook generation failed:", err);
-      setGenErr("Something went wrong while writing your playbook. This usually means a connection issue.");
+      lastFailureRef.current = { kind: "playbook" };
+      setGenErr(
+        describeApiError(
+          err,
+          "Something went wrong while writing your playbook.",
+        ),
+      );
       dispatch({ type: "SET_PHASE", phase: "primitives" });
     }
   };
@@ -125,14 +164,31 @@ export default function App() {
     setPendingSynthesis(null);
     dispatch({ type: "SET_PHASE", phase: "generating-synthesis" });
     try {
-      const synthesis = await generateSynthesis(state.intake, state.primitives, state.plan);
+      const synthesis = await generateSynthesis(
+        state.intake,
+        state.primitives,
+        state.plan,
+      );
+      lastFailureRef.current = null;
       setPendingSynthesis(synthesis);
       setSynthesisReady(true);
     } catch (err) {
       console.error("Synthesis generation failed:", err);
-      setGenErr("Something went wrong while writing your plan. This usually means a connection issue.");
+      lastFailureRef.current = { kind: "synthesis" };
+      setGenErr(
+        describeApiError(err, "Something went wrong while writing your plan."),
+      );
       dispatch({ type: "SET_PHASE", phase: "commitment" });
     }
+  };
+
+  const handleRetry = () => {
+    const last = lastFailureRef.current;
+    if (!last) return;
+    setGenErr(null);
+    if (last.kind === "primitives") handleGeneratePrimitives(last.args);
+    else if (last.kind === "playbook") doGeneratePlaybook();
+    else if (last.kind === "synthesis") handleGenerateSynthesis();
   };
 
   const handleSynthesisReady = useCallback(() => {
@@ -148,27 +204,54 @@ export default function App() {
     <div className="app-root">
       <PaperGrain />
 
-      {genErr && (phase === "intake" || phase === "primitives" || phase === "commitment") && (
-        <ErrorBanner message={genErr} onDismiss={() => setGenErr(null)} />
-      )}
+      {genErr &&
+        (phase === "intake" ||
+          phase === "primitives" ||
+          phase === "playbook" ||
+          phase === "commitment") && (
+          <ErrorBanner
+            message={genErr}
+            onRetry={handleRetry}
+            onDismiss={() => setGenErr(null)}
+          />
+        )}
 
       <Header state={state} dispatch={dispatch} />
 
       <main className="app-main">
         {phase === "intake" && (
-          <IntakeView state={state} dispatch={dispatch} onGenerate={handleGenerateRequest} />
+          <IntakeView
+            state={state}
+            dispatch={dispatch}
+            onGenerate={handleGenerateRequest}
+          />
         )}
         {phase === "generating-primitives" && (
-          <GeneratingIndicator mode="primitives" onReady={primitivesReady ? handlePrimitivesReady : null} />
+          <GeneratingIndicator
+            mode="primitives"
+            onReady={primitivesReady ? handlePrimitivesReady : null}
+          />
         )}
         {phase === "primitives" && (
-          <PrimitivesView state={state} dispatch={dispatch} onContinue={handleContinueToPlaybook} onStartOver={() => setShowStartOver(true)} />
+          <PrimitivesView
+            state={state}
+            dispatch={dispatch}
+            onContinue={handleContinueToPlaybook}
+            onStartOver={() => setShowStartOver(true)}
+          />
         )}
         {phase === "generating-playbook" && (
-          <GeneratingIndicator mode="playbook" onReady={playbookReady ? handlePlaybookReady : null} />
+          <GeneratingIndicator
+            mode="playbook"
+            onReady={playbookReady ? handlePlaybookReady : null}
+          />
         )}
         {phase === "playbook" && (
-          <PlaybookView state={state} dispatch={dispatch} onStartOver={() => setShowStartOver(true)} />
+          <PlaybookView
+            state={state}
+            dispatch={dispatch}
+            onStartOver={() => setShowStartOver(true)}
+          />
         )}
         {phase === "commitment" && (
           <CommitmentView
@@ -179,7 +262,10 @@ export default function App() {
           />
         )}
         {phase === "generating-synthesis" && (
-          <GeneratingIndicator mode="synthesis" onReady={synthesisReady ? handleSynthesisReady : null} />
+          <GeneratingIndicator
+            mode="synthesis"
+            onReady={synthesisReady ? handleSynthesisReady : null}
+          />
         )}
         {phase === "synthesis" && (
           <SynthesisView state={state} dispatch={dispatch} />
