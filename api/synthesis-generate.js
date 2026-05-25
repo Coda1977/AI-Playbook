@@ -42,7 +42,7 @@ export default async function handler(req, res) {
   const useCasesBlock = buildItemsBlock(primitives, CATEGORY_NAMES);
   const actionsBlock = buildItemsBlock(plan, RULE_NAMES);
 
-  const prompt = `You are an editorial synthesizer helping a manager walk out of a workshop with one cohesive plan rather than a checklist. You produce an opinionated one-page plan, not a redistribution of inputs.
+  const prompt = `You are an editorial synthesizer helping a manager walk out of a workshop with one tight takeaway rather than a report.
 
 CONTEXT, THIS SPECIFIC MANAGER:
 - Role and team: ${intake.role}
@@ -60,106 +60,43 @@ ALL CHANGE ACTIONS (* marks starred items the manager prioritized):
 ${actionsBlock}
 
 YOUR JOB:
-Write a one-page plan with this structure:
-1. title: A single sentence that names the manager's central tension or wedge.
-2. lede: 60 to 100 words framing the plan's central thesis. Synthesize from intake AND items together.
-3. storylines: ONE or TWO storylines, never three. Each has:
-   - eyebrowName: short theme name, 2 to 4 words (e.g., "The Wedge", "The Operating System")
-   - headline: the storyline's central claim, written as a sentence
-   - thesis: 1 to 2 sentences stating the bet this storyline represents, falsifiable and pointed
-   - prose: array of 2 short paragraphs synthesizing the manager's items into argument
-   - useCases: array of strings, the use cases that genuinely support this storyline (preserve original wording, do not paraphrase)
-   - actions: array of strings, the change actions that genuinely support this storyline (preserve original wording)
-4. thisWeek: array of exactly 3 concrete starting actions, each starting with a verb in imperative mood.
+Write a one-screen takeaway with this structure:
+1. title: A single sentence that names the manager's central tension or insight.
+2. narrative: ONE paragraph, 60 to 80 words. This is the entire story. Distill the insight that connects their starred use cases and change actions into one coherent thread. Not a summary of items, but the WHY behind them: why these choices make sense for this person in this role at this moment. This paragraph must be specific enough that it could not belong to anyone else.
+3. thisWeek: array of exactly 3 concrete starting actions, each starting with a verb in imperative mood. These should be the sharpest, most actionable next steps drawn from their starred items.
 
 CRITICAL RULES:
-- Synthesize the thesis from whichever signal is stronger. If intake is rich, weight it heavily. If intake is thin, let the starred patterns lead. Most managers will be somewhere in between.
-- Stars are signal, not filter. Starred items carry more weight as priority signals, but unstarred items can appear in a storyline if they genuinely support it.
-- Items not fitting a storyline are simply omitted. There is no requirement to surface every starred item.
-- Storylines: ONE or TWO, never three. The model must judge whether the data supports a single thesis or two distinct ones.
-- Each storyline's thesis must be distinct from the lede and from any other storyline's thesis. Generic statements like "AI helps your team work better" are forbidden.
-- Never invent experiences, metrics, outcomes, or stories for this manager. The plan must be specific to their actual situation.
-- NO EM DASHES anywhere in the output. Use periods, commas, colons, semicolons, or parentheses instead.
-- NO "isn't X, it's Y" or "not just X, it's Y" parallelism in titles, ledes, or theses. State the affirmative directly. Bad: "Your real risk isn't speed, it's safety." Good: "Your real risk is psychological safety."
-- Item text in useCases and actions arrays should preserve the original wording from the inputs above.
+- The narrative is not a summary. It is the insight that makes the starred items cohere.
+- Never re-list use cases or actions in the narrative. The manager already has those on the Review screen.
+- Never invent experiences, metrics, outcomes, or stories for this manager.
+- NO EM DASHES anywhere. Use periods, commas, colons, semicolons, or parentheses.
+- NO "isn't X, it's Y" or "not just X, it's Y" parallelism. State the affirmative directly.
+- 60 to 80 words for the narrative. Count them. If over 80, cut.
 
 QUALITY CHECKS (verify before returning):
-- Could this plan belong to anyone, or is it specific to this manager? If anyone's, rewrite.
-- Is each storyline's thesis distinct from the lede and from the other storyline's thesis?
-- Does each storyline include both prose AND source items?
+- Could this narrative belong to anyone, or is it specific to this manager? If anyone's, rewrite.
 - Are all thisWeek actions concrete enough that the manager knows what to do Monday morning?
+- Is the narrative under 80 words?
 
-Use the submit_one_page_plan tool to return your one-page plan.`;
+Use the submit_one_page_plan tool to return the takeaway.`;
 
   const planTool = {
     name: "submit_one_page_plan",
     description:
-      "Submit the manager's one-page plan. Title is one sentence; lede is 60-100 words; storylines is 1 or 2 items; thisWeek is exactly 3 imperative starting actions.",
+      "Submit the manager's one-screen takeaway. Title is one sentence; narrative is 60-80 words distilling the core insight; thisWeek is exactly 3 imperative starting actions.",
     input_schema: {
       type: "object",
-      required: ["title", "lede", "storylines", "thisWeek"],
+      required: ["title", "narrative", "thisWeek"],
       properties: {
         title: {
           type: "string",
           description:
-            "Single sentence that names the manager's central tension or wedge.",
+            "Single sentence that names the manager's central tension or insight.",
         },
-        lede: {
+        narrative: {
           type: "string",
           description:
-            "60 to 100 words framing the plan's central thesis, synthesizing intake and items.",
-        },
-        storylines: {
-          type: "array",
-          minItems: 1,
-          maxItems: 2,
-          items: {
-            type: "object",
-            required: [
-              "eyebrowName",
-              "headline",
-              "thesis",
-              "prose",
-              "useCases",
-              "actions",
-            ],
-            properties: {
-              eyebrowName: {
-                type: "string",
-                description: "Short theme name, 2 to 4 words.",
-              },
-              headline: {
-                type: "string",
-                description:
-                  "The storyline's central claim, written as a sentence.",
-              },
-              thesis: {
-                type: "string",
-                description:
-                  "1 to 2 sentences stating the bet this storyline represents.",
-              },
-              prose: {
-                type: "array",
-                minItems: 2,
-                maxItems: 2,
-                items: { type: "string" },
-                description:
-                  "Exactly 2 short paragraphs synthesizing the manager's items into argument.",
-              },
-              useCases: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Use cases that genuinely support this storyline, original wording preserved.",
-              },
-              actions: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Change actions that genuinely support this storyline, original wording preserved.",
-              },
-            },
-          },
+            "60 to 80 words. One paragraph distilling the insight that connects their choices. Not a summary, the WHY.",
         },
         thisWeek: {
           type: "array",
