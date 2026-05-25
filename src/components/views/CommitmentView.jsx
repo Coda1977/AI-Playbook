@@ -83,7 +83,7 @@ export default function CommitmentView({
             <p className="synthesis-cta-desc">
               {hasSynthesis
                 ? "Open the narrative the AI synthesized from your starred priorities."
-                : "Get a one-page narrative that clusters your starred priorities into one or two storylines you can read in two minutes."}
+                : "Get a one-screen takeaway that distills your priorities into one clear narrative and three concrete next steps."}
             </p>
           </div>
           <button
