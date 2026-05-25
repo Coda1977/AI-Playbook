@@ -63,7 +63,9 @@ YOUR JOB:
 Write a one-screen takeaway with this structure:
 1. title: A single sentence that names the manager's central tension or insight.
 2. narrative: ONE paragraph, 60 to 80 words. This is the entire story. Distill the insight that connects their starred use cases and change actions into one coherent thread. Not a summary of items, but the WHY behind them: why these choices make sense for this person in this role at this moment. This paragraph must be specific enough that it could not belong to anyone else.
-3. thisWeek: array of exactly 3 concrete starting actions, each starting with a verb in imperative mood. These should be the sharpest, most actionable next steps drawn from their starred items.
+3. topUseCases: array of up to 3 strings. Pick the starred use cases with the highest impact for this manager. Preserve original wording exactly.
+4. topActions: array of up to 3 strings. Pick the starred change actions most critical to making the use cases stick. Preserve original wording exactly.
+5. thisWeek: array of exactly 3 concrete starting actions, each starting with a verb in imperative mood. These should be the sharpest, most actionable next steps drawn from their starred items.
 
 CRITICAL RULES:
 - The narrative is not a summary. It is the insight that makes the starred items cohere.
@@ -83,10 +85,10 @@ Use the submit_one_page_plan tool to return the takeaway.`;
   const planTool = {
     name: "submit_one_page_plan",
     description:
-      "Submit the manager's one-screen takeaway. Title is one sentence; narrative is 60-80 words distilling the core insight; thisWeek is exactly 3 imperative starting actions.",
+      "Submit the manager's one-screen takeaway. Title is one sentence; narrative is 60-80 words distilling the core insight; topUseCases and topActions surface the highest-priority starred items; thisWeek is exactly 3 imperative starting actions.",
     input_schema: {
       type: "object",
-      required: ["title", "narrative", "thisWeek"],
+      required: ["title", "narrative", "topUseCases", "topActions", "thisWeek"],
       properties: {
         title: {
           type: "string",
@@ -97,6 +99,22 @@ Use the submit_one_page_plan tool to return the takeaway.`;
           type: "string",
           description:
             "60 to 80 words. One paragraph distilling the insight that connects their choices. Not a summary, the WHY.",
+        },
+        topUseCases: {
+          type: "array",
+          minItems: 1,
+          maxItems: 3,
+          items: { type: "string" },
+          description:
+            "Up to 3 highest-impact starred use cases, original wording preserved.",
+        },
+        topActions: {
+          type: "array",
+          minItems: 1,
+          maxItems: 3,
+          items: { type: "string" },
+          description:
+            "Up to 3 most critical starred change actions, original wording preserved.",
         },
         thisWeek: {
           type: "array",

@@ -89,6 +89,25 @@ export async function exportSynthesisDocx(state) {
     }),
   ];
 
+  if ((synthesis.topUseCases || []).length > 0) {
+    children.push(new Paragraph({
+      children: [new TextRun({ text: "AI Use Cases", bold: true, size: 22 })],
+      spacing: { before: 300, after: 100 },
+    }));
+    synthesis.topUseCases.forEach((u) => {
+      children.push(new Paragraph({ text: u, bullet: { level: 0 } }));
+    });
+  }
+  if ((synthesis.topActions || []).length > 0) {
+    children.push(new Paragraph({
+      children: [new TextRun({ text: "Change Actions", bold: true, size: 22 })],
+      spacing: { before: 200, after: 100 },
+    }));
+    synthesis.topActions.forEach((a) => {
+      children.push(new Paragraph({ text: a, bullet: { level: 0 } }));
+    });
+  }
+
   if ((synthesis.thisWeek || []).length > 0) {
     children.push(new Paragraph({
       text: "This Week",
