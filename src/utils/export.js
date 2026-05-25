@@ -75,6 +75,8 @@ export async function exportSynthesisDocx(state) {
     day: "numeric",
   });
 
+  const narrativeText = synthesis.narrative || synthesis.lede || "";
+
   const children = [
     new Paragraph({ text: synthesis.title, heading: HeadingLevel.TITLE }),
     new Paragraph({
@@ -82,48 +84,10 @@ export async function exportSynthesisDocx(state) {
       spacing: { after: 400 },
     }),
     new Paragraph({
-      children: [new TextRun({ text: synthesis.lede, italics: true, size: 24 })],
+      children: [new TextRun({ text: narrativeText, italics: true, size: 24 })],
       spacing: { after: 400 },
     }),
   ];
-
-  (synthesis.storylines || []).forEach((s, i) => {
-    const num = String(i + 1).padStart(2, "0");
-    children.push(new Paragraph({
-      children: [new TextRun({ text: `Storyline ${num}: ${s.eyebrowName}`, bold: true, size: 20, color: "666666" })],
-      spacing: { before: 400, after: 100 },
-    }));
-    children.push(new Paragraph({
-      text: s.headline,
-      heading: HeadingLevel.HEADING_1,
-      spacing: { after: 200 },
-    }));
-    children.push(new Paragraph({
-      children: [new TextRun({ text: s.thesis, italics: true, size: 24 })],
-      spacing: { after: 300 },
-    }));
-    (s.prose || []).forEach((p) => {
-      children.push(new Paragraph({ text: p, spacing: { after: 200 } }));
-    });
-    if ((s.useCases || []).length > 0) {
-      children.push(new Paragraph({
-        children: [new TextRun({ text: "AI Use Cases", bold: true, size: 22 })],
-        spacing: { before: 200, after: 100 },
-      }));
-      s.useCases.forEach((u) => {
-        children.push(new Paragraph({ text: u, bullet: { level: 0 } }));
-      });
-    }
-    if ((s.actions || []).length > 0) {
-      children.push(new Paragraph({
-        children: [new TextRun({ text: "Change Actions", bold: true, size: 22 })],
-        spacing: { before: 200, after: 100 },
-      }));
-      s.actions.forEach((a) => {
-        children.push(new Paragraph({ text: a, bullet: { level: 0 } }));
-      });
-    }
-  });
 
   if ((synthesis.thisWeek || []).length > 0) {
     children.push(new Paragraph({
