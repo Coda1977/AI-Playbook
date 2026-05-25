@@ -41,7 +41,7 @@ First, write your response as plain text. HARD LIMIT: 2-3 sentences, MAX 60 word
 Then write exactly this separator on its own line:
 ---IDEAS---
 Then write a JSON array of suggested ideas (no markdown fences):
-[{"text": "Specific actionable AI idea under 40 words", "categoryId": "${category.id}"}]
+[{"text": "15-20 word action sentence starting with a verb", "categoryId": "${category.id}"}]
 
 BREVITY IS MANDATORY. NEVER write more than 60 words before ---IDEAS---. Count them.`;
 }
