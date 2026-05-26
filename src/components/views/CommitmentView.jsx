@@ -73,17 +73,17 @@ export default function CommitmentView({
         >
           <div className="synthesis-cta-text">
             <div className="synthesis-cta-eyebrow">
-              {hasSynthesis ? "Your One-Page Plan" : "New"}
+              {hasSynthesis ? "Your Big Move" : "New"}
             </div>
             <h2 className="synthesis-cta-title">
               {hasSynthesis
-                ? "View your one-page plan"
+                ? "View your big move"
                 : "Synthesize this into one plan"}
             </h2>
             <p className="synthesis-cta-desc">
               {hasSynthesis
                 ? "Open the narrative the AI synthesized from your starred priorities."
-                : "Get a one-screen takeaway that distills your priorities into one clear narrative and three concrete next steps."}
+                : "See the one big move that ties your starred priorities together, with concrete actions to start tomorrow."}
             </p>
           </div>
           <button
@@ -92,14 +92,11 @@ export default function CommitmentView({
           >
             {hasSynthesis ? (
               <>
-                <FileText size={16} /> View My Plan
+                <FileText size={16} /> View My Big Move
               </>
             ) : (
               <>
-                <Sparkles size={16} /> Generate My Plan{" "}
-                <span className="synthesis-cta-experimental">
-                  (Experimental)
-                </span>
+                <Sparkles size={16} /> Find My Big Move
               </>
             )}
           </button>
@@ -324,7 +321,7 @@ export default function CommitmentView({
                 className="btn-ghost btn-lg"
               >
                 {hasSynthesis ? <FileText size={15} /> : <Sparkles size={15} />}
-                {hasSynthesis ? " View plan" : " Generate plan"}
+                {hasSynthesis ? " View big move" : " Find big move"}
               </button>
               <button
                 onClick={() => window.print()}

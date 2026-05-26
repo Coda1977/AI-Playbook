@@ -75,57 +75,33 @@ export async function exportSynthesisDocx(state) {
     day: "numeric",
   });
 
-  const narrativeText = synthesis.narrative || synthesis.lede || "";
+  const title = synthesis.bigMoveTitle || synthesis.title || "";
+  const actions = synthesis.actions || synthesis.thisWeek || [];
 
   const children = [
-    new Paragraph({ text: synthesis.title, heading: HeadingLevel.TITLE }),
+    new Paragraph({ text: "Your Big Move", heading: HeadingLevel.TITLE }),
     new Paragraph({
       children: [new TextRun({ text: `${intake.role} · ${date}`, italics: true, size: 22 })],
-      spacing: { after: 400 },
+      spacing: { after: 200 },
     }),
     new Paragraph({
-      children: [new TextRun({ text: narrativeText, italics: true, size: 24 })],
+      text: title,
+      heading: HeadingLevel.HEADING_1,
       spacing: { after: 400 },
     }),
   ];
 
-  if ((synthesis.topUseCases || []).length > 0) {
+  actions.forEach((item, i) => {
     children.push(new Paragraph({
-      children: [new TextRun({ text: "AI Use Cases", bold: true, size: 22 })],
-      spacing: { before: 300, after: 100 },
+      children: [
+        new TextRun({ text: `${String(i + 1).padStart(2, "0")}. `, bold: true }),
+        new TextRun({ text: item }),
+      ],
+      spacing: { after: 120 },
     }));
-    synthesis.topUseCases.forEach((u) => {
-      children.push(new Paragraph({ text: u, bullet: { level: 0 } }));
-    });
-  }
-  if ((synthesis.topActions || []).length > 0) {
-    children.push(new Paragraph({
-      children: [new TextRun({ text: "Change Actions", bold: true, size: 22 })],
-      spacing: { before: 200, after: 100 },
-    }));
-    synthesis.topActions.forEach((a) => {
-      children.push(new Paragraph({ text: a, bullet: { level: 0 } }));
-    });
-  }
-
-  if ((synthesis.thisWeek || []).length > 0) {
-    children.push(new Paragraph({
-      text: "This Week",
-      heading: HeadingLevel.HEADING_1,
-      spacing: { before: 500, after: 200 },
-    }));
-    synthesis.thisWeek.forEach((item, i) => {
-      children.push(new Paragraph({
-        children: [
-          new TextRun({ text: `${String(i + 1).padStart(2, "0")}. `, bold: true }),
-          new TextRun({ text: item }),
-        ],
-        spacing: { after: 120 },
-      }));
-    });
-  }
+  });
 
   const doc = new Document({ sections: [{ children }] });
   const blob = await Packer.toBlob(doc);
-  saveAs(blob, "ai-one-page-plan.docx");
+  saveAs(blob, "ai-big-move.docx");
 }
