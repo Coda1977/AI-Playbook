@@ -1,18 +1,8 @@
-import { useMemo } from "react";
 import { ArrowLeft, Download } from "lucide-react";
 import { exportSynthesisDocx } from "../../utils/export";
 
 export default function SynthesisView({ state, dispatch }) {
-  const { synthesis, intake } = state;
-
-  const date = useMemo(() => {
-    if (!synthesis || !synthesis.generatedAt) return "";
-    return new Date(synthesis.generatedAt).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  }, [synthesis]);
+  const { synthesis } = state;
 
   if (!synthesis) {
     return (
@@ -35,9 +25,6 @@ export default function SynthesisView({ state, dispatch }) {
           Your Big Move
         </div>
         <h1 className="synthesis-title">{title}</h1>
-        <div className="synthesis-meta" title={intake.role}>
-          {intake.role}{date ? <> &middot; {date}</> : null}
-        </div>
       </div>
 
       <div className="synthesis-thisweek animate-fade-in" style={{ animationDelay: "0.08s" }}>

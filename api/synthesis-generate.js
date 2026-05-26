@@ -62,7 +62,7 @@ ${actionsBlock}
 YOUR JOB:
 Look across everything this manager starred. Find the ONE coherent move that ties the most important items together. Name it. List the actions that make it up.
 
-1. bigMoveTitle: One sentence naming this manager's big move for the next few weeks. It should be specific and actionable, not abstract. Good: "Get your team drafting with AI by making it safe to experiment." Bad: "Transform your team's relationship with AI."
+1. bigMoveTitle: A short, punchy action phrase, 8 to 12 words MAX. Starts with a verb. Names one concrete outcome. No narrative framing, no "before X happens" clauses, no mentioning the role. Good: "Make AI-drafted QBRs your team's default within six weeks." Good: "Get every CSM running AI call summaries by July." Bad: "A manager who already uses AI must now make it team-wide before inconsistent adoption becomes the ceiling." (too long, too narrative, mentions the role).
 2. actions: Array of 4 to 6 concrete actions that comprise this big move. Mix AI use cases to try AND change actions to take, ordered by priority (most important first). Each action is one imperative sentence starting with a verb. Preserve original wording from the starred items where possible, but tighten to under 20 words each.
 
 CRITICAL RULES:
@@ -91,7 +91,7 @@ Use the submit_one_page_plan tool to return the big move.`;
         bigMoveTitle: {
           type: "string",
           description:
-            "One sentence naming the manager's big move for the next few weeks. Specific and actionable.",
+            "8 to 12 word action phrase starting with a verb. One concrete outcome, no narrative.",
         },
         actions: {
           type: "array",
