@@ -91,7 +91,7 @@ IMPORTANT CONTEXT SIGNALS TO PAY ATTENTION TO:
 - Remember: the team is asking themselves five unspoken questions: (1) From what to what, specifics? (2) What does this mean for my daily work? (3) Will this actually make a difference? (4) How will success be measured? (5) Does my manager really believe in this? Help the manager address these questions through their actions.
 
 TASK:
-For each rule below, generate 2-3 actions that are:
+For each rule below, generate exactly 2 actions that are:
 - Specific to THIS person's role, team, and situation, not interchangeable with someone else's plan
 - Under 25 words each, concise and punchy, no filler
 - Concrete enough to start this week (verbs like "schedule," "ask," "send," "create," "announce", never "consider," "think about," "explore the idea of")
@@ -115,7 +115,7 @@ Use the submit_change_plan tool to return your actions for each rule.`;
   const planTool = {
     name: "submit_change_plan",
     description:
-      "Submit the personalized change strategy. Each field is an array of 2 to 3 action sentences, each under 25 words, each starting with a concrete verb.",
+      "Submit the personalized change strategy. Each field is an array of exactly 2 action sentences, each under 25 words, each starting with a concrete verb.",
     input_schema: {
       type: "object",
       required: ["destination", "safe", "script", "small", "visible"],
@@ -123,35 +123,35 @@ Use the submit_change_plan tool to return your actions for each rule.`;
         destination: {
           type: "array",
           minItems: 2,
-          maxItems: 3,
+          maxItems: 2,
           items: { type: "string" },
           description: "Rule 1: Start at the End",
         },
         safe: {
           type: "array",
           minItems: 2,
-          maxItems: 3,
+          maxItems: 2,
           items: { type: "string" },
           description: "Rule 2: Make It Safe",
         },
         script: {
           type: "array",
           minItems: 2,
-          maxItems: 3,
+          maxItems: 2,
           items: { type: "string" },
           description: "Rule 3: Script the Steps",
         },
         small: {
           type: "array",
           minItems: 2,
-          maxItems: 3,
+          maxItems: 2,
           items: { type: "string" },
           description: "Rule 4: Start Small, to go Big",
         },
         visible: {
           type: "array",
           minItems: 2,
-          maxItems: 3,
+          maxItems: 2,
           items: { type: "string" },
           description: "Rule 5: Make Progress Visible",
         },

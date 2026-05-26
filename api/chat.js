@@ -108,7 +108,7 @@ ${allBlock}
 INSTRUCTIONS:
 1. Respond in 2-3 sentences, MAX 60 words. NO preamble ("Great question!"), NO recap of what they said, NO filler. Get straight to the point.
 2. End with a question that opens a DIFFERENT angle they haven't explored yet. Don't keep drilling into the same direction - steer toward what's missing.
-3. Suggest 1-3 new actions. Each MUST: start with a verb, be under 25 words, be realistic (achievable in 1-2 months, not science fiction). Cut every unnecessary word.
+3. Suggest 1-2 new actions. Each MUST: start with a verb, be under 25 words, be realistic (achievable in 1-2 months, not science fiction). Cut every unnecessary word.
 4. If they push back, ask what would work better -- don't defend or rephrase.
 5. Never invent experiences, metrics, or outcomes for the manager. If suggesting they share a story, leave the content to them.
 6. Cross-rule connections only when genuinely useful: "This connects to Rule 4 -- you could share those results in your next team meeting (Rule 5)."

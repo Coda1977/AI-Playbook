@@ -18,7 +18,7 @@ AI FLUENCY CONTEXT:
 - Calibrate idea sophistication to these levels. For "Not yet started" or "Capable": suggest approachable, low-barrier ideas that someone could try this week with no special setup. For "Adoptive" or "Transformative": suggest advanced integration, workflow redesign, or multi-tool orchestration that goes beyond what they likely already do.
 - The gap matters: a Transformative manager with a Not Yet Started team needs ideas the team can actually attempt, not ideas only the manager would understand.
 
-Generate 2-3 specific AI use case ideas for EACH of these 6 categories:
+Generate 2 specific AI use case ideas for EACH of these 6 categories:
 1. Content Creation (text, presentations, reports)
 2. Task Automation (repetitive processes, workflows)
 3. Research & Synthesis (information retrieval, analysis)
