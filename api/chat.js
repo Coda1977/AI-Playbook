@@ -17,15 +17,18 @@ function buildPrimitivesSystem({ intake, category, currentItems }) {
 
 You are helping brainstorm AI applications for ${category.title}: ${category.description}.
 
-MANAGER PROFILE:
+<manager_profile>
 - Role: ${intake.role}
 - What they want help with: ${helpLabels}
 - Key Responsibilities: ${intake.responsibilities}
 - Manager AI fluency: ${intake.managerFluency || "Not specified"}
 - Team AI fluency: ${intake.teamFluency || "Not specified"}
+</manager_profile>
 
 CURRENT IDEAS FOR THIS CATEGORY:
+<current_ideas>
 ${currentBlock}
+</current_ideas>
 
 YOUR STYLE:
 - Reference their actual role and responsibilities. NO generic advice.
@@ -37,13 +40,7 @@ YOUR STYLE:
 - NO "isn't X, it's Y" or "not just X, it's Y" parallelism. State the affirmative directly.
 
 RESPONSE FORMAT:
-First, write your response as plain text. HARD LIMIT: 2-3 sentences, MAX 60 words total. No preamble, no recap, no filler. End with a question that opens a DIFFERENT angle they haven't explored yet - don't keep drilling into the same direction.
-Then write exactly this separator on its own line:
----IDEAS---
-Then write a JSON array of suggested ideas (no markdown fences):
-[{"text": "15-20 word action sentence starting with a verb", "categoryId": "${category.id}"}]
-
-BREVITY IS MANDATORY. NEVER write more than 60 words before ---IDEAS---. Count them.`;
+Use the reply_with_ideas tool. Put your conversational reply in "content": 2-3 sentences, MAX 60 words total, no preamble, no recap, no filler. End it with a question that opens a DIFFERENT angle they haven't explored yet - don't keep drilling into the same direction. Put 1-2 suggested ideas in "ideas", each a 15-20 word action sentence starting with a verb, with categoryId "${category.id}".`;
 }
 
 function buildPlaybookSystem({
@@ -67,7 +64,7 @@ function buildPlaybookSystem({
 
   const starredBlock =
     starredPrimitives && starredPrimitives.length > 0
-      ? `\nSTARRED AI USE CASES:\n${starredPrimitives.map((p) => `- ${p.category}: ${p.text}`).join("\n")}`
+      ? `\nSTARRED AI USE CASES:\n<starred_use_cases>\n${starredPrimitives.map((p) => `- ${p.category}: ${p.text}`).join("\n")}\n</starred_use_cases>`
       : "";
 
   return `This is a workshop helping managers drive AI adoption with their teams. The manager has completed intake, explored AI use cases, and is now building their change strategy.
@@ -79,7 +76,7 @@ YOUR COACHING STYLE:
 - When they push back ("that won't work because..."), adapt immediately. Ask what WOULD work for their specific situation. Never defend a suggestion.
 - Connect the dots across rules when natural. If their Rule 4 (Start Small) actions mention a pilot, reference that in Rule 5 (Make Progress Visible) coaching.
 - Match their energy. If they're frustrated, acknowledge it before coaching. If they're excited, build on it.
-- End every response with a probing question that pushes them deeper into their specific situation, never generic ("what do you think?"). Good questions reference their actual team, their actual failure risks, or a specific person they've mentioned.
+- Closing questions are never generic ("what do you think?"). Good questions reference their actual team, their actual failure risks, or a specific person they've mentioned.
 
 BEHAVIORAL SCIENCE YOU SHOULD KNOW (use implicitly, don't cite):
 - If they're working on Rule 1 (Start at the End), help them make the destination concrete and emotional. Two powerful techniques: (1) The Magic Question, ask them to imagine waking up after the change has happened overnight, what clues would they see and hear? This forces specificity. (2) Definition of Done, once the destination is clear, write it as a testable statement the whole team can point to. Push them to try it themselves first if they haven't, they can't show a destination they haven't visited.
@@ -90,20 +87,26 @@ BEHAVIORAL SCIENCE YOU SHOULD KNOW (use implicitly, don't cite):
 - Remember: the team is asking themselves five unspoken questions: (1) From what to what, specifics? (2) What does this mean for my daily work? (3) Will this actually make a difference? (4) How will success be measured? (5) Does my manager really believe in this? Help the manager address these through their actions.
 
 CONTEXT, THIS SPECIFIC PERSON:
+<manager_profile>
 - Role & team: ${intake.role}
 - Manager fluency: ${intake.managerFluency}
 - Team fluency: ${intake.teamFluency}
 - Failure risks: ${intake.failureRisks}
-- 90-day vision: ${intake.successVision}${starredBlock}
+- 90-day vision: ${intake.successVision}
+</manager_profile>${starredBlock}
 
 CURRENT RULE: Rule ${rule.number}: ${rule.name}
 Principle: "${rule.principle}"
 
 ACTIONS FOR THIS RULE:
+<current_actions>
 ${actBlock}
+</current_actions>
 
 ALL ACTIONS:
+<all_actions>
 ${allBlock}
+</all_actions>
 
 INSTRUCTIONS:
 1. Respond in 2-3 sentences, MAX 60 words. NO preamble ("Great question!"), NO recap of what they said, NO filler. Get straight to the point.
@@ -115,13 +118,7 @@ INSTRUCTIONS:
 7. STYLE: No em dashes. Use commas, semicolons, periods, colons, or parentheses. No "isn't X, it's Y" or "not just X, it's Y" parallelism, state the affirmative directly.
 
 RESPONSE FORMAT:
-First, write your conversational response as plain text. HARD LIMIT: 60 words max. End with a question.
-Then write exactly this separator on its own line:
----IDEAS---
-Then write a JSON array of suggested actions (no markdown fences):
-[{"text": "Concise action under 25 words", "ruleId": "${rule.id}"}]
-
-BREVITY IS MANDATORY. NEVER exceed 60 words before ---IDEAS---. Count them.`;
+Use the reply_with_ideas tool. Put your conversational reply in "content": 60 words max, ending with a question. Put 1-2 suggested actions in "ideas", each under 25 words starting with a verb, with ruleId "${rule.id}".`;
 }
 
 export default async function handler(req, res) {
@@ -161,6 +158,57 @@ export default async function handler(req, res) {
     { role: "user", content: userMessage },
   ];
 
+  // Forced tool_use guarantees both the prose reply and the ideas array
+  // arrive in a structured object, replacing the old prose + ---IDEAS---
+  // separator format whose parsing could silently drop the idea cards.
+  const isPrimitives = mode === "primitives";
+  const ideaItem = isPrimitives
+    ? {
+        type: "object",
+        required: ["text", "categoryId"],
+        properties: {
+          text: {
+            type: "string",
+            description: "15-20 word action sentence starting with a verb",
+          },
+          categoryId: { type: "string" },
+        },
+      }
+    : {
+        type: "object",
+        required: ["text", "ruleId"],
+        properties: {
+          text: {
+            type: "string",
+            description: "Concise action under 25 words starting with a verb",
+          },
+          ruleId: { type: "string" },
+        },
+      };
+
+  const chatTool = {
+    name: "reply_with_ideas",
+    description:
+      "Reply to the manager and suggest addable ideas. content is the conversational reply (max 60 words, ends with a question); ideas is 1-2 suggestions, or empty if none fit this turn.",
+    input_schema: {
+      type: "object",
+      required: ["content", "ideas"],
+      properties: {
+        content: {
+          type: "string",
+          description:
+            "Conversational reply, 2-3 sentences, max 60 words, ends with a question.",
+        },
+        ideas: {
+          type: "array",
+          maxItems: 3,
+          items: ideaItem,
+          description: "1-2 suggested ideas (empty array if none fit).",
+        },
+      },
+    },
+  };
+
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -171,8 +219,10 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 400,
+        max_tokens: 500,
         system: sys,
+        tools: [chatTool],
+        tool_choice: { type: "tool", name: chatTool.name },
         messages,
       }),
     });
@@ -186,79 +236,23 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    const full = data.content
-      .filter((b) => b.type === "text")
-      .map((b) => b.text)
-      .join("");
-
-    const sep = full.indexOf("---IDEAS---");
-    let content = full;
-    let ideas = [];
-    if (sep !== -1) {
-      content = full.slice(0, sep).trim();
-      const jsonText = full
-        .slice(sep + 11)
-        .replace(/```json|```/g, "")
-        .trim();
-      try {
-        ideas = JSON.parse(jsonText);
-      } catch (e) {
-        console.warn(
-          "Chat JSON parse failed:",
-          e.message,
-          "raw:",
-          jsonText.slice(0, 300),
-        );
-        console.log(
-          JSON.stringify({
-            event: "chat_parse_fail",
-            reason: "json_parse_after_separator",
-            mode,
-            rawLength: full.length,
-            snippet: jsonText.slice(0, 200),
-          }),
-        );
-      }
-    } else {
-      const match = full.match(/\[\s*\{[\s\S]*?\}\s*\]/);
-      if (match) {
-        try {
-          ideas = JSON.parse(match[0]);
-          content = full.slice(0, full.indexOf(match[0])).trim();
-        } catch {
-          console.warn(
-            "Chat fallback JSON parse failed:",
-            "raw:",
-            full.slice(0, 300),
-          );
-          console.log(
-            JSON.stringify({
-              event: "chat_parse_fail",
-              reason: "fallback_regex_parse",
-              mode,
-              rawLength: full.length,
-              snippet: full.slice(0, 200),
-            }),
-          );
-        }
-      } else {
-        console.warn(
-          "Chat response missing IDEAS separator and no JSON found:",
-          "raw:",
-          full.slice(0, 300),
-        );
-        console.log(
-          JSON.stringify({
-            event: "chat_parse_fail",
-            reason: "no_separator_no_json",
-            mode,
-            rawLength: full.length,
-            snippet: full.slice(0, 200),
-          }),
-        );
-      }
+    const toolBlock = data.content?.find((b) => b.type === "tool_use");
+    if (!toolBlock?.input) {
+      console.error(
+        "Expected tool_use block missing. stop_reason:",
+        data.stop_reason,
+        "| content types:",
+        data.content?.map((b) => b.type).join(",") || "none",
+        "| raw response:",
+        JSON.stringify(data).slice(0, 1000),
+      );
+      return res.status(500).json({ error: "Model did not return reply" });
     }
 
+    const content = toolBlock.input.content || "";
+    const ideas = Array.isArray(toolBlock.input.ideas)
+      ? toolBlock.input.ideas
+      : [];
     return res.status(200).json({
       content,
       ideas: ideas.map((i) => ({ ...i, added: false })),

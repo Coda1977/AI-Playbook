@@ -61,7 +61,7 @@ export default async function handler(req, res) {
 
   const starredBlock =
     starredPrimitives && starredPrimitives.length > 0
-      ? `\n\nSTARRED AI USE CASES (the manager chose these as most important):\n${starredPrimitives.map((p) => `- ${p.category}: ${p.text}`).join("\n")}\n\nIMPORTANT: Reference these specific AI use cases in your actions where natural. For example, if they starred a content creation idea, Rule 3 (Script the Steps) actions should mention that specific use case as a concrete starting point. Make the playbook connect to the AI use cases they actually care about.`
+      ? `\n\nSTARRED AI USE CASES (the manager chose these as most important):\n<starred_use_cases>\n${starredPrimitives.map((p) => `- ${p.category}: ${p.text}`).join("\n")}\n</starred_use_cases>\n\nIMPORTANT: Reference these specific AI use cases in your actions where natural. For example, if they starred a content creation idea, Rule 3 (Script the Steps) actions should mention that specific use case as a concrete starting point. Make the playbook connect to the AI use cases they actually care about.`
       : "";
 
   const prompt = `You are a practical leadership coach helping a manager create a personalized AI change playbook. You generate specific, actionable steps grounded in behavioral science, not generic corporate advice.
@@ -75,11 +75,13 @@ KEY PRINCIPLES THAT GUIDE EVERYTHING YOU GENERATE:
 - Progress that isn't visible doesn't build momentum, convert skeptics, or sustain energy. Most change efforts under-communicate by 10x (Kotter).
 
 CONTEXT, THIS SPECIFIC PERSON:
+<manager_profile>
 - Role & team: ${intake.role}
 - Manager's AI fluency: ${intake.managerFluency}
 - Team's AI fluency: ${intake.teamFluency}
 - What would make AI adoption fail: ${intake.failureRisks}
-- 90-day success vision: ${intake.successVision}${starredBlock}
+- 90-day success vision: ${intake.successVision}
+</manager_profile>${starredBlock}
 
 IMPORTANT CONTEXT SIGNALS TO PAY ATTENTION TO:
 - The gap between manager fluency and team fluency is critical. A Transformative manager with a Not Yet Started team needs to slow down and build safety. A Capable manager with a Capable team needs momentum and scripted steps.
