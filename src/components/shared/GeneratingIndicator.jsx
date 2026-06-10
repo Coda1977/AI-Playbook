@@ -66,19 +66,25 @@ export default function GeneratingIndicator({ mode, onReady }) {
   const [complete, setComplete] = useState(false);
   const [slow, setSlow] = useState(false);
   const calledRef = useRef(false);
+  const resultReady = !!onReady;
 
+  // Steps pace at 2200ms while we wait on the API. Once the result is in,
+  // fast-forward the remaining steps instead of holding the full cadence.
   useEffect(() => {
-    const iv = setInterval(() => {
-      setStep((s) => {
-        if (s >= steps.length) {
-          clearInterval(iv);
-          return s;
-        }
-        return s + 1;
-      });
-    }, 2200);
+    const iv = setInterval(
+      () => {
+        setStep((s) => {
+          if (s >= steps.length) {
+            clearInterval(iv);
+            return s;
+          }
+          return s + 1;
+        });
+      },
+      resultReady ? 350 : 2200,
+    );
     return () => clearInterval(iv);
-  }, [steps.length]);
+  }, [steps.length, resultReady]);
 
   // Surface a passive "this is taking longer than usual" note after 45s.
   // The fetch itself times out at 75s (see utils/api.js), at which point
