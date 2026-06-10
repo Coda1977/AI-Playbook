@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sparkles, Check } from "lucide-react";
 import { HELP_OPTIONS } from "../../config/categories";
 import { FLUENCY_OPTIONS } from "../../config/rules";
@@ -92,21 +92,29 @@ function HelpPills({ selected, onToggle, hasError }) {
 
 export default function IntakeView({ state, dispatch, onGenerate }) {
   const existing = state.intake;
-  const [f, setF] = useState(
-    existing.role
-      ? existing
-      : {
-          role: "",
-          helpWith: [],
-          responsibilities: "",
-          managerFluency: "",
-          teamFluency: "",
-          failureRisks: "",
-          successVision: "",
-        },
-  );
+  // Merge over the blank shape so partial drafts (and older saved states
+  // missing newer keys) always have every field defined.
+  const [f, setF] = useState(() => ({
+    role: "",
+    helpWith: [],
+    responsibilities: "",
+    managerFluency: "",
+    teamFluency: "",
+    failureRisks: "",
+    successVision: "",
+    ...existing,
+  }));
   const [attempted, setAttempted] = useState(false);
   const formRef = useRef(null);
+
+  // Auto-save the draft as the user types. Answers used to live only in
+  // local state until submit, so a refresh or discarded tab lost everything.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      dispatch({ type: "SET_INTAKE", intake: f });
+    }, 600);
+    return () => clearTimeout(t);
+  }, [f, dispatch]);
   const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
   const toggleHelp = (id) =>
     setF((p) => ({

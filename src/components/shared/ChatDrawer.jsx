@@ -64,6 +64,9 @@ export default function ChatDrawer({ type, item, state, dispatch, onClose }) {
     } catch (e) {
       console.error(e);
       setError("The AI couldn't connect. Check your connection and try again.");
+      // Put the failed message back in the input so the user doesn't have to
+      // retype it (unless they've already started typing something new).
+      if (!isSystem) setInput((cur) => cur || txt);
     }
     setLoading(false);
   };
