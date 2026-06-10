@@ -99,6 +99,7 @@ export default function CommitmentView({
                 <Sparkles size={16} /> Find My Big Move
               </>
             )}
+            <span className="badge-experimental">Experimental</span>
           </button>
         </div>
       )}
