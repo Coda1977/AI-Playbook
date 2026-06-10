@@ -12,7 +12,13 @@ export default async function handler(req, res) {
 
   const prompt = `You are helping a ${intake.role} brainstorm how to use AI. Their responsibilities: ${intake.responsibilities}. They want to: ${helpLabels}.
 
-Generate 2-3 specific, actionable AI use case ideas for EACH of these 6 categories:
+AI FLUENCY CONTEXT:
+- Manager's AI fluency: ${intake.managerFluency || "Not specified"}
+- Team's AI fluency: ${intake.teamFluency || "Not specified"}
+- Calibrate idea sophistication to these levels. For "Not yet started" or "Capable": suggest approachable, low-barrier ideas that someone could try this week with no special setup. For "Adoptive" or "Transformative": suggest advanced integration, workflow redesign, or multi-tool orchestration that goes beyond what they likely already do.
+- The gap matters: a Transformative manager with a Not Yet Started team needs ideas the team can actually attempt, not ideas only the manager would understand.
+
+Generate 2 specific AI use case ideas for EACH of these 6 categories:
 1. Content Creation (text, presentations, reports)
 2. Task Automation (repetitive processes, workflows)
 3. Research & Synthesis (information retrieval, analysis)
@@ -30,7 +36,11 @@ Respond in this exact JSON format:
   "ideation": ["idea 1", "idea 2"]
 }
 
-Each idea should be specific to their role, under 40 words, and immediately actionable. No generic suggestions.
+IDEA FORMAT (strict):
+- Each idea is a SINGLE ACTION SENTENCE, 15 to 20 words. Not a description, not a paragraph.
+- Start with a verb. Example: "Draft blog posts from talking points and tone guidelines for faster publishing."
+- Be specific to their role. Reference their actual responsibilities where possible.
+- No explanation of benefits, no "reducing X" or "saving Y." The action speaks for itself.
 
 STYLE RULES (strict):
 - NO em dashes anywhere. Use commas, semicolons, periods, colons, or parentheses.
@@ -47,7 +57,7 @@ STYLE RULES (strict):
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 2048,
+        max_tokens: 1024,
         messages: [{ role: "user", content: prompt }],
       }),
     });

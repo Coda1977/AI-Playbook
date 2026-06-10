@@ -42,7 +42,7 @@ export default async function handler(req, res) {
   const useCasesBlock = buildItemsBlock(primitives, CATEGORY_NAMES);
   const actionsBlock = buildItemsBlock(plan, RULE_NAMES);
 
-  const prompt = `You are an editorial synthesizer helping a manager walk out of a workshop with one cohesive plan rather than a checklist. You produce an opinionated one-page plan, not a redistribution of inputs.
+  const prompt = `You are helping a manager leave a workshop with one clear move to make, not a report to file.
 
 CONTEXT, THIS SPECIFIC MANAGER:
 - Role and team: ${intake.role}
@@ -60,114 +60,46 @@ ALL CHANGE ACTIONS (* marks starred items the manager prioritized):
 ${actionsBlock}
 
 YOUR JOB:
-Write a one-page plan with this structure:
-1. title: A single sentence that names the manager's central tension or wedge.
-2. lede: 60 to 100 words framing the plan's central thesis. Synthesize from intake AND items together.
-3. storylines: ONE or TWO storylines, never three. Each has:
-   - eyebrowName: short theme name, 2 to 4 words (e.g., "The Wedge", "The Operating System")
-   - headline: the storyline's central claim, written as a sentence
-   - thesis: 1 to 2 sentences stating the bet this storyline represents, falsifiable and pointed
-   - prose: array of 2 short paragraphs synthesizing the manager's items into argument
-   - useCases: array of strings, the use cases that genuinely support this storyline (preserve original wording, do not paraphrase)
-   - actions: array of strings, the change actions that genuinely support this storyline (preserve original wording)
-4. thisWeek: array of exactly 3 concrete starting actions, each starting with a verb in imperative mood.
+Look across everything this manager starred. Find the ONE coherent move that ties the most important items together. Name it. List the actions that make it up.
+
+1. bigMoveTitle: A short, punchy action phrase, 8 to 12 words MAX. Starts with a verb. Names one concrete outcome. No narrative framing, no "before X happens" clauses, no mentioning the role. Good: "Make AI-drafted QBRs your team's default within six weeks." Good: "Get every CSM running AI call summaries by July." Bad: "A manager who already uses AI must now make it team-wide before inconsistent adoption becomes the ceiling." (too long, too narrative, mentions the role).
+2. actions: Array of 4 to 6 concrete actions that comprise this big move. Mix AI use cases to try AND change actions to take, ordered by priority (most important first). Each action is one imperative sentence starting with a verb. Preserve original wording from the starred items where possible, but tighten to under 20 words each.
 
 CRITICAL RULES:
-- Synthesize the thesis from whichever signal is stronger. If intake is rich, weight it heavily. If intake is thin, let the starred patterns lead. Most managers will be somewhere in between.
-- Stars are signal, not filter. Starred items carry more weight as priority signals, but unstarred items can appear in a storyline if they genuinely support it.
-- Items not fitting a storyline are simply omitted. There is no requirement to surface every starred item.
-- Storylines: ONE or TWO, never three. The model must judge whether the data supports a single thesis or two distinct ones.
-- Each storyline's thesis must be distinct from the lede and from any other storyline's thesis. Generic statements like "AI helps your team work better" are forbidden.
-- Never invent experiences, metrics, outcomes, or stories for this manager. The plan must be specific to their actual situation.
-- NO EM DASHES anywhere in the output. Use periods, commas, colons, semicolons, or parentheses instead.
-- NO "isn't X, it's Y" or "not just X, it's Y" parallelism in titles, ledes, or theses. State the affirmative directly. Bad: "Your real risk isn't speed, it's safety." Good: "Your real risk is psychological safety."
-- Item text in useCases and actions arrays should preserve the original wording from the inputs above.
+- The big move is ONE focus, not a summary of everything. Omit starred items that don't fit.
+- Actions are ordered by priority. First action = most important thing to do tomorrow.
+- Mix use cases and change actions freely. The manager doesn't care about the distinction; they care about what to do.
+- Never invent experiences, metrics, outcomes, or stories.
+- NO EM DASHES anywhere. Use periods, commas, colons, semicolons, or parentheses.
+- NO "isn't X, it's Y" or "not just X, it's Y" parallelism. State the affirmative directly.
 
-QUALITY CHECKS (verify before returning):
-- Could this plan belong to anyone, or is it specific to this manager? If anyone's, rewrite.
-- Is each storyline's thesis distinct from the lede and from the other storyline's thesis?
-- Does each storyline include both prose AND source items?
-- Are all thisWeek actions concrete enough that the manager knows what to do Monday morning?
+QUALITY CHECKS:
+- Is the bigMoveTitle specific to this manager? If it could belong to anyone, rewrite.
+- Would the manager know exactly what to do tomorrow from action #1?
+- Are there 4-6 actions, not more?
 
-Use the submit_one_page_plan tool to return your one-page plan.`;
+Use the submit_one_page_plan tool to return the big move.`;
 
   const planTool = {
     name: "submit_one_page_plan",
     description:
-      "Submit the manager's one-page plan. Title is one sentence; lede is 60-100 words; storylines is 1 or 2 items; thisWeek is exactly 3 imperative starting actions.",
+      "Submit the manager's big move. bigMoveTitle is one specific sentence; actions is 4-6 prioritized imperative sentences mixing use cases and change actions.",
     input_schema: {
       type: "object",
-      required: ["title", "lede", "storylines", "thisWeek"],
+      required: ["bigMoveTitle", "actions"],
       properties: {
-        title: {
+        bigMoveTitle: {
           type: "string",
           description:
-            "Single sentence that names the manager's central tension or wedge.",
+            "8 to 12 word action phrase starting with a verb. One concrete outcome, no narrative.",
         },
-        lede: {
-          type: "string",
-          description:
-            "60 to 100 words framing the plan's central thesis, synthesizing intake and items.",
-        },
-        storylines: {
+        actions: {
           type: "array",
-          minItems: 1,
-          maxItems: 2,
-          items: {
-            type: "object",
-            required: [
-              "eyebrowName",
-              "headline",
-              "thesis",
-              "prose",
-              "useCases",
-              "actions",
-            ],
-            properties: {
-              eyebrowName: {
-                type: "string",
-                description: "Short theme name, 2 to 4 words.",
-              },
-              headline: {
-                type: "string",
-                description:
-                  "The storyline's central claim, written as a sentence.",
-              },
-              thesis: {
-                type: "string",
-                description:
-                  "1 to 2 sentences stating the bet this storyline represents.",
-              },
-              prose: {
-                type: "array",
-                minItems: 2,
-                maxItems: 2,
-                items: { type: "string" },
-                description:
-                  "Exactly 2 short paragraphs synthesizing the manager's items into argument.",
-              },
-              useCases: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Use cases that genuinely support this storyline, original wording preserved.",
-              },
-              actions: {
-                type: "array",
-                items: { type: "string" },
-                description:
-                  "Change actions that genuinely support this storyline, original wording preserved.",
-              },
-            },
-          },
-        },
-        thisWeek: {
-          type: "array",
-          minItems: 3,
-          maxItems: 3,
+          minItems: 4,
+          maxItems: 6,
           items: { type: "string" },
           description:
-            "Exactly 3 concrete starting actions, each starting with a verb in imperative mood.",
+            "4 to 6 prioritized actions (mix of use cases and change actions), each an imperative sentence under 20 words.",
         },
       },
     },

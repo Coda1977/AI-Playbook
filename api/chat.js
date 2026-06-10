@@ -21,13 +21,16 @@ MANAGER PROFILE:
 - Role: ${intake.role}
 - What they want help with: ${helpLabels}
 - Key Responsibilities: ${intake.responsibilities}
+- Manager AI fluency: ${intake.managerFluency || "Not specified"}
+- Team AI fluency: ${intake.teamFluency || "Not specified"}
 
 CURRENT IDEAS FOR THIS CATEGORY:
 ${currentBlock}
 
 YOUR STYLE:
 - Reference their actual role and responsibilities. NO generic advice.
-- Each idea MUST be under 40 words. If it's over, cut it.
+- Each idea is a SINGLE ACTION SENTENCE, 15 to 20 words. Start with a verb. No benefit explanations.
+- Calibrate sophistication to their fluency. Don't suggest basics to advanced users or advanced moves to beginners.
 - If they push back, adapt. Don't rephrase the same idea.
 - Never invent experiences, metrics, or outcomes for the manager. If suggesting they share a story, leave the content to them.
 - NO em dashes. Use commas, semicolons, periods, colons, or parentheses.
@@ -38,7 +41,7 @@ First, write your response as plain text. HARD LIMIT: 2-3 sentences, MAX 60 word
 Then write exactly this separator on its own line:
 ---IDEAS---
 Then write a JSON array of suggested ideas (no markdown fences):
-[{"text": "Specific actionable AI idea under 40 words", "categoryId": "${category.id}"}]
+[{"text": "15-20 word action sentence starting with a verb", "categoryId": "${category.id}"}]
 
 BREVITY IS MANDATORY. NEVER write more than 60 words before ---IDEAS---. Count them.`;
 }
@@ -105,7 +108,7 @@ ${allBlock}
 INSTRUCTIONS:
 1. Respond in 2-3 sentences, MAX 60 words. NO preamble ("Great question!"), NO recap of what they said, NO filler. Get straight to the point.
 2. End with a question that opens a DIFFERENT angle they haven't explored yet. Don't keep drilling into the same direction - steer toward what's missing.
-3. Suggest 1-3 new actions. Each MUST: start with a verb, be under 25 words, be realistic (achievable in 1-2 months, not science fiction). Cut every unnecessary word.
+3. Suggest 1-2 new actions. Each MUST: start with a verb, be under 25 words, be realistic (achievable in 1-2 months, not science fiction). Cut every unnecessary word.
 4. If they push back, ask what would work better -- don't defend or rephrase.
 5. Never invent experiences, metrics, or outcomes for the manager. If suggesting they share a story, leave the content to them.
 6. Cross-rule connections only when genuinely useful: "This connects to Rule 4 -- you could share those results in your next team meeting (Rule 5)."
