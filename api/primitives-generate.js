@@ -26,16 +26,6 @@ Generate 2 specific AI use case ideas for EACH of these 6 categories:
 5. Technical Work (spreadsheets, scripts, tools)
 6. Strategy & Ideation (planning, brainstorming)
 
-Respond in this exact JSON format:
-{
-  "content": ["idea 1", "idea 2"],
-  "automation": ["idea 1", "idea 2"],
-  "research": ["idea 1", "idea 2"],
-  "data": ["idea 1", "idea 2"],
-  "coding": ["idea 1", "idea 2"],
-  "ideation": ["idea 1", "idea 2"]
-}
-
 IDEA FORMAT (strict):
 - Each idea is a SINGLE ACTION SENTENCE, 15 to 20 words. Not a description, not a paragraph.
 - Start with a verb. Example: "Draft blog posts from talking points and tone guidelines for faster publishing."
@@ -45,7 +35,42 @@ IDEA FORMAT (strict):
 STYLE RULES (strict):
 - NO em dashes anywhere. Use commas, semicolons, periods, colons, or parentheses.
 - NO "isn't X, it's Y" or "not just X, it's Y" parallelism. State the affirmative thesis directly.
-- No filler ("It's worth noting", "Importantly").`;
+- No filler ("It's worth noting", "Importantly").
+
+Use the submit_use_cases tool to return your ideas for each category.`;
+
+  const categoryField = (description) => ({
+    type: "array",
+    minItems: 2,
+    maxItems: 2,
+    items: { type: "string" },
+    description,
+  });
+
+  const useCasesTool = {
+    name: "submit_use_cases",
+    description:
+      "Submit the personalized AI use cases. Each field is an array of exactly 2 idea sentences, each 15 to 20 words, each starting with a verb.",
+    input_schema: {
+      type: "object",
+      required: [
+        "content",
+        "automation",
+        "research",
+        "data",
+        "coding",
+        "ideation",
+      ],
+      properties: {
+        content: categoryField("Content Creation (text, presentations, reports)"),
+        automation: categoryField("Task Automation (repetitive processes, workflows)"),
+        research: categoryField("Research & Synthesis (information retrieval, analysis)"),
+        data: categoryField("Data & Insights (analysis, visualization)"),
+        coding: categoryField("Technical Work (spreadsheets, scripts, tools)"),
+        ideation: categoryField("Strategy & Ideation (planning, brainstorming)"),
+      },
+    },
+  };
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -57,7 +82,9 @@ STYLE RULES (strict):
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 1024,
+        max_tokens: 2048,
+        tools: [useCasesTool],
+        tool_choice: { type: "tool", name: useCasesTool.name },
         messages: [{ role: "user", content: prompt }],
       }),
     });
@@ -71,18 +98,21 @@ STYLE RULES (strict):
     }
 
     const data = await response.json();
-    const raw = data.content
-      .filter((b) => b.type === "text")
-      .map((b) => b.text)
-      .join("");
-
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      return res.status(500).json({ error: "Could not parse AI response" });
+    const toolBlock = data.content?.find((b) => b.type === "tool_use");
+    if (!toolBlock?.input) {
+      console.error(
+        "Expected tool_use block missing. stop_reason:",
+        data.stop_reason,
+        "| content types:",
+        data.content?.map((b) => b.type).join(",") || "none",
+        "| raw response:",
+        JSON.stringify(data).slice(0, 1000),
+      );
+      return res
+        .status(500)
+        .json({ error: "Model did not return structured ideas" });
     }
-
-    const primitives = JSON.parse(jsonMatch[0]);
-    return res.status(200).json({ primitives });
+    return res.status(200).json({ primitives: toolBlock.input });
   } catch (err) {
     console.error("Generation error:", err);
     return res.status(500).json({ error: "Failed to generate ideas" });
