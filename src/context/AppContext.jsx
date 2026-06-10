@@ -228,10 +228,22 @@ function reducer(state, action) {
 
 const AppContext = createContext(null);
 
+// A persisted "generating-*" phase means the page was closed or refreshed
+// mid-generation. The in-flight request is gone, so rehydrating into it
+// strands the user on a progress screen that never resolves. Snap back to
+// the phase the generation started from.
+const GENERATING_FALLBACK = {
+  "generating-primitives": "intake",
+  "generating-playbook": "primitives",
+  "generating-synthesis": "commitment",
+};
+
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, INIT, () => {
     const saved = loadState();
-    return saved && saved.phase ? { ...INIT, ...saved } : INIT;
+    if (!saved || !saved.phase) return INIT;
+    const phase = GENERATING_FALLBACK[saved.phase] || saved.phase;
+    return { ...INIT, ...saved, phase };
   });
 
   useEffect(() => {
