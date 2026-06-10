@@ -10,12 +10,18 @@ export default async function handler(req, res) {
 
   const helpLabels = (intake.helpWith || []).join(", ");
 
-  const prompt = `You are helping a ${intake.role} brainstorm how to use AI. Their responsibilities: ${intake.responsibilities}. They want to: ${helpLabels}.
+  const prompt = `You are helping a manager brainstorm how to use AI.
 
-AI FLUENCY CONTEXT:
+<manager_profile>
+- Role and team: ${intake.role}
+- Key responsibilities: ${intake.responsibilities}
+- What they want help with: ${helpLabels}
 - Manager's AI fluency: ${intake.managerFluency || "Not specified"}
 - Team's AI fluency: ${intake.teamFluency || "Not specified"}
-- Calibrate idea sophistication to these levels. For "Not yet started" or "Capable": suggest approachable, low-barrier ideas that someone could try this week with no special setup. For "Adoptive" or "Transformative": suggest advanced integration, workflow redesign, or multi-tool orchestration that goes beyond what they likely already do.
+</manager_profile>
+
+AI FLUENCY CONTEXT:
+- Calibrate idea sophistication to the fluency levels in the profile. For "Not yet started" or "Capable": suggest approachable, low-barrier ideas that someone could try this week with no special setup. For "Adoptive" or "Transformative": suggest advanced integration, workflow redesign, or multi-tool orchestration that goes beyond what they likely already do.
 - The gap matters: a Transformative manager with a Not Yet Started team needs ideas the team can actually attempt, not ideas only the manager would understand.
 
 Generate 2 specific AI use case ideas for EACH of these 6 categories:
