@@ -111,6 +111,7 @@ export default function PrimitivesView({
               </div>
             </div>
             <div
+              className="gate-hint"
               style={{
                 fontSize: 13,
                 color: "var(--color-dark-gray)",

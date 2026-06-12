@@ -409,6 +409,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
           <strong>{doneCount}</strong> of 7 fields
         </div>
         <div
+          className="gate-hint"
           style={{
             fontSize: 13,
             color: "var(--color-dark-gray)",

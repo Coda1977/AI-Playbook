@@ -79,6 +79,7 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
               </div>
             </div>
             <div
+              className="gate-hint"
               style={{
                 fontSize: 13,
                 color: "var(--color-dark-gray)",
