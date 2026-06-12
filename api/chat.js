@@ -6,12 +6,33 @@ const rulesList = [
   { id: "visible", number: 5, name: "Make Progress Visible" },
 ];
 
-function buildPrimitivesSystem({ intake, category, currentItems }) {
+const categoriesList = [
+  { id: "content", title: "Content Creation" },
+  { id: "automation", title: "Task Automation" },
+  { id: "research", title: "Research & Synthesis" },
+  { id: "data", title: "Data & Insights" },
+  { id: "coding", title: "Technical Work" },
+  { id: "ideation", title: "Strategy & Ideation" },
+];
+
+function buildPrimitivesSystem({ intake, category, currentItems, allPrimitives }) {
   const helpLabels = (intake.helpWith || []).join(", ");
   const currentBlock =
     currentItems && currentItems.length
       ? currentItems.map((a) => `- ${a}`).join("\n")
       : "(no ideas yet)";
+
+  // One line per other category so the chat doesn't duplicate ideas that
+  // already live in another tab, and can route suggestions there instead.
+  const otherBlock = categoriesList
+    .filter((c) => c.id !== category.id)
+    .map((c) => {
+      const texts = ((allPrimitives && allPrimitives[c.id]) || []).map(
+        (i) => i.text,
+      );
+      return `- ${c.title} (categoryId "${c.id}"): ${texts.length ? texts.join(" / ") : "(none)"}`;
+    })
+    .join("\n");
 
   return `This is a workshop helping managers drive AI adoption with their teams. The manager has completed intake and is now exploring use cases.
 
@@ -30,6 +51,11 @@ CURRENT IDEAS FOR THIS CATEGORY:
 ${currentBlock}
 </current_ideas>
 
+IDEAS ALREADY IN OTHER CATEGORIES (never suggest a duplicate or near-duplicate of these):
+<other_categories>
+${otherBlock}
+</other_categories>
+
 YOUR STYLE:
 - Reference their actual role and responsibilities. NO generic advice.
 - Each idea is a SINGLE ACTION SENTENCE, 15 to 20 words. Start with a verb. No benefit explanations.
@@ -40,7 +66,7 @@ YOUR STYLE:
 - NO "isn't X, it's Y" or "not just X, it's Y" parallelism. State the affirmative directly.
 
 RESPONSE FORMAT:
-Use the reply_with_ideas tool. Put your conversational reply in "content": 2-3 sentences, MAX 60 words total, no preamble, no recap, no filler. End it with a question that opens a DIFFERENT angle they haven't explored yet - don't keep drilling into the same direction. Put 1-2 suggested ideas in "ideas", each a 15-20 word action sentence starting with a verb, with categoryId "${category.id}".`;
+Use the reply_with_ideas tool. Put your conversational reply in "content": 2-3 sentences, MAX 60 words total, no preamble, no recap, no filler. End it with a question that opens a DIFFERENT angle they haven't explored yet - don't keep drilling into the same direction. Put 1-2 suggested ideas in "ideas", each a 15-20 word action sentence starting with a verb. Use categoryId "${category.id}" unless an idea clearly belongs in another category, then use that category's id.`;
 }
 
 function buildPlaybookSystem({
