@@ -1,19 +1,5 @@
-const rulesList = [
-  { id: "destination", number: 1, name: "Start at the End" },
-  { id: "safe", number: 2, name: "Make It Safe" },
-  { id: "script", number: 3, name: "Script the Steps" },
-  { id: "small", number: 4, name: "Start Small, to go Big" },
-  { id: "visible", number: 5, name: "Make Progress Visible" },
-];
-
-const categoriesList = [
-  { id: "content", title: "Content Creation" },
-  { id: "automation", title: "Task Automation" },
-  { id: "research", title: "Research & Synthesis" },
-  { id: "data", title: "Data & Insights" },
-  { id: "coding", title: "Technical Work" },
-  { id: "ideation", title: "Strategy & Ideation" },
-];
+import { RULES, CATEGORIES } from "../lib/workshop.js";
+import { rejectForeignOrigin } from "../lib/apiGuard.js";
 
 function buildPrimitivesSystem({ intake, category, currentItems, allPrimitives }) {
   const helpLabels = (intake.helpWith || []).join(", ");
@@ -24,8 +10,7 @@ function buildPrimitivesSystem({ intake, category, currentItems, allPrimitives }
 
   // One line per other category so the chat doesn't duplicate ideas that
   // already live in another tab, and can route suggestions there instead.
-  const otherBlock = categoriesList
-    .filter((c) => c.id !== category.id)
+  const otherBlock = CATEGORIES.filter((c) => c.id !== category.id)
     .map((c) => {
       const texts = ((allPrimitives && allPrimitives[c.id]) || []).map(
         (i) => i.text,
@@ -61,6 +46,7 @@ YOUR STYLE:
 - Each idea is a SINGLE ACTION SENTENCE, 15 to 20 words. Start with a verb. No benefit explanations.
 - Calibrate sophistication to their fluency. Don't suggest basics to advanced users or advanced moves to beginners.
 - If they push back, adapt. Don't rephrase the same idea.
+- Never re-suggest an idea you already suggested earlier in this conversation (marked "[Suggested with this reply: ...]"), even reworded. Bring a genuinely new angle.
 - Never invent experiences, metrics, or outcomes for the manager. If suggesting they share a story, leave the content to them.
 - NO em dashes. Use commas, semicolons, periods, colons, or parentheses.
 - NO "isn't X, it's Y" or "not just X, it's Y" parallelism. State the affirmative directly.
@@ -81,17 +67,22 @@ function buildPlaybookSystem({
       ? currentItems.map((a) => `- ${a}`).join("\n")
       : "(no actions yet)";
 
-  const allBlock = rulesList
-    .map((r) => {
-      const a = (allPlan && allPlan[r.id]) || [];
-      return `Rule ${r.number} (${r.name}): ${a.length ? a.map((x) => `${x.starred ? "\u2605" : "\u25A1"} ${x.text}`).join("; ") : "(none)"}`;
-    })
-    .join("\n");
+  const allBlock = RULES.map((r) => {
+    const a = (allPlan && allPlan[r.id]) || [];
+    return `Rule ${r.number} (${r.name}): ${a.length ? a.map((x) => `${x.starred ? "★" : "□"} ${x.text}`).join("; ") : "(none)"}`;
+  }).join("\n");
 
   const starredBlock =
     starredPrimitives && starredPrimitives.length > 0
       ? `\nSTARRED AI USE CASES:\n<starred_use_cases>\n${starredPrimitives.map((p) => `- ${p.category}: ${p.text}`).join("\n")}\n</starred_use_cases>`
       : "";
+
+  // Only the current rule's behavioral science ships with each message. The
+  // full five-rule block used to ride along on every turn; long system
+  // prompts make replies more verbose (see CLAUDE.md), and the drawer is
+  // always scoped to one rule anyway.
+  const ruleDef = RULES.find((r) => r.id === rule.id);
+  const ruleGuidance = ruleDef ? ruleDef.chatHint : "";
 
   return `This is a workshop helping managers drive AI adoption with their teams. The manager has completed intake, explored AI use cases, and is now building their change strategy.
 
@@ -104,12 +95,8 @@ YOUR COACHING STYLE:
 - Match their energy. If they're frustrated, acknowledge it before coaching. If they're excited, build on it.
 - Closing questions are never generic ("what do you think?"). Good questions reference their actual team, their actual failure risks, or a specific person they've mentioned.
 
-BEHAVIORAL SCIENCE YOU SHOULD KNOW (use implicitly, don't cite):
-- If they're working on Rule 1 (Start at the End), help them make the destination concrete and emotional. Two powerful techniques: (1) The Magic Question, ask them to imagine waking up after the change has happened overnight, what clues would they see and hear? This forces specificity. (2) Definition of Done, once the destination is clear, write it as a testable statement the whole team can point to. Push them to try it themselves first if they haven't, they can't show a destination they haven't visited.
-- If they're working on Rule 2 (Make It Safe), one leader demo nearly doubles adoption, push for that. Two anxieties drive resistance (Schein): survival anxiety (if I don't change, bad things happen) and learning anxiety (fear of incompetence, identity loss, group exclusion, loss of power). Help them decrease learning anxiety, name specific fears their team feels, not just practical workflow changes. Naming "you might feel like your 15 years of expertise matter less" is more powerful than "AI will make you more productive." When possible, suggest training whole teams together rather than individuals, resistance embeds in group norms. Suggest creating practice fields (sandbox time, AI lab hours) where people can experiment without consequences. Don't forget: celebrating failed experiments is as important as celebrating wins.
-- If they're working on Rule 3 (Script the Steps), help them find the bright spots (who's already doing it?) and remove friction. Defaults beat training, where can AI be embedded into existing tools rather than added as a new step?
-- If they're working on Rule 4 (Start Small), help them build a small wins ladder, 3-6 sequential wins, each setting up the next. Not isolated experiments, but a visible staircase. Push back if they're trying to do too much at once. Help them protect the pilot from premature scaling pressure.
-- If they're working on Rule 5 (Make Progress Visible), push for regular rhythm, not one-off announcements. Help them connect progress to outcomes people care about, not adoption metrics. Follow-up is everything, if they asked someone to try something, they need to ask how it went.
+BEHAVIORAL SCIENCE FOR THIS RULE (use implicitly, don't cite):
+${ruleGuidance}
 - Remember: the team is asking themselves five unspoken questions: (1) From what to what, specifics? (2) What does this mean for my daily work? (3) Will this actually make a difference? (4) How will success be measured? (5) Does my manager really believe in this? Help the manager address these through their actions.
 
 CONTEXT, THIS SPECIFIC PERSON:
@@ -139,9 +126,10 @@ INSTRUCTIONS:
 2. End with a question that opens a DIFFERENT angle they haven't explored yet. Don't keep drilling into the same direction - steer toward what's missing.
 3. Suggest 1-2 new actions. Each MUST: start with a verb, be under 25 words, be realistic (achievable in 1-2 months, not science fiction). Cut every unnecessary word.
 4. If they push back, ask what would work better -- don't defend or rephrase.
-5. Never invent experiences, metrics, or outcomes for the manager. If suggesting they share a story, leave the content to them.
-6. Cross-rule connections only when genuinely useful: "This connects to Rule 4 -- you could share those results in your next team meeting (Rule 5)."
-7. STYLE: No em dashes. Use commas, semicolons, periods, colons, or parentheses. No "isn't X, it's Y" or "not just X, it's Y" parallelism, state the affirmative directly.
+5. Never re-suggest an action you already suggested earlier in this conversation (marked "[Suggested with this reply: ...]"), even reworded. Bring a genuinely new angle.
+6. Never invent experiences, metrics, or outcomes for the manager. If suggesting they share a story, leave the content to them.
+7. Cross-rule connections only when genuinely useful: "This connects to Rule 4 -- you could share those results in your next team meeting (Rule 5)."
+8. STYLE: No em dashes. Use commas, semicolons, periods, colons, or parentheses. No "isn't X, it's Y" or "not just X, it's Y" parallelism, state the affirmative directly.
 
 RESPONSE FORMAT:
 Use the reply_with_ideas tool. Put your conversational reply in "content": 60 words max, ending with a question. Put 1-2 suggested actions in "ideas", each under 25 words starting with a verb, with ruleId "${rule.id}".`;
@@ -151,6 +139,7 @@ export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+  if (rejectForeignOrigin(req, res)) return;
 
   const {
     mode,
@@ -179,8 +168,31 @@ export default async function handler(req, res) {
           starredPrimitives,
         });
 
+  // Replay the stored transcript. Two fidelity fixes over the raw store:
+  // 1. Assistant turns get their suggested ideas serialized back in, so the
+  //    model remembers what it already offered (the ideas used to live only
+  //    in the tool output and vanished from history, causing re-suggestions).
+  // 2. If the history already ends with this exact user message (older client
+  //    bundles appended it before sending), drop it; the server appends the
+  //    user message itself. Prevents the model hearing every message twice.
+  const recent = (chatHistory || []).slice(-40);
+  if (
+    recent.length &&
+    recent[recent.length - 1].role === "user" &&
+    recent[recent.length - 1].content === userMessage
+  ) {
+    recent.pop();
+  }
   const messages = [
-    ...(chatHistory || []).map((m) => ({ role: m.role, content: m.content })),
+    ...recent.map((m) => {
+      let content = m.content;
+      if (m.role === "assistant" && Array.isArray(m.ideas) && m.ideas.length) {
+        content += `\n[Suggested with this reply: ${m.ideas
+          .map((i) => `"${i.text}"`)
+          .join(" | ")}]`;
+      }
+      return { role: m.role, content };
+    }),
     { role: "user", content: userMessage },
   ];
 

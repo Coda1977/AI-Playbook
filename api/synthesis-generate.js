@@ -1,19 +1,5 @@
-const RULE_NAMES = {
-  destination: "Start at the End",
-  safe: "Make It Safe",
-  script: "Script the Steps",
-  small: "Start Small, to go Big",
-  visible: "Make Progress Visible",
-};
-
-const CATEGORY_NAMES = {
-  content: "Content Creation",
-  automation: "Task Automation",
-  research: "Research & Synthesis",
-  data: "Data & Insights",
-  coding: "Technical Work",
-  ideation: "Strategy & Ideation",
-};
+import { RULE_NAMES, CATEGORY_NAMES } from "../lib/workshop.js";
+import { rejectForeignOrigin } from "../lib/apiGuard.js";
 
 function buildItemsBlock(items, nameMap) {
   const lines = [];
@@ -32,6 +18,7 @@ export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+  if (rejectForeignOrigin(req, res)) return;
 
   const { intake, primitives, plan } = req.body;
   if (!intake || !primitives || !plan) {
@@ -73,6 +60,7 @@ Look across everything this manager starred. Find the ONE coherent move that tie
 
 CRITICAL RULES:
 - The big move is ONE focus, not a summary of everything. Omit starred items that don't fit.
+- The starred items (marked *) are the manager's chosen priorities. Build the move around them and draw the actions primarily from starred items, both use cases and change actions. Use an unstarred item only when the move genuinely needs it to hold together.
 - Actions are ordered by priority. First action = most important thing to do tomorrow.
 - Mix use cases and change actions freely. The manager doesn't care about the distinction; they care about what to do.
 - Never invent experiences, metrics, outcomes, or stories.

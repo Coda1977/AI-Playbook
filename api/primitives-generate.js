@@ -1,7 +1,11 @@
+import { CATEGORIES } from "../lib/workshop.js";
+import { rejectForeignOrigin } from "../lib/apiGuard.js";
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+  if (rejectForeignOrigin(req, res)) return;
 
   const { intake } = req.body;
   if (!intake) {
@@ -9,6 +13,10 @@ export default async function handler(req, res) {
   }
 
   const helpLabels = (intake.helpWith || []).join(", ");
+
+  const categoriesBlock = CATEGORIES.map(
+    (c) => `${c.number}. ${c.title} (${c.description})`,
+  ).join("\n");
 
   const prompt = `You are helping a manager brainstorm how to use AI.
 
@@ -18,19 +26,21 @@ export default async function handler(req, res) {
 - What they want help with: ${helpLabels}
 - Manager's AI fluency: ${intake.managerFluency || "Not specified"}
 - Team's AI fluency: ${intake.teamFluency || "Not specified"}
+- 90-day success vision: ${intake.successVision || "Not specified"}
 </manager_profile>
 
 AI FLUENCY CONTEXT:
 - Calibrate idea sophistication to the fluency levels in the profile. For "Not yet started" or "Capable": suggest approachable, low-barrier ideas that someone could try this week with no special setup. For "Adoptive" or "Transformative": suggest advanced integration, workflow redesign, or multi-tool orchestration that goes beyond what they likely already do.
 - The gap matters: a Transformative manager with a Not Yet Started team needs ideas the team can actually attempt, not ideas only the manager would understand.
 
-Generate 2 specific AI use case ideas for EACH of these 6 categories:
-1. Content Creation (text, presentations, reports)
-2. Task Automation (repetitive processes, workflows)
-3. Research & Synthesis (information retrieval, analysis)
-4. Data & Insights (analysis, visualization)
-5. Technical Work (spreadsheets, scripts, tools)
-6. Strategy & Ideation (planning, brainstorming)
+Generate AI use case ideas across these 6 categories:
+${categoriesBlock}
+
+HOW MANY IDEAS PER CATEGORY:
+- Generate 12 ideas total across the 6 categories. Every category gets at least 1.
+- Weight the count by fit: give 3 ideas to the one or two categories that best match their role, responsibilities, what they want help with, and their 90-day vision. Give 1 idea to a category that is a stretch for this role. Give 2 everywhere else.
+- One sharp idea in a stretch category beats two filler ideas. Never pad a category to hit a number.
+- If their 90-day vision names a concrete workflow or outcome, make sure at least one idea directly serves it.
 
 IDEA FORMAT (strict):
 - Each idea is a SINGLE ACTION SENTENCE, 15 to 20 words. Not a description, not a paragraph.
@@ -45,36 +55,25 @@ STYLE RULES (strict):
 
 Use the submit_use_cases tool to return your ideas for each category.`;
 
-  const categoryField = (description) => ({
-    type: "array",
-    minItems: 2,
-    maxItems: 2,
-    items: { type: "string" },
-    description,
-  });
+  const properties = {};
+  for (const c of CATEGORIES) {
+    properties[c.id] = {
+      type: "array",
+      minItems: 1,
+      maxItems: 3,
+      items: { type: "string" },
+      description: `${c.title} (${c.description})`,
+    };
+  }
 
   const useCasesTool = {
     name: "submit_use_cases",
     description:
-      "Submit the personalized AI use cases. Each field is an array of exactly 2 idea sentences, each 15 to 20 words, each starting with a verb.",
+      "Submit the personalized AI use cases. Each field is an array of 1 to 3 idea sentences (12 ideas total across all fields), each 15 to 20 words, each starting with a verb.",
     input_schema: {
       type: "object",
-      required: [
-        "content",
-        "automation",
-        "research",
-        "data",
-        "coding",
-        "ideation",
-      ],
-      properties: {
-        content: categoryField("Content Creation (text, presentations, reports)"),
-        automation: categoryField("Task Automation (repetitive processes, workflows)"),
-        research: categoryField("Research & Synthesis (information retrieval, analysis)"),
-        data: categoryField("Data & Insights (analysis, visualization)"),
-        coding: categoryField("Technical Work (spreadsheets, scripts, tools)"),
-        ideation: categoryField("Strategy & Ideation (planning, brainstorming)"),
-      },
+      required: CATEGORIES.map((c) => c.id),
+      properties,
     },
   };
 

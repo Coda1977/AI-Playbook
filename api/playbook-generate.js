@@ -1,58 +1,18 @@
-const RULES = [
-  {
-    id: "destination",
-    number: 1,
-    name: "Start at the End",
-    principle:
-      "Show the destination and create emotional resonance. People can't move toward something they can't picture, and they won't move toward something they don't feel.",
-    promptHint:
-      "Generate actions to help this manager paint a vivid, concrete destination for their team's AI adoption, and connect it to something the team actually cares about. The destination must be specific ('by June, we generate first drafts in 10 minutes instead of 2 hours') not vague ('we're adopting AI'). Two key techniques: (1) The Magic Question, ask the manager to imagine waking up after the change has happened overnight, what clues would they see and hear? This forces concrete specificity. (2) Definition of Done, once the destination is clear, write it as a testable statement the whole team can point to. Critically, the manager must try AI first themselves before asking anyone else to, if they haven't used it yet, that's action #1. Help them explain the 'why' in local terms (what this means for this specific team's daily work, not 'the CEO said so'), and find the emotional angle that resonates with their people: easier work, better customer outcomes, professional growth, not being left behind, whatever fits. Passion sustains change longer than fear.",
-  },
-  {
-    id: "safe",
-    number: 2,
-    name: "Make It Safe",
-    principle:
-      "People won't try what they can't afford to fail at. Protect the stumbling, respect the loss, and celebrate experiments.",
-    promptHint:
-      "Generate actions that address three dimensions of safety: (1) Go first and show mistakes, the manager shares their own fumbling attempts ('here's what I tried, here's where I got stuck, here's what finally worked') to give permission to struggle. A single leader demo can nearly double adoption. (2) Acknowledge what's being lost, the old way had real value (speed, familiarity, expertise, identity). Two anxieties drive resistance (Schein): survival anxiety (if I don't change, bad things happen) and learning anxiety (fear of incompetence, identity loss, group exclusion, loss of power). Decrease learning anxiety rather than increasing fear, naming specific fears must come before selling AI's benefits. The five learning fears to probe: temporary incompetence, punishment for incompetence, loss of personal identity, loss of group membership, loss of power/position. Include direct conversations (1:1s, not town halls) where people feel heard. (3) Don't punish early failure, when someone tries and it doesn't work, respond with 'what did you learn?' not 'why didn't that work?' (4) Train the group, not just the individual, resistance embeds in group norms, training whole teams together supports new norms emerging. (5) Create practice fields, dedicated time and space where people can experiment with AI without organizational consequences (sandbox projects, AI lab hours, hackathon time). Include actions for asking and actually listening, and celebrating both wins and losses from AI experiments publicly.",
-  },
-  {
-    id: "script",
-    number: 3,
-    name: "Script the Steps",
-    principle:
-      'Don\'t ask people to "embrace change." Tell them what to do on Monday morning.',
-    promptHint:
-      "Generate actions that give people specific, concrete instructions rather than inspirational mandates. Not 'start using AI' but 'tomorrow, take one email thread and ask AI to summarize it, just one.' Help the manager: (1) Find the bright spots, someone on the team has probably figured something out already. Find that person, learn exactly what they do, and help them show others. (2) Remove friction, when someone says 'I would, but...' fix that specific blocker (access issue, time issue, skill issue). (3) Make the new way the easy way, embed AI into what people already do rather than adding it on top. Defaults beat willpower: look for where AI can become the path of least resistance in existing workflows, templates, tools, and standard operating procedures.",
-  },
-  {
-    id: "small",
-    number: 4,
-    name: "Start Small, to go Big",
-    principle: "Begin contained, expand with proof.",
-    promptHint:
-      "Generate actions to help this manager start with one focused experiment, not five things at once. Key principles: (1) Pick one use case, one team, one workflow and nail it before expanding. (2) Start with people who want to try it, don't waste energy converting skeptics first; let enthusiasts succeed, then use those successes to bring along the middle. (3) Set clear 'expand when' criteria upfront, specific markers of success, not vague feelings. (4) Protect the pilot from pressure to scale too fast, when leadership asks 'why aren't we doing this everywhere?' hold the line until the pilot actually works. Help them build a small wins ladder, 3-6 sequential wins, each explicitly setting up the next. Not isolated experiments, but a visible staircase.",
-  },
-  {
-    id: "visible",
-    number: 5,
-    name: "Make Progress Visible",
-    principle: "Communicate relentlessly. Show wins. Sustain the narrative.",
-    promptHint:
-      "Generate actions to make progress visible and sustain momentum through communication. Most change efforts under-communicate by 10x or more, progress that isn't visible doesn't build momentum, convert skeptics, or sustain energy. Help the manager: (1) Share what's working, when someone figures something out, don't let it stay private ('Sarah found a way to do X, I asked her to show the team Thursday'). (2) Talk about it regularly, not one announcement and done, but in team meetings, 1:1s, casual conversation. Keep the change visible by simply mentioning it. (3) Connect progress to outcomes people care about, not 'adoption is at 60%' but 'the team saved 12 hours last week' or 'we got the proposal out a day early.' (4) Follow up, if they said they'd find an answer, come back with it. If they asked someone to try something, ask how it went.",
-  },
-];
+import { RULES } from "../lib/workshop.js";
+import { rejectForeignOrigin } from "../lib/apiGuard.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+  if (rejectForeignOrigin(req, res)) return;
 
   const { intake, starredPrimitives } = req.body;
   if (!intake) {
     return res.status(400).json({ error: "Missing intake data" });
   }
+
+  const helpLabels = (intake.helpWith || []).join(", ");
 
   const rulesBlock = RULES.map(
     (r) =>
@@ -77,6 +37,8 @@ KEY PRINCIPLES THAT GUIDE EVERYTHING YOU GENERATE:
 CONTEXT, THIS SPECIFIC PERSON:
 <manager_profile>
 - Role & team: ${intake.role}
+- Key responsibilities: ${intake.responsibilities}
+- What they want help with: ${helpLabels}
 - Manager's AI fluency: ${intake.managerFluency}
 - Team's AI fluency: ${intake.teamFluency}
 - What would make AI adoption fail: ${intake.failureRisks}
@@ -93,7 +55,7 @@ IMPORTANT CONTEXT SIGNALS TO PAY ATTENTION TO:
 - Remember: the team is asking themselves five unspoken questions: (1) From what to what, specifics? (2) What does this mean for my daily work? (3) Will this actually make a difference? (4) How will success be measured? (5) Does my manager really believe in this? Help the manager address these questions through their actions.
 
 TASK:
-For each rule below, generate exactly 2 actions that are:
+Generate 2 actions per rule by default. Express priority through the count: give a THIRD action only to the one or two rules the context signals above single out for this manager (11 or 12 actions total, never more). Every action must be:
 - Specific to THIS person's role, team, and situation, not interchangeable with someone else's plan
 - Under 25 words each, concise and punchy, no filler
 - Concrete enough to start this week (verbs like "schedule," "ask," "send," "create," "announce", never "consider," "think about," "explore the idea of")
@@ -114,50 +76,22 @@ ${rulesBlock}
 
 Use the submit_change_plan tool to return your actions for each rule.`;
 
+  const ruleField = (r) => ({
+    type: "array",
+    minItems: 2,
+    maxItems: 3,
+    items: { type: "string" },
+    description: `Rule ${r.number}: ${r.name}`,
+  });
+
   const planTool = {
     name: "submit_change_plan",
     description:
-      "Submit the personalized change strategy. Each field is an array of exactly 2 action sentences, each under 25 words, each starting with a concrete verb.",
+      "Submit the personalized change strategy. Each field is an array of 2 action sentences (3 only for the one or two prioritized rules), each under 25 words, each starting with a concrete verb.",
     input_schema: {
       type: "object",
-      required: ["destination", "safe", "script", "small", "visible"],
-      properties: {
-        destination: {
-          type: "array",
-          minItems: 2,
-          maxItems: 2,
-          items: { type: "string" },
-          description: "Rule 1: Start at the End",
-        },
-        safe: {
-          type: "array",
-          minItems: 2,
-          maxItems: 2,
-          items: { type: "string" },
-          description: "Rule 2: Make It Safe",
-        },
-        script: {
-          type: "array",
-          minItems: 2,
-          maxItems: 2,
-          items: { type: "string" },
-          description: "Rule 3: Script the Steps",
-        },
-        small: {
-          type: "array",
-          minItems: 2,
-          maxItems: 2,
-          items: { type: "string" },
-          description: "Rule 4: Start Small, to go Big",
-        },
-        visible: {
-          type: "array",
-          minItems: 2,
-          maxItems: 2,
-          items: { type: "string" },
-          description: "Rule 5: Make Progress Visible",
-        },
-      },
+      required: RULES.map((r) => r.id),
+      properties: Object.fromEntries(RULES.map((r) => [r.id, ruleField(r)])),
     },
   };
 
