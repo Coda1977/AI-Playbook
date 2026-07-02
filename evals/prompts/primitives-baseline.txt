@@ -1,0 +1,7 @@
+Suggest 2-3 AI use cases for this person in each of 6 categories.
+
+Person: {{role}}. They want help with: {{helpWith}}.
+
+Categories: content, automation, research, data, coding, ideation.
+
+Respond as JSON: {"content":[...], "automation":[...], "research":[...], "data":[...], "coding":[...], "ideation":[...]}

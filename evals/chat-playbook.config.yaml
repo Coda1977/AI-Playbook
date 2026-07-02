@@ -1,0 +1,196 @@
+# AI Playbook — eval for api/chat.js in playbook (change strategy) mode
+# Forced tool_use (reply_with_ideas → {content, ideas}); the ---IDEAS--- text
+# format this config used to assert was deleted in June 2026.
+# Synced to buildPlaybookSystem in api/chat.js (feat/quality-pass): the system
+# prompt now ships only the CURRENT rule's behavioral science ({{ruleGuidance}}).
+
+description: AI Playbook — chat.js (playbook mode via tool_use)
+
+providers:
+  - id: anthropic:messages:claude-sonnet-4-6
+    config:
+      max_tokens: 500 # matches api/chat.js
+      tools:
+        - name: reply_with_ideas
+          description: "Reply to the manager and suggest addable ideas. content is the conversational reply (max 60 words, ends with a question); ideas is 1-2 suggestions, or empty if none fit this turn."
+          input_schema:
+            type: object
+            required: ["content", "ideas"]
+            properties:
+              content:
+                type: string
+                description: "Conversational reply, 2-3 sentences, max 60 words, ends with a question."
+              ideas:
+                type: array
+                maxItems: 3
+                items:
+                  type: object
+                  required: ["text", "ruleId"]
+                  properties:
+                    text:
+                      type: string
+                      description: "Concise action under 25 words starting with a verb"
+                    ruleId: { type: string }
+                description: "1-2 suggested ideas (empty array if none fit)."
+      tool_choice:
+        type: tool
+        name: reply_with_ideas
+
+prompts:
+  - id: file://prompts/chat-playbook.json
+    label: chat-playbook
+
+defaultTest:
+  assert:
+    # 1. Tool output parses to {content, ideas}.
+    - type: javascript
+      value: |
+        let parsed;
+        try { parsed = typeof output === "string" ? JSON.parse(output) : output; }
+        catch (e) { return { pass: false, score: 0, reason: "Could not parse output as JSON: " + e.message }; }
+        const r = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        if (typeof r.content !== "string" || !r.content.trim()) return { pass: false, score: 0, reason: "Missing content string" };
+        if (!Array.isArray(r.ideas)) return { pass: false, score: 0, reason: "Missing ideas array" };
+        return true;
+
+    # 2. CRITICAL: content ≤60 words.
+    - type: javascript
+      value: |
+        const parsed = typeof output === "string" ? JSON.parse(output) : output;
+        const r = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        const wc = r.content.trim().split(/\s+/).filter(Boolean).length;
+        // Target is 60; the model estimates rather than counts, so allow 10%
+        // drift and fail only on real verbosity creep.
+        if (wc > 66) return { pass: false, score: 0, reason: `Content is ${wc} words (target 60, tolerance 66)` };
+        if (wc < 5) return { pass: false, score: 0, reason: `Content only ${wc} words, looks truncated` };
+        return { pass: true, score: 1, reason: `Content ${wc}/60 words` };
+
+    # 3. Content ends with a question.
+    - type: javascript
+      value: |
+        const parsed = typeof output === "string" ? JSON.parse(output) : output;
+        const r = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        return /\?["'”’)\]]*$/.test(r.content.trim()) || { pass: false, score: 0, reason: "Content must end with a question" };
+
+    # 4. Ideas: 1-2 actions with text + ruleId, ≤25 words, no weak starts.
+    - type: javascript
+      value: |
+        const parsed = typeof output === "string" ? JSON.parse(output) : output;
+        const r = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        if (r.ideas.length < 1 || r.ideas.length > 2) return { pass: false, score: 0, reason: `${r.ideas.length} ideas (expect 1-2)` };
+        const bannedStarts = [/^consider\b/i, /^think about\b/i, /^try to\b/i, /^maybe\b/i, /^explore the idea\b/i];
+        for (const i of r.ideas) {
+          if (!i.text || !i.ruleId) return { pass: false, score: 0, reason: "Action missing text or ruleId" };
+          const wc = i.text.split(/\s+/).length;
+          if (wc > 25) return { pass: false, score: 0, reason: `Action over 25 words: "${i.text.slice(0,50)}" (${wc}w)` };
+          for (const b of bannedStarts) {
+            if (b.test(i.text)) return { pass: false, score: 0, reason: `Weak action start: "${i.text.slice(0,40)}"` };
+          }
+        }
+        return { pass: true, score: 1, reason: `${r.ideas.length} action(s) under 25 words` };
+
+    # 5. No em dashes.
+    - type: javascript
+      value: |
+        const flat = typeof output === "string" ? output : JSON.stringify(output);
+        const hits = (flat.match(/—/g) || []).length;
+        return hits === 0 || { pass: false, score: 0, reason: `${hits} em dash(es)` };
+
+    # 6. No AI parallelism.
+    - type: javascript
+      value: |
+        const flat = typeof output === "string" ? output : JSON.stringify(output);
+        const patterns = [/not just .{1,40}, (it'?s|but) /i, /isn'?t .{1,40}, it'?s /i];
+        for (const p of patterns) {
+          const m = flat.match(p);
+          if (m) return { pass: false, score: 0, reason: `AI parallelism: "${m[0]}"` };
+        }
+        return true;
+
+    # 7. No preamble.
+    - type: javascript
+      value: |
+        const parsed = typeof output === "string" ? JSON.parse(output) : output;
+        const r = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        const prose = r.content.trim();
+        const preambles = [/^great question/i, /^that'?s a (great|good)/i, /^happy to help/i, /^absolutely/i];
+        for (const p of preambles) {
+          if (p.test(prose)) return { pass: false, score: 0, reason: `Preamble: "${prose.slice(0, 40)}..."` };
+        }
+        return true;
+
+tests:
+  - description: "Rule 2 (Make It Safe), engineering, vague open"
+    vars:
+      role: "Engineering Manager at a 50-person SaaS startup, leads 7 engineers"
+      managerFluency: "Capable"
+      teamFluency: "Not yet started"
+      failureRisks: "Senior engineers think AI produces bad code and will refuse to use it"
+      successVision: "Every engineer using AI for at least one PR per week"
+      ruleNumber: "2"
+      ruleName: "Make It Safe"
+      ruleId: "safe"
+      rulePrinciple: "People won't try what they can't afford to fail at"
+      ruleGuidance: "One leader demo nearly doubles adoption, push for that. Two anxieties drive resistance (Schein): survival anxiety (if I don't change, bad things happen) and learning anxiety (fear of incompetence, identity loss, group exclusion, loss of power). Help them decrease learning anxiety, name specific fears their team feels, not just practical workflow changes. Naming \"you might feel like your 15 years of expertise matter less\" is more powerful than \"AI will make you more productive.\" When possible, suggest training whole teams together rather than individuals, resistance embeds in group norms. Suggest creating practice fields (sandbox time, AI lab hours) where people can experiment without consequences. Don't forget: celebrating failed experiments is as important as celebrating wins."
+      actionsBlock: "(no actions yet)"
+      allActionsBlock: "Rule 1 (Start at the End): (none)\nRule 2 (Make It Safe): (none)\nRule 3 (Script the Steps): (none)\nRule 4 (Start Small, to go Big): (none)\nRule 5 (Make Progress Visible): (none)"
+      userMessage: "Where should I start?"
+    assert:
+      - type: llm-rubric
+        value: |
+          The reply format is one 60-word coaching turn (content) plus 1-2 addable actions (ideas), so it can only take ONE angle per turn. For Make It Safe with senior engineer resistance, the content + ideas together must take at least one CONCRETE senior-engineer-specific safety angle, such as:
+          - naming what senior engineers fear losing (expertise, identity, code quality reputation), or
+          - the manager going first with a visible AI experiment, or
+          - a 1:1 conversation with the skeptics rather than a town hall, or
+          - a no-consequences practice field where skeptics can test their beliefs.
+          Fail only if the response is generic "create psychological safety" advice that ignores the senior engineer context, or if it validates the skeptics' belief without any move.
+
+  - description: "Rule 4 (Start Small), CS team, previous failure context"
+    vars:
+      role: "Director of Customer Success, leads 15 CSMs at a 200-person SaaS"
+      managerFluency: "Capable"
+      teamFluency: "Not yet started"
+      failureRisks: "Previous CRM rollout failed because CSMs felt forced and disengaged"
+      successVision: "AI summarizes calls and drafts QBRs by end of quarter"
+      ruleNumber: "4"
+      ruleName: "Start Small, to go Big"
+      ruleId: "small"
+      rulePrinciple: "Begin contained, expand with proof."
+      ruleGuidance: "Help them build a small wins ladder, 3-6 sequential wins, each setting up the next. Not isolated experiments, but a visible staircase. Push back if they're trying to do too much at once. Help them protect the pilot from premature scaling pressure."
+      actionsBlock: "(no actions yet)"
+      allActionsBlock: "Rule 1 (Start at the End): (none)\nRule 2 (Make It Safe): (none)\nRule 3 (Script the Steps): (none)\nRule 4 (Start Small, to go Big): (none)\nRule 5 (Make Progress Visible): (none)"
+      userMessage: "I want to roll this out to all 15 CSMs at once so nobody feels left out."
+    assert:
+      - type: llm-rubric
+        value: |
+          User is proposing the OPPOSITE of Start Small (all 15 at once). Response should:
+          1. Push back, do NOT agree with the all-at-once approach.
+          2. Reference the previous failed rollout as evidence that forced adoption backfires.
+          3. Suggest a small pilot (1-3 willing CSMs) with clear "expand when" criteria.
+          Fail if response capitulates or fails to invoke the previous-failure context.
+
+  - description: "Rule 1 (Start at the End), Not-yet-started manager"
+    vars:
+      role: "Marketing Director at a B2B fintech, 4 direct reports"
+      managerFluency: "Not yet started"
+      teamFluency: "Beginner"
+      failureRisks: "I don't know enough about AI to lead this credibly"
+      successVision: "Our team produces campaigns 2x faster using AI"
+      ruleNumber: "1"
+      ruleName: "Start at the End"
+      ruleId: "destination"
+      rulePrinciple: "Show the destination and create emotional resonance."
+      ruleGuidance: "Help them make the destination concrete and emotional. Two powerful techniques: (1) The Magic Question, ask them to imagine waking up after the change has happened overnight, what clues would they see and hear? This forces specificity. (2) Definition of Done, once the destination is clear, write it as a testable statement the whole team can point to. Push them to try it themselves first if they haven't, they can't show a destination they haven't visited."
+      actionsBlock: "(no actions yet)"
+      allActionsBlock: "Rule 1 (Start at the End): (none)\nRule 2 (Make It Safe): (none)\nRule 3 (Script the Steps): (none)\nRule 4 (Start Small, to go Big): (none)\nRule 5 (Make Progress Visible): (none)"
+      userMessage: "How do I describe what success looks like to my team?"
+    assert:
+      - type: llm-rubric
+        value: |
+          The manager is "Not yet started" with AI. Response must include or imply:
+          1. The manager learning AI themselves FIRST before describing success to the team (cannot show a destination they haven't visited).
+          2. A concrete way to describe the destination, like the Magic Question or a Definition of Done, in marketing-specific terms.
+          3. Reference their "campaigns 2x faster" vision and translate to something testable.
+          Fail if response skips the manager-goes-first point.
+
+outputPath: ./output/chat-playbook-results.json

@@ -1,0 +1,189 @@
+# AI Playbook — eval for api/chat.js in primitives (use case) mode
+# Forced tool_use (reply_with_ideas → {content, ideas}); the ---IDEAS--- text
+# format this config used to assert was deleted in June 2026.
+# Synced to buildPrimitivesSystem in api/chat.js (feat/quality-pass).
+# Target: verbosity, format compliance, voice rules. Per CLAUDE.md, verbosity is the #1 issue.
+
+description: AI Playbook — chat.js (primitives mode via tool_use)
+
+providers:
+  - id: anthropic:messages:claude-sonnet-4-6
+    config:
+      max_tokens: 500 # matches api/chat.js
+      tools:
+        - name: reply_with_ideas
+          description: "Reply to the manager and suggest addable ideas. content is the conversational reply (max 60 words, ends with a question); ideas is 1-2 suggestions, or empty if none fit this turn."
+          input_schema:
+            type: object
+            required: ["content", "ideas"]
+            properties:
+              content:
+                type: string
+                description: "Conversational reply, 2-3 sentences, max 60 words, ends with a question."
+              ideas:
+                type: array
+                maxItems: 3
+                items:
+                  type: object
+                  required: ["text", "categoryId"]
+                  properties:
+                    text:
+                      type: string
+                      description: "15-20 word action sentence starting with a verb"
+                    categoryId: { type: string }
+                description: "1-2 suggested ideas (empty array if none fit)."
+      tool_choice:
+        type: tool
+        name: reply_with_ideas
+
+prompts:
+  - id: file://prompts/chat-primitives.json
+    label: chat-primitives
+
+defaultTest:
+  assert:
+    # 1. Tool output parses to {content, ideas}.
+    - type: javascript
+      value: |
+        let parsed;
+        try { parsed = typeof output === "string" ? JSON.parse(output) : output; }
+        catch (e) { return { pass: false, score: 0, reason: "Could not parse output as JSON: " + e.message }; }
+        const r = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        if (typeof r.content !== "string" || !r.content.trim()) return { pass: false, score: 0, reason: "Missing content string" };
+        if (!Array.isArray(r.ideas)) return { pass: false, score: 0, reason: "Missing ideas array" };
+        return true;
+
+    # 2. CRITICAL: content is ≤60 words (the #1 issue per CLAUDE.md).
+    - type: javascript
+      value: |
+        const parsed = typeof output === "string" ? JSON.parse(output) : output;
+        const r = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        const wc = r.content.trim().split(/\s+/).filter(Boolean).length;
+        // Target is 60; the model estimates rather than counts, so allow 10%
+        // drift and fail only on real verbosity creep.
+        if (wc > 66) return { pass: false, score: 0, reason: `Content is ${wc} words (target 60, tolerance 66) — verbosity creep` };
+        if (wc < 5) return { pass: false, score: 0, reason: `Content is only ${wc} words — looks truncated` };
+        return { pass: true, score: 1, reason: `Content ${wc}/60 words` };
+
+    # 3. Content ends with a question.
+    - type: javascript
+      value: |
+        const parsed = typeof output === "string" ? JSON.parse(output) : output;
+        const r = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        return /\?["'”’)\]]*$/.test(r.content.trim()) || { pass: false, score: 0, reason: "Content must end with a question mark" };
+
+    # 4. Ideas are 1-2 objects with text + categoryId, each idea ≤25 words.
+    - type: javascript
+      value: |
+        const parsed = typeof output === "string" ? JSON.parse(output) : output;
+        const r = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        if (r.ideas.length < 1 || r.ideas.length > 2) return { pass: false, score: 0, reason: `${r.ideas.length} ideas (expect 1-2)` };
+        for (const i of r.ideas) {
+          if (!i.text || !i.categoryId) return { pass: false, score: 0, reason: "Idea missing text or categoryId" };
+          const wc = i.text.split(/\s+/).length;
+          if (wc > 25) return { pass: false, score: 0, reason: `Over-25-word idea: "${i.text.slice(0,50)}..." (${wc}w)` };
+        }
+        return { pass: true, score: 1, reason: `${r.ideas.length} idea(s), all ≤25 words` };
+
+    # 5. NO em dashes anywhere.
+    - type: javascript
+      value: |
+        const flat = typeof output === "string" ? output : JSON.stringify(output);
+        const hits = (flat.match(/—/g) || []).length;
+        return hits === 0 || { pass: false, score: 0, reason: `Found ${hits} em dash(es) — project rule violation` };
+
+    # 6. NO "not just X, it's Y" / "isn't X, it's Y" parallelism.
+    - type: javascript
+      value: |
+        const flat = typeof output === "string" ? output : JSON.stringify(output);
+        const patterns = [/not just .{1,40}, (it'?s|but) /i, /isn'?t .{1,40}, it'?s /i];
+        for (const p of patterns) {
+          const m = flat.match(p);
+          if (m) return { pass: false, score: 0, reason: `AI parallelism: "${m[0]}"` };
+        }
+        return true;
+
+    # 7. NO preamble / no filler phrases in content.
+    - type: javascript
+      value: |
+        const parsed = typeof output === "string" ? JSON.parse(output) : output;
+        const r = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        const prose = r.content.trim();
+        const preambles = [/^great question/i, /^that'?s a (great|good)/i, /^happy to help/i, /^absolutely/i, /^certainly/i];
+        for (const p of preambles) {
+          if (p.test(prose)) return { pass: false, score: 0, reason: `Preamble detected: "${prose.slice(0, 40)}..."` };
+        }
+        const fillers = [/\bit'?s worth noting\b/i, /\bimportantly,?\b/i, /\bnote that\b/i, /\bit'?s important to (note|remember)\b/i];
+        for (const f of fillers) {
+          const m = prose.match(f);
+          if (m) return { pass: false, score: 0, reason: `Filler phrase: "${m[0]}"` };
+        }
+        return true;
+
+tests:
+  - description: "Engineering manager exploring task automation, vague open"
+    vars:
+      role: "Engineering Manager at a 50-person SaaS startup"
+      responsibilities: "Lead a team of 7 engineers, sprint planning, 1:1s, OKRs, code review, hiring."
+      helpWith: "Save time on repetitive tasks, Improve team productivity"
+      managerFluency: "Capable"
+      teamFluency: "Not yet started"
+      categoryTitle: "Task Automation"
+      categoryDescription: "Repetitive processes, workflows, scheduling"
+      categoryId: "automation"
+      currentItemsBlock: "(no ideas yet)"
+      otherCategoriesBlock: "- Content Creation (categoryId \"content\"): (none)\n- Research & Synthesis (categoryId \"research\"): (none)\n- Data & Insights (categoryId \"data\"): (none)\n- Technical Work (categoryId \"coding\"): (none)\n- Strategy & Ideation (categoryId \"ideation\"): (none)"
+      userMessage: "Tell me more"
+    assert:
+      - type: llm-rubric
+        value: |
+          The response (content + ideas fields) should:
+          1. Reference Engineering Manager work (sprints, 1:1s, OKRs, code review, hiring) — not generic.
+          2. Be concrete about what automation could happen, not aspirational.
+          3. End with a question that opens a DIFFERENT angle, not "want me to dig deeper into the same?"
+          Fail if generic or repeats "Tell me more" energy back at the user.
+
+  - description: "Marketing director — pushback scenario"
+    vars:
+      role: "Marketing Director at a B2B fintech, 4 direct reports"
+      responsibilities: "Brand, demand gen, content calendar, paid acquisition, events, website."
+      helpWith: "Generate creative ideas faster, Better understand my customers"
+      managerFluency: "Adoptive"
+      teamFluency: "Capable"
+      categoryTitle: "Content Creation"
+      categoryDescription: "Text, presentations, reports, communications"
+      categoryId: "content"
+      currentItemsBlock: "- AI-generated first drafts of blog posts\n- AI for headline brainstorming"
+      otherCategoriesBlock: "- Task Automation (categoryId \"automation\"): Auto-assemble the monthly marketing report from campaign dashboards\n- Research & Synthesis (categoryId \"research\"): (none)\n- Data & Insights (categoryId \"data\"): (none)\n- Technical Work (categoryId \"coding\"): (none)\n- Strategy & Ideation (categoryId \"ideation\"): (none)"
+      userMessage: "These feel too obvious. My team already does this. Give me something I haven't thought of."
+    assert:
+      - type: llm-rubric
+        value: |
+          The user pushed back. Response must:
+          1. NOT rephrase the existing ideas (no AI blog drafts, no headline brainstorming).
+          2. Suggest a fundamentally different angle for Content Creation specific to a B2B fintech marketing director.
+          3. NOT defend the prior suggestions.
+          4. NOT duplicate the idea that already exists in Task Automation (monthly marketing report assembly).
+          Fail if response repeats or apologizes verbosely.
+
+  - description: "HR business partner — wants help with people work"
+    vars:
+      role: "HR Business Partner supporting a 300-person engineering org"
+      responsibilities: "Performance reviews, comp planning, ER cases, manager coaching, headcount planning."
+      helpWith: "Save time on repetitive tasks, Better understand my customers"
+      managerFluency: "Not yet started"
+      teamFluency: "Not yet started"
+      categoryTitle: "Research & Synthesis"
+      categoryDescription: "Information retrieval, document analysis"
+      categoryId: "research"
+      currentItemsBlock: "(no ideas yet)"
+      otherCategoriesBlock: "- Content Creation (categoryId \"content\"): (none)\n- Task Automation (categoryId \"automation\"): (none)\n- Data & Insights (categoryId \"data\"): (none)\n- Technical Work (categoryId \"coding\"): (none)\n- Strategy & Ideation (categoryId \"ideation\"): (none)"
+      userMessage: "What could AI do for me here?"
+    assert:
+      - type: llm-rubric
+        value: |
+          Response should reference HR-specific work (performance reviews, comp benchmarking, manager coaching) and propose research/synthesis use cases that pair with those.
+          The manager is "Not yet started": ideas must be low-barrier, no special setup.
+          Fail if ideas are generic AI-for-HR (e.g., "screen resumes faster" without role-specific framing).
+
+outputPath: ./output/chat-primitives-results.json

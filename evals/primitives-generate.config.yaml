@@ -1,0 +1,205 @@
+# AI Playbook — eval for api/primitives-generate.js
+# Forced tool_use. 12 ideas total, redistributed 1-3 per category by fit.
+# Synced to the prompt in api/primitives-generate.js (feat/quality-pass).
+
+description: AI Playbook — primitives-generate (use case ideation via tool_use)
+
+providers:
+  - id: anthropic:messages:claude-sonnet-4-6
+    config:
+      max_tokens: 2048
+      tools:
+        - name: submit_use_cases
+          description: "Submit the personalized AI use cases. Each field is an array of 1 to 3 idea sentences (12 ideas total across all fields), each 15 to 20 words, each starting with a verb."
+          input_schema:
+            type: object
+            required: ["content", "automation", "research", "data", "coding", "ideation"]
+            properties:
+              content:
+                type: array
+                minItems: 1
+                maxItems: 3
+                items: { type: string }
+                description: "Content Creation (Text, presentations, reports, communications)"
+              automation:
+                type: array
+                minItems: 1
+                maxItems: 3
+                items: { type: string }
+                description: "Task Automation (Repetitive processes, workflows, scheduling)"
+              research:
+                type: array
+                minItems: 1
+                maxItems: 3
+                items: { type: string }
+                description: "Research & Synthesis (Information retrieval, document analysis)"
+              data:
+                type: array
+                minItems: 1
+                maxItems: 3
+                items: { type: string }
+                description: "Data & Insights (Analysis, visualization, pattern recognition)"
+              coding:
+                type: array
+                minItems: 1
+                maxItems: 3
+                items: { type: string }
+                description: "Technical Work (Spreadsheets, scripts, tools, systems)"
+              ideation:
+                type: array
+                minItems: 1
+                maxItems: 3
+                items: { type: string }
+                description: "Strategy & Ideation (Planning, brainstorming, problem-solving)"
+      tool_choice:
+        type: tool
+        name: submit_use_cases
+
+prompts:
+  - id: file://prompts/primitives-generate.txt
+    label: primitives-generate
+
+defaultTest:
+  assert:
+    # 1. Tool output parses; all 6 categories present with 1-3 ideas; 10-14 total.
+    - type: javascript
+      value: |
+        let parsed;
+        try { parsed = typeof output === "string" ? JSON.parse(output) : output; }
+        catch (e) { return { pass: false, score: 0, reason: "Could not parse output as JSON: " + e.message }; }
+        const obj = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        const required = ["content", "automation", "research", "data", "coding", "ideation"];
+        const missing = required.filter(k => !Array.isArray(obj[k]));
+        if (missing.length) return { pass: false, score: 0, reason: `Missing/non-array category keys: ${missing.join(", ")}` };
+        let total = 0;
+        for (const k of required) {
+          const arr = obj[k];
+          if (arr.length < 1 || arr.length > 3) return { pass: false, score: 0, reason: `${k} has ${arr.length} ideas (need 1-3)` };
+          for (const idea of arr) {
+            if (typeof idea !== "string") return { pass: false, score: 0, reason: `${k} contains non-string idea` };
+          }
+          total += arr.length;
+        }
+        if (total < 10 || total > 14) return { pass: false, score: 0, reason: `${total} ideas total (prompt asks for 12, accept 10-14)` };
+        return { pass: true, score: 1, reason: `${total} ideas across 6 categories` };
+
+    # 2. Distribution is actually weighted: at least one category got 3 and one got 1.
+    - type: javascript
+      value: |
+        const parsed = typeof output === "string" ? JSON.parse(output) : output;
+        const obj = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        const counts = Object.values(obj).filter(Array.isArray).map(a => a.length);
+        if (!counts.includes(3)) return { pass: false, score: 0, reason: `No category got 3 ideas (counts: ${counts.join(",")}) — weighting not expressed` };
+        if (!counts.includes(1)) return { pass: false, score: 0, reason: `No category got 1 idea (counts: ${counts.join(",")}) — weighting not expressed` };
+        return { pass: true, score: 1, reason: `Weighted distribution: ${counts.join(",")}` };
+
+    # 3. Each idea is a short action sentence (target 15-20 words, hard cap 25).
+    - type: javascript
+      value: |
+        const parsed = typeof output === "string" ? JSON.parse(output) : output;
+        const obj = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        const offenders = [];
+        for (const [cat, arr] of Object.entries(obj)) {
+          if (!Array.isArray(arr)) continue;
+          for (const idea of arr) {
+            const wc = idea.trim().split(/\s+/).length;
+            if (wc > 25) offenders.push(`${cat}: "${idea.slice(0,60)}..." (${wc} words)`);
+          }
+        }
+        return offenders.length === 0 || { pass: false, score: 0, reason: `Over 25-word ideas: ${offenders.join(" | ")}` };
+
+    # 4. Each idea starts with a verb-looking capitalized word.
+    - type: javascript
+      value: |
+        const parsed = typeof output === "string" ? JSON.parse(output) : output;
+        const obj = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        const offenders = [];
+        for (const [cat, arr] of Object.entries(obj)) {
+          if (!Array.isArray(arr)) continue;
+          for (const idea of arr) {
+            if (!/^[A-Z][a-z]+/.test(idea.trim())) offenders.push(`${cat}: "${idea.slice(0,40)}"`);
+          }
+        }
+        return offenders.length === 0 || { pass: false, score: 0, reason: `Ideas not starting with a capitalized verb: ${offenders.join(" | ")}` };
+
+    # 5. NO em dashes anywhere (project style rule).
+    - type: javascript
+      value: |
+        const flat = typeof output === "string" ? output : JSON.stringify(output);
+        const hits = (flat.match(/—/g) || []).length;
+        return hits === 0 || { pass: false, score: 0, reason: `Found ${hits} em dash(es) — project rule violation` };
+
+    # 6. NO "not just X, it's Y" / "isn't X, it's Y" parallelism.
+    - type: javascript
+      value: |
+        const flat = typeof output === "string" ? output : JSON.stringify(output);
+        const patterns = [/not just .{1,40}, (it'?s|but) /i, /isn'?t .{1,40}, it'?s /i];
+        for (const p of patterns) {
+          const m = flat.match(p);
+          if (m) return { pass: false, score: 0, reason: `Found AI parallelism: "${m[0]}"` };
+        }
+        return true;
+
+    # 7. NO filler phrases.
+    - type: javascript
+      value: |
+        const flat = typeof output === "string" ? output : JSON.stringify(output);
+        const fillers = [/\bit'?s worth noting\b/i, /\bimportantly,?\b/i, /\bit'?s important to (note|remember)\b/i, /\bnote that\b/i];
+        for (const f of fillers) {
+          const m = flat.match(f);
+          if (m) return { pass: false, score: 0, reason: `Found filler phrase: "${m[0]}"` };
+        }
+        return true;
+
+tests:
+  - description: "Engineering manager — wants to save time"
+    vars:
+      role: "Engineering Manager at a 50-person SaaS startup"
+      responsibilities: "Lead a team of 7 engineers, run sprint planning, do 1:1s, write quarterly OKRs, review code, hire and onboard."
+      helpWith: "Save time on repetitive tasks, Improve team productivity"
+      managerFluency: "Capable"
+      teamFluency: "Not yet started"
+      successVision: "Every engineer uses AI for at least one PR per week, and sprint planning prep takes half the time"
+    assert:
+      - type: llm-rubric
+        value: |
+          The output is ~12 AI use case ideas across 6 categories for an Engineering Manager. Check:
+          1. Ideas reference an Engineering Manager's specific responsibilities (sprint planning, 1:1s, OKRs, code review, hiring), not generic "use AI to help with emails."
+          2. Ideas are immediately actionable (a concrete workflow), not aspirational.
+          3. Ideas make sense for their named category (e.g., "Technical Work" ideas involve scripts/spreadsheets/tools).
+          4. At least one idea serves the stated 90-day vision (AI-assisted PRs or faster sprint prep).
+          Fail if more than 3 of the ideas are generic.
+
+  - description: "Marketing director — wants creative leverage"
+    vars:
+      role: "Marketing Director at a B2B fintech, 4 direct reports"
+      responsibilities: "Own brand, demand gen, content calendar, paid acquisition, event marketing, and the website."
+      helpWith: "Generate creative ideas faster, Better understand my customers"
+      managerFluency: "Adoptive"
+      teamFluency: "Capable"
+      successVision: "Campaign concepts go from brief to first draft in a day instead of a week"
+    assert:
+      - type: llm-rubric
+        value: |
+          Ideas must reference marketing-specific responsibilities (demand gen, content calendar, paid acquisition, events, website).
+          Category fidelity: "Strategy & Ideation" ideas should focus on campaign concepts/positioning; "Data & Insights" on customer/funnel analytics.
+          Given the manager wants creative leverage (helpWith), Content Creation or Strategy & Ideation should be among the categories with the MOST ideas, and a stretch category like Technical Work should have fewer.
+          Fail if ideas are interchangeable with a generic "marketer" template.
+
+  - description: "Customer Success lead — wants team enablement"
+    vars:
+      role: "Head of Customer Success at a 200-person company, leads team of 12"
+      responsibilities: "Customer health monitoring, escalations, QBRs, renewals forecasting, onboarding playbooks, CS team training."
+      helpWith: "Help my team learn AI tools, Standardize quality"
+      managerFluency: "Capable"
+      teamFluency: "Not yet started"
+      successVision: "Every CSM uses AI to prep QBRs and we cut prep time in half"
+    assert:
+      - type: llm-rubric
+        value: |
+          Ideas must reference CS-specific work (health monitoring, QBRs, renewals, onboarding, escalations).
+          The "Research & Synthesis" category should produce ideas about prepping QBRs or summarizing account history, not generic research.
+          The team is "Not yet started": ideas must be low-barrier, things a CSM could try this week without special setup.
+          Fail if more than 3 ideas are generic across the 6 categories.
+
+outputPath: ./output/primitives-generate-results.json

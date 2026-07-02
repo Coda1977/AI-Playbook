@@ -1,0 +1,182 @@
+# NOTE (2026-07-02): provider tools added to match the tool_use migration; prompt snapshot now targets the bigMoveTitle/actions schema.
+# AI Playbook — synthesis specificity: rich vs thin intake.
+# Same synthesis prompt × 6 cases (3 managers × {rich, thin}).
+# Llm-rubric scores how specific the resulting plan is to the manager.
+
+description: Synthesis specificity — rich vs thin intake
+
+providers:
+  - id: anthropic:messages:claude-sonnet-4-6
+    config:
+      max_tokens: 3000
+      tools:
+        - name: submit_one_page_plan
+          description: "Submit the manager's big move. bigMoveTitle is one specific sentence; actions is 4-6 prioritized imperative sentences mixing use cases and change actions."
+          input_schema:
+            type: object
+            required: ["bigMoveTitle", "actions"]
+            properties:
+              bigMoveTitle: { type: string }
+              actions:
+                type: array
+                minItems: 4
+                maxItems: 6
+                items: { type: string }
+      tool_choice:
+        type: tool
+        name: submit_one_page_plan
+
+prompts:
+  - id: file://prompts/synthesis-generate.txt
+    label: synthesis
+
+defaultTest:
+  options:
+    provider:
+      id: anthropic:messages:claude-sonnet-4-6
+      config:
+        max_tokens: 800
+  assert:
+    - type: llm-rubric
+      threshold: 0.7  # 3.5/5 = 0.7 (pass if specificity >= 3.5)
+      value: |
+        Score the synthesis output (a one-page plan) for SPECIFICITY to the input manager.
+
+        Input manager:
+        - Role: {{role}}
+        - Failure risks: {{failureRisks}}
+        - 90-day vision: {{successVision}}
+        - Manager fluency: {{managerFluency}}, Team fluency: {{teamFluency}}
+
+        Score 1-5 on whether the plan is unmistakably tied to THIS manager vs generic-could-apply-to-anyone:
+        - 5 = every storyline thesis and thisWeek action ties to specific input details (role, fluency, failure risks, vision)
+        - 3 = plan is roughly relevant but contains generic change-management language and could fit other managers in the same function with minor edits
+        - 1 = could swap names/roles and reuse for anyone
+
+        Also call out any "thinness signals" — phrases that read like the model invented specifics to compensate for vague inputs (named tools/time budgets/demographics not in the input).
+
+        Convert: pass_score = score/5. Pass if score >= 3.5 (pass_score >= 0.7).
+        In your reason, give the 1-5 score and list 1-3 thinness signals if any.
+
+tests:
+  # MANAGER A
+  - description: "A-rich (Engineering Manager)"
+    vars:
+      role: "Engineering Manager at a 50-person SaaS startup, leads 7 engineers"
+      helpWith: "Save time on repetitive tasks, Improve team productivity"
+      responsibilities: "Lead a team of 7 engineers, sprint planning, 1:1s, OKRs, code review, hiring"
+      managerFluency: "Capable"
+      teamFluency: "Not yet started"
+      failureRisks: "Senior engineers think AI produces bad code and will refuse to use it"
+      successVision: "Every engineer using AI for at least one PR per week"
+      useCasesBlock: |
+        Content Creation:
+          * AI drafts PR descriptions from commit diffs
+        Task Automation:
+          * Auto-generate weekly status from Jira
+      actionsBlock: |
+        Start at the End:
+          * Spend 90 min using Copilot on a refactor before asking the team
+        Make It Safe:
+          * 1:1s with the two senior engineers
+  - description: "A-thin (Engineering Manager)"
+    vars:
+      role: "Engineering Manager"
+      helpWith: "Save time"
+      responsibilities: "Manage engineers"
+      managerFluency: "Capable"
+      teamFluency: "Beginner"
+      failureRisks: "People won't use it"
+      successVision: "Team uses AI"
+      useCasesBlock: |
+        Content Creation:
+          * AI drafts PR descriptions from commit diffs
+        Task Automation:
+          * Auto-generate weekly status from Jira
+      actionsBlock: |
+        Start at the End:
+          * Spend 90 min using Copilot on a refactor before asking the team
+        Make It Safe:
+          * 1:1s with the two senior engineers
+
+  # MANAGER B
+  - description: "B-rich (HR Business Partner)"
+    vars:
+      role: "HR Business Partner supporting a 300-person engineering org"
+      helpWith: "Save time on repetitive tasks, Standardize quality"
+      responsibilities: "Performance reviews, comp planning, ER cases, manager coaching, headcount planning"
+      managerFluency: "Beginner"
+      teamFluency: "Beginner"
+      failureRisks: "Bias in AI-assisted decisions and legal exposure on perf reviews"
+      successVision: "AI handles 70% of performance review prep work for the eng managers I support"
+      useCasesBlock: |
+        Content Creation:
+          * AI drafts performance review summaries from quarterly notes
+        Data & Insights:
+          AI flags bias signals in draft review language
+      actionsBlock: |
+        Start at the End:
+          * Write a 'what does fair review prep look like' standard
+        Make It Safe:
+          * Establish a legal review checkpoint before AI-drafted feedback ships
+  - description: "B-thin (HR Business Partner)"
+    vars:
+      role: "HR Business Partner"
+      helpWith: "Standardize quality"
+      responsibilities: "HR stuff"
+      managerFluency: "Beginner"
+      teamFluency: "Beginner"
+      failureRisks: "Bias"
+      successVision: "AI helps with reviews"
+      useCasesBlock: |
+        Content Creation:
+          * AI drafts performance review summaries from quarterly notes
+        Data & Insights:
+          AI flags bias signals in draft review language
+      actionsBlock: |
+        Start at the End:
+          * Write a 'what does fair review prep look like' standard
+        Make It Safe:
+          * Establish a legal review checkpoint before AI-drafted feedback ships
+
+  # MANAGER C
+  - description: "C-rich (Marketing Director)"
+    vars:
+      role: "Marketing Director at a B2B fintech, 4 direct reports"
+      helpWith: "Generate creative ideas faster, Better understand my customers"
+      responsibilities: "Brand, demand gen, content calendar, paid acquisition, events, website"
+      managerFluency: "Capable"
+      teamFluency: "Beginner"
+      failureRisks: "Brand voice drift if everyone uses AI differently"
+      successVision: "AI is a creative partner for the team, not a replacement, by end of quarter"
+      useCasesBlock: |
+        Content Creation:
+          * AI transforms one report into 5 distribution formats
+        Strategy & Ideation:
+          * AI brainstorms vertical-specific campaign angles for fintech buyers
+      actionsBlock: |
+        Start at the End:
+          * Define what 'creative partner not replacement' means concretely
+        Make It Safe:
+          * Create Brand Voice Guardrails doc with examples + counter-examples
+  - description: "C-thin (Marketing Director)"
+    vars:
+      role: "Marketing Director"
+      helpWith: "More ideas"
+      responsibilities: "Marketing"
+      managerFluency: "Capable"
+      teamFluency: "Beginner"
+      failureRisks: "Brand drift"
+      successVision: "Better content"
+      useCasesBlock: |
+        Content Creation:
+          * AI transforms one report into 5 distribution formats
+        Strategy & Ideation:
+          * AI brainstorms vertical-specific campaign angles for fintech buyers
+      actionsBlock: |
+        Start at the End:
+          * Define what 'creative partner not replacement' means concretely
+        Make It Safe:
+          * Create Brand Voice Guardrails doc with examples + counter-examples
+
+outputPath: ./output/thin-intake-ab-results.json
