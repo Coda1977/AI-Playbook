@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ChevronRight, RotateCcw } from "lucide-react";
+import { ChevronRight, RotateCcw, Star } from "lucide-react";
 import { RULES } from "../../config/rules";
+import { MIN_STARS_FOR_REVIEW, C } from "../../config/constants";
 import { FlashProvider } from "../../context/AppContext";
 import RuleSection from "../playbook/RuleSection";
 import ChatDrawer from "../shared/ChatDrawer";
@@ -20,6 +21,9 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
     (sum, r) => sum + (state.plan[r.id] || []).filter((a) => a.starred).length,
     0,
   );
+  // Starred actions anchor the Big Move synthesis, so Review requires them,
+  // mirroring the star gate on the use-cases phase.
+  const canContinue = starred >= MIN_STARS_FOR_REVIEW;
 
   return (
     <FlashProvider>
@@ -69,13 +73,13 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
           <footer className="gate-bar" aria-label="Phase progress and actions">
             <div className="gate-left">
               <div className="gate-counter">
-                <strong>{totalActions}</strong> actions,{" "}
-                <strong>{rulesWithActions}</strong> rules
-                {starred > 0 && (
-                  <>
-                    , <strong>{starred}</strong> starred
-                  </>
-                )}
+                <Star
+                  size={14}
+                  fill={C.accentGlow}
+                  color={C.accentGlow}
+                  style={{ verticalAlign: "text-bottom" }}
+                />{" "}
+                <strong>{starred}</strong> of {totalActions}
               </div>
             </div>
             <div
@@ -87,18 +91,23 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
               }}
             >
               {starred === 0
-                ? "Star your priorities, then continue"
-                : "Ready when you are"}
+                ? "Star the actions that matter most to you"
+                : starred < MIN_STARS_FOR_REVIEW
+                  ? `Star at least ${MIN_STARS_FOR_REVIEW} to continue`
+                  : "Ready when you are"}
             </div>
             <div className="gate-actions">
               <button onClick={onStartOver} className="btn-ghost btn-sm">
                 <RotateCcw size={12} /> Start over
               </button>
               <button
-                onClick={() =>
-                  dispatch({ type: "SET_PHASE", phase: "commitment" })
+                onClick={
+                  canContinue
+                    ? () => dispatch({ type: "SET_PHASE", phase: "commitment" })
+                    : undefined
                 }
-                className="btn-gate btn-gate-active"
+                className={`btn-gate ${canContinue ? "btn-gate-active" : "btn-gate-disabled"}`}
+                disabled={!canContinue}
               >
                 Continue to Review <ChevronRight size={16} />
               </button>

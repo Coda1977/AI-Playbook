@@ -40,9 +40,36 @@ const INIT = {
   plan: { destination: [], safe: [], script: [], small: [], visible: [] },
   playbookChat: {},
   synthesis: null,
+  // contentVersion bumps on every mutation of ideas/actions/stars;
+  // synthesisVersion records the contentVersion the Big Move was generated
+  // from. A mismatch means the synthesis is stale and should be regenerated.
+  contentVersion: 0,
+  synthesisVersion: 0,
 };
 
+// Actions that change the content the synthesis is derived from.
+const CONTENT_ACTIONS = new Set([
+  "SET_PRIMITIVES",
+  "ADD_PRIMITIVE",
+  "UPDATE_PRIMITIVE",
+  "DELETE_PRIMITIVE",
+  "TOGGLE_PRIMITIVE_STAR",
+  "SET_PLAN",
+  "ADD_ACTION",
+  "UPDATE_ACTION",
+  "DELETE_ACTION",
+  "TOGGLE_STAR",
+]);
+
 function reducer(state, action) {
+  const next = baseReducer(state, action);
+  if (next !== state && CONTENT_ACTIONS.has(action.type)) {
+    return { ...next, contentVersion: (state.contentVersion || 0) + 1 };
+  }
+  return next;
+}
+
+function baseReducer(state, action) {
   switch (action.type) {
     case "HYDRATE":
       return { ...INIT, ...action.state };
@@ -218,7 +245,12 @@ function reducer(state, action) {
     }
 
     case "SET_SYNTHESIS":
-      return { ...state, synthesis: action.synthesis, phase: "synthesis" };
+      return {
+        ...state,
+        synthesis: action.synthesis,
+        synthesisVersion: state.contentVersion || 0,
+        phase: "synthesis",
+      };
     case "RESET":
       return { ...INIT };
     default:

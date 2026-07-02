@@ -124,23 +124,23 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
         : [...p.helpWith, id],
     }));
 
-  const ok =
-    f.role &&
-    f.helpWith.length > 0 &&
-    f.responsibilities &&
-    f.managerFluency &&
-    f.teamFluency &&
-    f.failureRisks &&
-    f.successVision;
-  const doneCount = [
-    f.role,
-    f.helpWith.length > 0,
-    f.responsibilities,
-    f.managerFluency,
-    f.teamFluency,
-    f.failureRisks,
-    f.successVision,
-  ].filter(Boolean).length;
+  // Everything downstream is generated from these answers, so the gate
+  // requires a minimum of substance, not just presence. Thresholds follow the
+  // word-count bands the inline hints already use (more than 5 words = "good
+  // start"); role can legitimately be shorter.
+  const words = (s) =>
+    s && s.trim() ? s.trim().split(/\s+/).length : 0;
+  const fieldOk = {
+    role: words(f.role) >= 4,
+    helpWith: f.helpWith.length > 0,
+    responsibilities: words(f.responsibilities) >= 6,
+    managerFluency: !!f.managerFluency,
+    teamFluency: !!f.teamFluency,
+    failureRisks: words(f.failureRisks) >= 6,
+    successVision: words(f.successVision) >= 6,
+  };
+  const ok = Object.values(fieldOk).every(Boolean);
+  const doneCount = Object.values(fieldOk).filter(Boolean).length;
 
   const RAIL_FIELDS = [
     { key: "role", label: "Role" },
@@ -151,12 +151,10 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
     { key: "failureRisks", label: "Risks" },
     { key: "successVision", label: "Vision" },
   ];
-  const fieldDone = (field) =>
-    field.isArray ? f[field.key]?.length > 0 : !!f[field.key];
+  const fieldDone = (field) => fieldOk[field.key];
 
-  const missing = (field) => attempted && !f[field];
-  const missingArray = (field) =>
-    attempted && (!f[field] || f[field].length === 0);
+  const missing = (field) => attempted && !fieldOk[field];
+  const missingArray = (field) => attempted && !fieldOk[field];
 
   const handleSubmit = () => {
     if (ok) {
@@ -213,7 +211,8 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
 
             {attempted && !ok && (
               <div className="intake-validation-msg animate-fade-in">
-                Please complete all fields before continuing.
+                Please complete the highlighted fields. Short answers need a
+                few more words; they drive everything the AI builds for you.
               </div>
             )}
 

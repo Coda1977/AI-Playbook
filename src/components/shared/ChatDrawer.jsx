@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { X, Send, Sparkles, Plus, Check, AlertTriangle } from "lucide-react";
 import { C } from "../../config/constants";
+import { CATEGORIES } from "../../config/categories";
 import { useFlash } from "../../context/AppContext";
 import { sendChat } from "../../utils/api";
+
+const CATEGORY_TITLES = Object.fromEntries(
+  CATEGORIES.map((c) => [c.id, c.title]),
+);
 
 export default function ChatDrawer({ type, item, state, dispatch, onClose }) {
   const isPrimitive = type === "primitive";
@@ -22,25 +27,29 @@ export default function ChatDrawer({ type, item, state, dispatch, onClose }) {
 
   const scroll = () => { setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100); };
 
-  const doSend = async (txt, isSystem = false) => {
+  const doSend = async (txt) => {
     const s = stateRef.current;
     const cs = isPrimitive ? s.primitivesChat : s.playbookChat;
     const addMsgType = isPrimitive ? "ADD_PRIMITIVES_CHAT_MSG" : "ADD_CHAT_MSG";
     const idKey = isPrimitive ? "categoryId" : "ruleId";
 
-    if (!isSystem) dispatch({ type: addMsgType, [idKey]: itemId, message: { role: "user", content: txt } });
+    dispatch({ type: addMsgType, [idKey]: itemId, message: { role: "user", content: txt } });
     setLoading(true);
     setError(null);
 
     try {
-      const hist = isSystem ? [] : [...(cs[itemId] || []), { role: "user", content: txt }];
+      // History excludes the new message; the server appends userMessage
+      // itself. Appending it here too used to make the model hear every
+      // user message twice.
+      const hist = [...(cs[itemId] || [])];
       const currentItems = isPrimitive
         ? (s.primitives[itemId] || []).map((a) => a.text)
         : (s.plan[itemId] || []).map((a) => a.text);
 
       const starred = [];
       for (const [catId, ideas] of Object.entries(s.primitives)) {
-        ideas.filter((i) => i.starred).forEach((i) => starred.push({ category: catId, text: i.text }));
+        ideas.filter((i) => i.starred).forEach((i) =>
+          starred.push({ category: CATEGORY_TITLES[catId] || catId, text: i.text }));
       }
 
       const res = await sendChat({
@@ -66,7 +75,7 @@ export default function ChatDrawer({ type, item, state, dispatch, onClose }) {
       setError("The AI couldn't connect. Check your connection and try again.");
       // Put the failed message back in the input so the user doesn't have to
       // retype it (unless they've already started typing something new).
-      if (!isSystem) setInput((cur) => cur || txt);
+      setInput((cur) => cur || txt);
     }
     setLoading(false);
   };

@@ -81,13 +81,13 @@ export default function GeneratingIndicator({ mode, onReady }) {
           return s + 1;
         });
       },
-      resultReady ? 350 : 2200,
+      resultReady ? 200 : 2200,
     );
     return () => clearInterval(iv);
   }, [steps.length, resultReady]);
 
   // Surface a passive "this is taking longer than usual" note after 45s.
-  // The fetch itself times out at 75s (see utils/api.js), at which point
+  // The fetch itself times out at 105s (see utils/api.js), at which point
   // App.jsx catches and reverts the phase + shows the retry banner.
   useEffect(() => {
     const t = setTimeout(() => setSlow(true), 45_000);
@@ -96,7 +96,7 @@ export default function GeneratingIndicator({ mode, onReady }) {
 
   useEffect(() => {
     if (step >= steps.length && !stepsFinished) {
-      const t = setTimeout(() => setStepsFinished(true), 600);
+      const t = setTimeout(() => setStepsFinished(true), 300);
       return () => clearTimeout(t);
     }
   }, [step, stepsFinished, steps.length]);
@@ -108,7 +108,7 @@ export default function GeneratingIndicator({ mode, onReady }) {
   useEffect(() => {
     if (complete && onReady && !calledRef.current) {
       calledRef.current = true;
-      const t = setTimeout(onReady, 1200);
+      const t = setTimeout(onReady, 600);
       return () => clearTimeout(t);
     }
   }, [complete, onReady]);

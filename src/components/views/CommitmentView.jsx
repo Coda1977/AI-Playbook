@@ -38,8 +38,14 @@ export default function CommitmentView({
   const starredActions = allActions.filter((a) => a.starred);
 
   const hasSynthesis = !!state.synthesis;
+  // The Big Move was generated from a snapshot of ideas/actions/stars. Any
+  // edit since then makes it stale; offer regeneration instead of showing an
+  // outdated plan as if it were current.
+  const synthesisStale =
+    hasSynthesis &&
+    (state.synthesisVersion || 0) !== (state.contentVersion || 0);
   const handleSynthesisClick = () => {
-    if (hasSynthesis) {
+    if (hasSynthesis && !synthesisStale) {
       dispatch({ type: "SET_PHASE", phase: "synthesis" });
     } else if (onGenerateSynthesis) {
       onGenerateSynthesis();
@@ -73,24 +79,52 @@ export default function CommitmentView({
         >
           <div className="synthesis-cta-text">
             <div className="synthesis-cta-eyebrow">
-              {hasSynthesis ? "Your Big Move" : "New"}
+              {synthesisStale
+                ? "Plan Changed"
+                : hasSynthesis
+                  ? "Your Big Move"
+                  : "New"}
             </div>
             <h2 className="synthesis-cta-title">
-              {hasSynthesis
-                ? "View your big move"
-                : "Synthesize this into one plan"}
+              {synthesisStale
+                ? "Your big move is out of date"
+                : hasSynthesis
+                  ? "View your big move"
+                  : "Synthesize this into one plan"}
             </h2>
             <p className="synthesis-cta-desc">
-              {hasSynthesis
-                ? "Open the narrative the AI synthesized from your starred priorities."
-                : "See the one big move that ties your starred priorities together, with concrete actions to start tomorrow."}
+              {synthesisStale ? (
+                <>
+                  You changed ideas, actions, or stars since it was generated.
+                  Regenerate it from your current priorities, or{" "}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      dispatch({ type: "SET_PHASE", phase: "synthesis" })
+                    }
+                    className="btn-reset-link"
+                    style={{ display: "inline", padding: 0 }}
+                  >
+                    view the previous version
+                  </button>
+                  .
+                </>
+              ) : hasSynthesis ? (
+                "Open the narrative the AI synthesized from your starred priorities."
+              ) : (
+                "See the one big move that ties your starred priorities together, with concrete actions to start tomorrow."
+              )}
             </p>
           </div>
           <button
             onClick={handleSynthesisClick}
             className="btn-primary btn-lg synthesis-cta-btn"
           >
-            {hasSynthesis ? (
+            {synthesisStale ? (
+              <>
+                <Sparkles size={16} /> Regenerate My Big Move
+              </>
+            ) : hasSynthesis ? (
               <>
                 <FileText size={16} /> View My Big Move
               </>
@@ -321,8 +355,16 @@ export default function CommitmentView({
                 onClick={handleSynthesisClick}
                 className="btn-ghost btn-lg"
               >
-                {hasSynthesis ? <FileText size={15} /> : <Sparkles size={15} />}
-                {hasSynthesis ? " View big move" : " Find big move"}
+                {hasSynthesis && !synthesisStale ? (
+                  <FileText size={15} />
+                ) : (
+                  <Sparkles size={15} />
+                )}
+                {synthesisStale
+                  ? " Regenerate big move"
+                  : hasSynthesis
+                    ? " View big move"
+                    : " Find big move"}
               </button>
               <button
                 onClick={() => window.print()}

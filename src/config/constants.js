@@ -2,6 +2,8 @@ export const LS_KEY = "ai_change_playbook_combined_v1";
 
 export const MIN_STARS_FOR_PLAYBOOK = 3;
 
+export const MIN_STARS_FOR_REVIEW = 3;
+
 export const C = {
   black: "#000000",
   charcoal: "#222222",
