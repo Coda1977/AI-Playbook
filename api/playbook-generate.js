@@ -48,16 +48,16 @@ CONTEXT, THIS SPECIFIC PERSON:
 IMPORTANT CONTEXT SIGNALS TO PAY ATTENTION TO:
 - The gap between manager fluency and team fluency is critical. A Transformative manager with a Not Yet Started team needs to slow down and build safety. A Capable manager with a Capable team needs momentum and scripted steps.
 - If the manager is "Not yet started," their own AI learning is action #1 in Rule 1 (Start at the End), they must try it first before asking anyone else to.
-- If the failure risks mention senior people resisting, prioritize Rule 2 (Make It Safe), especially acknowledging losses and creating space for honest conversation.
+- If the failure risks mention senior people resisting, prioritize Rule 2 (Make It Safe), especially naming what those people personally stand to lose (expertise, identity, standing), not just their stated objection, and creating space for honest conversation.
 - If the failure risks mention previous failed attempts, prioritize Rule 4 (Start Small) and Rule 5 (Make Progress Visible), smaller scope, more communication.
 - If the 90-day vision is ambitious (e.g., "AI embedded in every workflow"), the plan needs concrete phasing via Rule 3 (Script the Steps) and Rule 4 (Start Small). If it's modest (e.g., "a few experiments"), match that energy.
 - All participants work in SaaS companies. Tailor examples and actions to SaaS contexts, product teams, customer success, engineering, marketing, sales, support.
 - Remember: the team is asking themselves five unspoken questions: (1) From what to what, specifics? (2) What does this mean for my daily work? (3) Will this actually make a difference? (4) How will success be measured? (5) Does my manager really believe in this? Help the manager address these questions through their actions.
 
 TASK:
-Generate 2 actions per rule by default. Express priority through the count: give a THIRD action only to the one or two rules the context signals above single out for this manager (11 or 12 actions total, never more). Every action must be:
+First, decide which ONE or TWO rules the context signals above single out for this manager, and commit to them in the prioritizedRules field. Then generate EXACTLY 2 actions for every rule, except the prioritized rule(s) which get EXACTLY 3. That is 11 or 12 actions total, never more. Every action must be:
 - Specific to THIS person's role, team, and situation, not interchangeable with someone else's plan
-- Under 25 words each, concise and punchy, no filler
+- Under 25 words each (hard limit). Quoted scripts count toward the limit; shorten the script rather than exceed it. Concise and punchy, no filler
 - Concrete enough to start this week (verbs like "schedule," "ask," "send," "create," "announce", never "consider," "think about," "explore the idea of")
 - Sensitive to their fluency levels (don't suggest advanced moves for not-yet-started teams, don't suggest basics for transformative teams)
 - Sensitive to their failure risks (if people fear job loss, don't generate actions that ignore that fear)
@@ -70,6 +70,7 @@ QUALITY CHECK BEFORE RETURNING, VERIFY EACH ACTION:
 4. Would this person know exactly what to do Monday morning? (If not, make it more specific.)
 5. If the action involves sharing a personal story, does it leave the content to the manager? (Say "share your AI experiment with the team" NOT "explain how automating X saved Y hours." Never invent experiences, metrics, or outcomes for the manager.)
 6. STYLE: No em dashes anywhere. Use commas, semicolons, periods, colons, or parentheses. No "isn't X, it's Y" or "not just X, it's Y" parallelism, state the affirmative directly.
+7. COUNT: exactly 2 actions per rule, exactly 3 for the rule(s) in prioritizedRules. If any other rule ended up with 3, delete its weakest action.
 
 RULES:
 ${rulesBlock}
@@ -87,11 +88,24 @@ Use the submit_change_plan tool to return your actions for each rule.`;
   const planTool = {
     name: "submit_change_plan",
     description:
-      "Submit the personalized change strategy. Each field is an array of 2 action sentences (3 only for the one or two prioritized rules), each under 25 words, each starting with a concrete verb.",
+      "Submit the personalized change strategy. prioritizedRules names the 1-2 rules that get a third action; every other rule gets exactly 2 actions (11-12 total). Each action is under 25 words and starts with a concrete verb.",
     input_schema: {
       type: "object",
-      required: RULES.map((r) => r.id),
-      properties: Object.fromEntries(RULES.map((r) => [r.id, ruleField(r)])),
+      required: ["prioritizedRules", ...RULES.map((r) => r.id)],
+      properties: {
+        // Declared first so the model commits to its priorities before
+        // writing actions; without this commitment it hands 3 actions to
+        // most rules and overshoots the 11-12 total.
+        prioritizedRules: {
+          type: "array",
+          minItems: 1,
+          maxItems: 2,
+          items: { type: "string", enum: RULES.map((r) => r.id) },
+          description:
+            "The one or two rule ids the context signals prioritize for this manager. Only these rules get a third action.",
+        },
+        ...Object.fromEntries(RULES.map((r) => [r.id, ruleField(r)])),
+      },
     },
   };
 
@@ -135,7 +149,22 @@ Use the submit_change_plan tool to return your actions for each rule.`;
         .status(500)
         .json({ error: "Model did not return structured plan" });
     }
-    return res.status(200).json({ plan: toolBlock.input });
+    // prioritizedRules is the model's self-commitment, not plan content;
+    // leaking it into the response would become a bogus sixth rule in state.
+    // The model also reliably overshoots prose count limits (it hands 3
+    // actions to more rules than it committed to), and the tool schema can't
+    // express "3 only for the rules named in prioritizedRules". Enforce the
+    // lighter-output contract deterministically: 2 actions per rule, 3 for
+    // the 1-2 prioritized rules, 10-12 total.
+    const { prioritizedRules, ...plan } = toolBlock.input;
+    const prioritized = Array.isArray(prioritizedRules)
+      ? prioritizedRules.slice(0, 2)
+      : [];
+    for (const r of RULES) {
+      const actions = Array.isArray(plan[r.id]) ? plan[r.id] : [];
+      plan[r.id] = actions.slice(0, prioritized.includes(r.id) ? 3 : 2);
+    }
+    return res.status(200).json({ plan });
   } catch (err) {
     console.error("Generation error:", err);
     return res.status(500).json({ error: "Failed to generate plan" });

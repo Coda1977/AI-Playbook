@@ -47,7 +47,11 @@ src/config/                 # categories.js, rules.js, constants.js
 src/context/                # AppContext, ToastContext
 src/utils/                  # export.js (Word export), storage.js
 api/                        # primitives-generate.js, playbook-generate.js, chat.js
+lib/                        # workshop.js (canonical RULES + CATEGORIES shared by src AND api), apiGuard.js
+evals/                      # promptfoo configs + prompt snapshots for all 4 endpoints (keep snapshots in sync with api/ prompts)
 ```
+
+**Single source of truth**: the five rules (with promptHints and chatHints) and six categories live ONLY in `lib/workshop.js`. `src/config/{rules,categories}.js` re-export them; all four api handlers import them. Never redefine them inline; the pre-lib copies had drifted.
 
 ## Git Workflow
 
@@ -61,12 +65,25 @@ api/                        # primitives-generate.js, playbook-generate.js, chat
 ### How the AI works
 
 Four API endpoints in `api/`:
-- **`primitives-generate.js`** -- Initial use case generation (Phase 2). One-shot, no chat. Generates exactly 2 ideas per 6 categories. Returns structured output via forced `tool_use` (`submit_use_cases`), migrated June 2026. max_tokens 2048.
-- **`playbook-generate.js`** -- Initial strategy generation (Phase 3). One-shot, no chat. Generates 2-3 actions per 5 rules. max_tokens 4096. Returns structured output via Anthropic `tool_use` (forced `tool_choice`), so the response is a guaranteed-shape JSON object rather than parsed free text. Has quality check #5 (anti-hallucination).
+- **`primitives-generate.js`** -- Initial use case generation (Phase 2). One-shot, no chat. Generates 12 ideas total, redistributed 1-3 per category by fit to role/helpWith/vision (every category gets at least 1; July 2026, was exactly 2 everywhere). Returns structured output via forced `tool_use` (`submit_use_cases`), migrated June 2026. max_tokens 2048.
+- **`playbook-generate.js`** -- Initial strategy generation (Phase 3). One-shot, no chat. 2 actions per rule, 3 on the 1-2 rules the intake signals prioritize; the model commits via a `prioritizedRules` schema field and the server ENFORCES the counts by trimming (the model overshoots prose count limits, so the trim is the contract; July 2026). max_tokens 4096. Returns structured output via Anthropic `tool_use` (forced `tool_choice`). Has quality check #5 (anti-hallucination).
 - **`synthesis-generate.js`** -- One-page plan synthesis (Phase 4). One-shot, no chat. Returns structured output via Anthropic `tool_use` (forced `tool_choice` on `submit_one_page_plan`). max_tokens 4096.
 - **`chat.js`** -- Ongoing chat for both phases. Two system prompt builders: `buildPrimitivesSystem()` for use cases, `buildPlaybookSystem()` for strategy. max_tokens 500. Returns structured output via forced `tool_use` (`reply_with_ideas` tool with `content` + `ideas` fields), migrated June 2026 from the dual prose + `---IDEAS---` format whose parsing could silently drop the idea cards.
 
-All four endpoints now use forced `tool_use` for structured output. User-provided text (intake fields, idea/action lists) is wrapped in XML-style tags (`<manager_profile>`, `<current_ideas>`, etc.) in every prompt to keep data distinct from instructions.
+All four endpoints now use forced `tool_use` for structured output. User-provided text (intake fields, idea/action lists) is wrapped in XML-style tags (`<manager_profile>`, `<current_ideas>`, etc.) in every prompt to keep data distinct from instructions. All four reject cross-origin POSTs via `lib/apiGuard.js` (ops scripts must send an `Origin` header matching the deployment host).
+
+### Changes made (July 2026, feat/quality-pass)
+
+- **Quotas redistributed within the lighter-output budget** -- primitives: 12 ideas total, 1-3 per category weighted by fit (the exactly-2 quota forced filler in stretch categories); playbook: 2 per rule + 3 on the 1-2 prioritized rules, server-enforced via trim. The prompt's prioritization instructions were previously unexpressible under the fixed schema.
+- **Chat transcript fidelity** -- the model heard every user message twice (client appended it to history AND the server appended `userMessage`; server now dedupes a trailing duplicate for old clients and the client stopped appending). Previously suggested ideas are serialized back into replayed assistant turns as `[Suggested with this reply: ...]` so the model stops re-suggesting them; both prompts instruct against re-suggesting. Starred use cases reach playbook chat as category titles, not raw ids.
+- **Playbook chat prompt ships only the current rule's behavioral science** (`chatHint` in lib/workshop.js) instead of all five rules; per the verbosity learnings, shorter prompt, tighter replies.
+- **Missing intake fields wired in** -- playbook prompt gets responsibilities + helpWith; primitives prompt gets successVision (it usually names the exact use case the manager cares about).
+- **Big Move staleness** -- `contentVersion` bumps on every idea/action/star mutation; `SET_SYNTHESIS` records `synthesisVersion`. A mismatch flips the Review CTA to "Regenerate My Big Move" (with a view-previous link). Was: view-only forever, silently stale after edits.
+- **Phase 3 star gate** -- Review requires 3 starred actions (MIN_STARS_FOR_REVIEW), mirroring Phase 2; synthesis prompt explicitly builds the move around starred items.
+- **Intake gates on substance** -- role needs 4+ words, the three long fields 6+ (matching the existing 0/5/15 hint bands); truthiness-only gating let "x" through to generation.
+- **API origin guard** -- `rejectForeignOrigin` on all four handlers; the deployed endpoints no longer spend the Anthropic key for anyone with the URL. Chat history is also capped server-side (last 40).
+- **Eval suite resynced** -- all configs/snapshots in `evals/` were 1-3 schema generations stale (text-JSON primitives, `---IDEAS---` chat, lede/storylines synthesis). Now mirror the live prompts and tool_use formats. Word-cap assertions carry ~10-20% tolerance because the model estimates rather than counts. Run with `npx promptfoo eval -c <cfg> --grader anthropic:messages:claude-sonnet-4-6 --no-write` (the `--no-write` avoids a promptfoo sqlite serialization crash).
+- **Key learning: schema maxItems + prose count instructions do NOT control counts.** Even with a committed `prioritizedRules` field and an explicit count checklist, the model hands 3 actions to extra rules and writes 26-31 word actions. Deterministic server-side trimming is the only reliable count control (the structured-output sibling of "max_tokens is the only hard brevity control").
 
 ### Changes made (June 2026)
 
