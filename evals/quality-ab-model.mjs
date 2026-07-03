@@ -61,6 +61,20 @@ const PERSONAS = [
     },
   },
   {
+    // Capable manager AND capable team: the case where transformative ideas
+    // can clear the floors, and the persona Yonatan reviews personally.
+    key: "od-director", label: "Director of Organizational Development",
+    vars: {
+      role: "Director of Organizational Development at a 400-person SaaS company, leads 5 L&D partners",
+      responsibilities: "Leadership development programs, manager training curricula, org design projects, engagement surveys, executive coaching",
+      helpWith: "Improve the quality of what I produce, Take on things I can't do today",
+      managerFluency: "Capable -- I use AI tools purposefully for specific tasks and can explain how they help",
+      teamFluency: "Capable -- A few people use AI for specific tasks, but it's individual and inconsistent",
+      failureRisks: "Facilitators fear AI-generated content will make programs feel generic and undercut their craft",
+      successVision: "Program design cycles run twice as fast and managers keep practicing between sessions instead of forgetting everything after the workshop",
+    },
+  },
+  {
     key: "hr-partner", label: "HR Business Partner",
     vars: {
       role: "HR Business Partner supporting a 300-person engineering org at a public SaaS company",
@@ -84,29 +98,34 @@ const USE_CASES_TOOL = {
   description: "Submit the personalized AI use cases. Each field is an array of 1 to 3 idea sentences (12 ideas total across all fields), each 15 to 20 words, each starting with a verb.",
   input_schema: { type: "object", required: CATS, properties: Object.fromEntries(CATS.map((c) => [c, catField()])) },
 };
-const CONVERGE_TOOL = {
-  name: "submit_use_cases",
-  description: "Submit the personalized AI use cases. focusCategories names the 1-2 best-fit categories (3 ideas each) and stretchCategory the biggest stretch (1 idea); every other category gets 2. Each idea is a 15 to 20 word sentence starting with a verb.",
-  input_schema: {
-    type: "object", required: [...CATS, "focusCategories", "stretchCategory"],
-    properties: {
-      ...Object.fromEntries(CATS.map((c) => [c, catField()])),
-      focusCategories: { type: "array", minItems: 1, maxItems: 2, items: { type: "string", enum: CATS }, description: "The 1-2 categories that best fit this manager; each gets 3 ideas" },
-      stretchCategory: { type: "string", enum: CATS, description: "The category that is the biggest stretch for this role; it gets exactly 1 idea" },
-      modalityCoverage: {
-        type: "object",
-        required: ["preloadedAssistant", "critique", "rolePlay", "transcription"],
-        properties: {
-          preloadedAssistant: { type: "string", description: "The final idea (quoted verbatim) where someone chats with an assistant preloaded with the team's context" },
-          critique: { type: "string", description: "The final idea (quoted verbatim) where AI critiques, red-teams, or pressure-tests something" },
-          rolePlay: { type: "string", description: "The final idea (quoted verbatim) where someone rehearses or role-plays with AI" },
-          transcription: { type: "string", description: "The final idea (quoted verbatim) where a meeting or conversation is transcribed and synthesized" },
+// Mirrors api/primitives-generate.js: the preloadedAssistant family is only
+// required when someone (manager or team) could actually set one up.
+function convergeTool(vars) {
+  const canPreload = !/^not yet/i.test(vars.managerFluency || "") || !/^not yet/i.test(vars.teamFluency || "");
+  return {
+    name: "submit_use_cases",
+    description: "Submit the personalized AI use cases. focusCategories names the 1-2 best-fit categories (3 ideas each) and stretchCategory the biggest stretch (1 idea); every other category gets 2. Each idea is a 15 to 20 word sentence starting with a verb.",
+    input_schema: {
+      type: "object", required: [...CATS, "focusCategories", "stretchCategory"],
+      properties: {
+        ...Object.fromEntries(CATS.map((c) => [c, catField()])),
+        focusCategories: { type: "array", minItems: 1, maxItems: 2, items: { type: "string", enum: CATS }, description: "The 1-2 categories that best fit this manager; each gets 3 ideas" },
+        stretchCategory: { type: "string", enum: CATS, description: "The category that is the biggest stretch for this role; it gets exactly 1 idea" },
+        modalityCoverage: {
+          type: "object",
+          required: [...(canPreload ? ["preloadedAssistant"] : []), "critique", "rolePlay", "transcription"],
+          properties: {
+            preloadedAssistant: { type: "string", description: "The final idea (quoted verbatim) where someone chats with an assistant preloaded with the team's context" },
+            critique: { type: "string", description: "The final idea (quoted verbatim) where AI critiques, red-teams, or pressure-tests something" },
+            rolePlay: { type: "string", description: "The final idea (quoted verbatim) where someone rehearses or role-plays with AI" },
+            transcription: { type: "string", description: "The final idea (quoted verbatim) where a meeting or conversation is transcribed and synthesized" },
+          },
+          description: "Proof of modality spread: name the final idea covering each family",
         },
-        description: "Proof of modality spread: name the final idea covering each family",
       },
     },
-  },
-};
+  };
+}
 const CANDIDATES_TOOL = {
   name: "propose_candidates",
   description: "Propose the longlist of candidate AI use cases: 25 to 30 candidates spanning all six categories, both altitudes, and all modalities.",
@@ -177,9 +196,10 @@ async function generatePipeline(vars) {
       return `${i + 1}. [${CATEGORY_TITLES[c.categoryId] || "Uncategorized"}] ${c.text.trim()}${flag}`;
     })
     .join("\n");
+  const tool = convergeTool(vars);
   const raw = await anthropic({
     model: GEN_MODEL, max_tokens: 2048,
-    tools: [CONVERGE_TOOL], tool_choice: { type: "tool", name: CONVERGE_TOOL.name },
+    tools: [tool], tool_choice: { type: "tool", name: tool.name },
     messages: [{ role: "user", content: render(CONVERGE_PROMPT, { ...vars, candidatesBlock, teamFluencyFloor: teamFluencyFloor(vars.teamFluency) }) }],
   });
   // Mirror the server-side commitment trim in api/primitives-generate.js.

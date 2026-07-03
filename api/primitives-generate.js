@@ -77,7 +77,7 @@ ${categoriesBlock}
 
 STEP 1, FLOORS. Drop any candidate that fails one:
 - It serves an outcome this manager owns and can act on within their own authority.
-- Hard constraints in the failure risks are generation constraints. If veterans reject AI-written customer emails, nothing sends AI-written customer emails (drafting that a human rewrites is fine, and say so). If employee data must stay in approved tools, nothing feeds individual employee data to AI.
+- Hard constraints in the failure risks are generation constraints. If veterans reject AI-written customer emails, nothing sends AI-written customer emails (drafting that a human rewrites is fine, and say so). If employee data must stay in approved tools, nothing feeds individual employee data to AI. An idea that brushes a named failure risk has near-zero adoption probability: its sentence must name the safe input form (anonymized, aggregated, no individual records), or drop it. When the named risk is about perception ("anything that smells like AI reading employee data"), mitigation is not enough; keep AI away from that data entirely.
 - Ideas the TEAM runs must be feasible for THIS team: ${teamFluencyFloor(intake.teamFluency)} An idea only the manager runs personally may use the manager's fluency instead, and a tool the manager sets up once that the team then uses by simple chat counts as team-feasible.
 - Downscope, don't discard: when a candidate's value is real but its form exceeds the team's fluency, keep it and rewrite it as the version this team could run today. An automated tracker digest becomes a weekly habit (paste the board into chat, get the digest); a trigger-based alert becomes a standing question the owner asks a preloaded assistant each morning. The feasible version is the idea's first probe; the automated form can come later. Downscope into varied forms, never everything into pasting.
 - It applies AI to the work itself, never to the AI adoption effort (no AI training, rollout plans, prompt libraries).
@@ -94,7 +94,7 @@ STEP 2, RANK the survivors by expected value for THIS manager:
 STEP 3, PORTFOLIO. Structural constraints on the final 12:
 - 12 ideas total, every category gets at least 1. The one or two categories that best fit the role, responsibilities, help-with, and vision get 3 each; the category that is the biggest stretch for this role gets 1; the rest get 2. Commit your choices in the focusCategories and stretchCategory fields; the counts are enforced from that commitment.
 - At least one idea directly serves the work the 90-day vision names.
-- Anti-monoculture minimums for the final 12, all of which run in plain chat when the floor requires it: at least one preloaded-assistant idea, one critique or red-team idea, one role-play or rehearsal idea, and one transcription-or-meeting-synthesis idea. Prove it in the modalityCoverage fields: each names the final idea that covers that family. At most six of the 12 may be paste-an-artifact, get-an-output transformations.
+- Anti-monoculture minimums for the final 12, all of which run in plain chat when the floor requires it: at least one preloaded-assistant idea (skip this family if neither the manager nor the team could set one up yet), one critique or red-team idea, one role-play or rehearsal idea, and one transcription-or-meeting-synthesis idea. Prove it in the modalityCoverage fields: each names the final idea that covers that family. At most six of the 12 may be paste-an-artifact, get-an-output transformations.
 - No near-duplicates. If no surviving candidate fits a category, write one yourself that clears the floors.
 
 STEP 4, REWRITE each selected idea as a single action sentence, 15 to 20 words:
@@ -164,6 +164,9 @@ export default async function handler(req, res) {
   const categoryTitles = Object.fromEntries(
     CATEGORIES.map((c) => [c.id, c.title]),
   );
+  const canPreloadAssistant =
+    !/^not yet/i.test(intake.managerFluency || "") ||
+    !/^not yet/i.test(intake.teamFluency || "");
 
   const candidatesTool = {
     name: "propose_candidates",
@@ -237,8 +240,11 @@ export default async function handler(req, res) {
         },
         modalityCoverage: {
           type: "object",
+          // A preloaded assistant needs someone able to set it up; when both
+          // manager and team are not yet started, forcing that family
+          // produces exactly the floor-violating ideas the floor bans.
           required: [
-            "preloadedAssistant",
+            ...(canPreloadAssistant ? ["preloadedAssistant"] : []),
             "critique",
             "rolePlay",
             "transcription",
