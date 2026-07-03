@@ -24,16 +24,23 @@ STARRED AI USE CASES (the manager chose these as most important):
 {{starredBlock}}
 </starred_use_cases>
 
-IMPORTANT: Reference these specific AI use cases in your actions where natural. For example, if they starred a content creation idea, Rule 3 (Script the Steps) actions should mention that specific use case as a concrete starting point. Make the playbook connect to the AI use cases they actually care about.
+IMPORTANT: Reference these specific AI use cases in your actions where natural. For example, if they starred a content creation idea, Rule 3 (Script the Steps) actions should mention that specific use case as a concrete starting point. Make the playbook connect to the AI use cases they actually care about. If a starred use case is TRANSFORMATIVE (it replaces a deliverable or changes how the work happens), Rule 1 must paint the after-state around it and its first small probe IS the Rule 4 pilot; a transformative star outranks accelerator stars for the pilot slot.
 
 IMPORTANT CONTEXT SIGNALS TO PAY ATTENTION TO:
 - The gap between manager fluency and team fluency is critical. A Transformative manager with a Not Yet Started team needs to slow down and build safety. A Capable manager with a Capable team needs momentum and scripted steps.
 - If the manager is "Not yet started," their own AI learning is action #1 in Rule 1 (Start at the End), they must try it first before asking anyone else to.
 - If the failure risks mention senior people resisting, prioritize Rule 2 (Make It Safe), especially naming what those people personally stand to lose (expertise, identity, standing), not just their stated objection, and creating space for honest conversation.
 - If the failure risks mention previous failed attempts, prioritize Rule 4 (Start Small) and Rule 5 (Make Progress Visible), smaller scope, more communication.
+- If the failure risks name a different loss than fear of failure (judgment atrophy from over-reliance, brand voice, privacy), Rule 2 (Make It Safe) must protect against THAT loss; do not default to the standard fear-of-failure moves.
 - If the 90-day vision is ambitious (e.g., "AI embedded in every workflow"), the plan needs concrete phasing via Rule 3 (Script the Steps) and Rule 4 (Start Small). If it's modest (e.g., "a few experiments"), match that energy.
 - All participants work in SaaS companies. Tailor examples and actions to SaaS contexts, product teams, customer success, engineering, marketing, sales, support.
 - Remember: the team is asking themselves five unspoken questions: (1) From what to what, specifics? (2) What does this mean for my daily work? (3) Will this actually make a difference? (4) How will success be measured? (5) Does my manager really believe in this? Help the manager address these questions through their actions.
+
+MOVE PALETTE (a value preference, never a quota):
+- Five moves: a conversation (1:1, team discussion), a structural default (template, checklist, changed ownership, a step embedded in an existing workflow), a practice field (sandbox, rehearsal, pilot), social proof (a bright spot shared, a demo), or measurement and follow-up (a metric, a rhythm of asking).
+- Pick the move with the highest probability of changing behavior per unit of manager effort. When a default or template can carry the intent, prefer it over an announcement. Reserve meetings for what only conversation can do: naming fears, hearing people.
+- Operationalize the rule's lever, never generic hygiene: Rule 1 makes the destination concrete and felt, Rule 2 names specific losses, Rule 3 changes a default or replicates a bright spot, Rule 4 builds the small-win ladder, Rule 5 builds a visibility rhythm.
+- Fit-check stock moves: never assume an experimenting peer, a willing volunteer, or a venue the intake does not mention; a team that has not started has no bright spot to find yet. Use what is actually there.
 
 TASK:
 First, decide which ONE or TWO rules the context signals above single out for this manager, and commit to them in the prioritizedRules field. Then generate EXACTLY 2 actions for every rule, except the prioritized rule(s) which get EXACTLY 3. That is 11 or 12 actions total, never more. Every action must be:
@@ -44,6 +51,7 @@ First, decide which ONE or TWO rules the context signals above single out for th
 - Sensitive to their failure risks (if people fear job loss, don't generate actions that ignore that fear)
 - Connected across rules where natural (e.g., a small experiment from Rule 4 might connect to making progress visible in Rule 5)
 - Anchor roles: pick the pilot workflow from the starred use cases, then place it deliberately. It belongs in Rule 3 (script it) and Rule 4 (pilot it), and MAY appear once in Rule 5 (share its results). Rule 2 (Make It Safe) actions are about people and fears, never about any workflow's mechanics. Rule 1 names the pilot workflow in at most one action; its other actions anchor to people and outcomes. Hard ceiling: the same workflow appears in at most 4 of the 12 actions. Starred use cases that are not the pilot should still appear somewhere.
+- Transformative star routing: if a starred use case reshapes how the work happens (replaces a deliverable, turns a periodic event into a continuous practice, inverts who does the work), treat it as Rule 1 destination material (the vivid after-state) and make its first small probe the Rule 4 pilot; it outranks accelerator stars for the pilot slot. Do not scatter it across the other rules.
 
 QUALITY CHECK BEFORE RETURNING, VERIFY EACH ACTION:
 1. Could this action belong to anyone, or is it specific to this person? (If anyone's, rewrite it.)
