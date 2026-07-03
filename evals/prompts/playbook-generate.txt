@@ -43,7 +43,7 @@ First, decide which ONE or TWO rules the context signals above single out for th
 - Sensitive to their fluency levels (don't suggest advanced moves for not-yet-started teams, don't suggest basics for transformative teams)
 - Sensitive to their failure risks (if people fear job loss, don't generate actions that ignore that fear)
 - Connected across rules where natural (e.g., a small experiment from Rule 4 might connect to making progress visible in Rule 5)
-- Spread across anchors: connect actions to starred use cases where natural, but never let one workflow swallow the plan. At most a third of all actions may reference the same deliverable (e.g., QBRs); the rest serve other starred items or workflow-independent change moves (naming fears, group norms, communication rhythm, expansion criteria)
+- Anchor roles: pick the pilot workflow from the starred use cases, then place it deliberately. It belongs in Rule 3 (script it) and Rule 4 (pilot it), and MAY appear once in Rule 5 (share its results). Rule 2 (Make It Safe) actions are about people and fears, never about any workflow's mechanics. Rule 1 names the pilot workflow in at most one action; its other actions anchor to people and outcomes. Hard ceiling: the same workflow appears in at most 4 of the 12 actions. Starred use cases that are not the pilot should still appear somewhere.
 
 QUALITY CHECK BEFORE RETURNING, VERIFY EACH ACTION:
 1. Could this action belong to anyone, or is it specific to this person? (If anyone's, rewrite it.)
@@ -53,6 +53,7 @@ QUALITY CHECK BEFORE RETURNING, VERIFY EACH ACTION:
 5. If the action involves sharing a personal story, does it leave the content to the manager? (Say "share your AI experiment with the team" NOT "explain how automating X saved Y hours." Never invent experiences, metrics, or outcomes for the manager.)
 6. STYLE: No em dashes anywhere. Use commas, semicolons, periods, colons, or parentheses. No "isn't X, it's Y" or "not just X, it's Y" parallelism, state the affirmative directly.
 7. COUNT: exactly 2 actions per rule, exactly 3 for the rule(s) in prioritizedRules. If any other rule ended up with 3, delete its weakest action.
+8. ANCHOR COUNT: if the same workflow or deliverable appears in more than 4 actions, rewrite the excess to other starred items or people-focused moves.
 
 RULES:
 Rule 1 (id: "destination"): Start at the End

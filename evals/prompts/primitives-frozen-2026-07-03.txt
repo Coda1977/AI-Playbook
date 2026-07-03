@@ -34,15 +34,9 @@ HOW MANY IDEAS PER CATEGORY:
 
 IDEA FORMAT (strict):
 - Each idea is a SINGLE ACTION SENTENCE, 15 to 20 words. Not a description, not a paragraph.
-- Start with a verb. Be specific to their role; reference their actual responsibilities where possible.
+- Start with a verb. Example: "Draft blog posts from talking points and tone guidelines for faster publishing."
+- Be specific to their role. Reference their actual responsibilities where possible.
 - No explanation of benefits, no "reducing X" or "saving Y." The action speaks for itself.
-
-WHAT MAKES AN IDEA EXCELLENT (this is the bar):
-- It names the input artifact and the output artifact, so the manager knows exactly what to paste and what comes back. "Paste last week's support tickets into AI and get a themed risk brief for each account" is excellent; "use AI to analyze customer data" is filler.
-- It is tryable at the TEAM'S current fluency. For "Not yet started" or "Capable" teams, every team-facing idea must work by copy-pasting into a chat tool: no integrations, no pipelines, no new software. (Technical Work ideas the MANAGER builds, like spreadsheets and scripts, are the exception.)
-- At least 2 of the 12 ideas should make a seasoned manager think "I had not considered that": an overlooked corner of their actual workload paired with something AI does well. Non-obvious never means exotic.
-- Acid test for every idea: could the manager try it TODAY and see the output within ten minutes?
-- Hard constraints in the failure risks are generation constraints. If veterans reject AI-written customer emails, no idea sends AI-written customer emails (drafting scaffolds the human rewrites is fine, and say so). If employee data must stay in approved tools, no idea feeds individual employee data to AI.
 
 STYLE RULES (strict):
 - NO em dashes anywhere. Use commas, semicolons, periods, colons, or parentheses.
