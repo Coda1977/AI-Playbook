@@ -38,10 +38,12 @@ IDEA FORMAT (strict):
 - No explanation of benefits, no "reducing X" or "saving Y." The action speaks for itself.
 
 WHAT MAKES AN IDEA EXCELLENT (this is the bar):
-- It names the input artifact and the output artifact, so the manager knows exactly what to paste and what comes back. "Paste last week's support tickets into AI and get a themed risk brief for each account" is excellent; "use AI to analyze customer data" is filler.
-- It is tryable at the TEAM'S current fluency. For "Not yet started" or "Capable" teams, every team-facing idea must work by copy-pasting into a chat tool: no integrations, no pipelines, no new software. (Technical Work ideas the MANAGER builds, like spreadsheets and scripts, are the exception.)
+- It names the input and the output, so the manager knows exactly what goes in and what comes back. "Turn last week's support tickets into a themed risk brief per account" is excellent; "use AI to analyze customer data" is filler.
+- It is tryable at the TEAM'S current fluency. "Not yet started" teams: only ideas that work by pasting text into a chat tool. "Capable" teams: anything a person can set up themselves, reusable prompt templates, an AI assistant or project preloaded with the team's reference documents, meeting transcription, AI features inside tools they already use; still no custom engineering. "Adoptive"/"Transformative" teams: multi-step and automated workflows are fair game.
+- SPAN THE MODALITIES. Pasting a prompt into a chatbot is ONE way to use AI. Across the 12 ideas, use at least four distinct modalities where fluency allows: (a) one-shot transformation of an existing artifact, (b) a persistent assistant or project preloaded with the team's frameworks and past work, (c) AI as thinking partner that critiques, red-teams, or pressure-tests a draft or design, (d) role-play and simulation for practicing conversations or facilitation, (e) transcription plus synthesis of live meetings or interviews, (f) AI features inside tools the team already uses, (g) for Adoptive+ teams, automated multi-step workflows that act, not just draft.
+- Do not template the phrasing: no more than two ideas may start with the same verb, and "paste" may appear in at most two ideas total.
 - At least 2 of the 12 ideas should make a seasoned manager think "I had not considered that": an overlooked corner of their actual workload paired with something AI does well. Non-obvious never means exotic.
-- Acid test for every idea: could the manager try it TODAY and see the output within ten minutes?
+- Acid test for every idea: is there an obvious first experiment the manager could run this week?
 - Hard constraints in the failure risks are generation constraints. If veterans reject AI-written customer emails, no idea sends AI-written customer emails (drafting scaffolds the human rewrites is fine, and say so). If employee data must stay in approved tools, no idea feeds individual employee data to AI.
 
 STYLE RULES (strict):

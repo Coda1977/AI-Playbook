@@ -194,6 +194,7 @@ tests:
           3. Ideas make sense for their named category (e.g., "Technical Work" ideas involve scripts/spreadsheets/tools).
           4. At least one idea serves the stated 90-day vision (AI-assisted PRs or faster sprint prep).
           Fail if more than 3 of the ideas are generic.
+          Also fail if more than half the ideas are paste-a-prompt transactions; the list should span multiple AI modalities (assistants with loaded context, critique/red-teaming, role-play, transcription, in-tool AI).
 
   - description: "Marketing director — wants creative leverage"
     vars:
@@ -210,6 +211,7 @@ tests:
           Category fidelity: "Strategy & Ideation" ideas should focus on campaign concepts/positioning; "Data & Insights" on customer/funnel analytics.
           Given the manager wants creative leverage (helpWith), Content Creation or Strategy & Ideation should be among the categories with the MOST ideas, and a stretch category like Technical Work should have fewer.
           Fail if ideas are interchangeable with a generic "marketer" template.
+          Also fail if more than half the ideas are paste-a-prompt transactions; the list should span multiple AI modalities.
 
   - description: "Customer Success lead — wants team enablement"
     vars:
@@ -226,5 +228,6 @@ tests:
           The "Research & Synthesis" category should produce ideas about prepping QBRs or summarizing account history, not generic research.
           The team is "Not yet started": ideas must be low-barrier, things a CSM could try this week without special setup.
           Fail if more than 3 ideas are generic across the 6 categories.
+          Also fail if more than half the ideas are paste-a-prompt transactions; the list should span multiple AI modalities.
 
 outputPath: ./output/primitives-generate-results.json
