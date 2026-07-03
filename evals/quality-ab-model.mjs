@@ -1,21 +1,25 @@
-// Idea-quality A/B: does the diverge/converge pipeline beat the single-pass prompt?
-//   Arms: single-pass excellence-bar prompt @ sonnet-4-6 (frozen 2026-07-03)
-//       | diverge+converge pipeline @ sonnet-4-6 (the live endpoint's two calls)
+// Idea-quality A/B: does the current primitives prompt beat its predecessor?
+//   Arms: excellence-bar single-pass @ sonnet-4-6 (frozen 2026-07-03)
+//       | current prompt @ sonnet-4-6 (transformative license + injected floor
+//         + commitment trim + modality coverage, i.e. the live endpoint)
 //   Judge: claude-opus-4-8, absolute 1-5 score + order-swapped pairwise verdicts.
 //   Judged by EXPECTED VALUE for the manager, never by idea size (Yonatan's
 //   2026-07-03 decision: size is a dimension, not a value).
 // Also re-checks playbook workflow dominance under the current playbook prompt.
 //
-// Earlier findings this file already settled (do not relitigate): Sonnet 5 is
-// not the quality lever (3-1-1 vs 4.6, flat absolute scores); the excellence-bar
-// prompt beat the pre-bar baseline 4/5.
+// Findings this file already settled (do not relitigate): Sonnet 5 is not the
+// quality lever (3-1-1 vs 4.6, flat absolute scores); the excellence-bar
+// prompt beat the pre-bar baseline 4/5; the diverge/converge two-call
+// pipeline was parity-at-best vs single-pass (1 win / 9 losses / 3 ties
+// pairwise over 4 runs, absolute tied, no transformative ideas surfacing)
+// and was dropped on 2026-07-03.
 //
 // Run: node evals/quality-ab-model.mjs   (direct Anthropic calls, no dev server needed)
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { teamFluencyFloor, flagsDownscope } from "../lib/workshop.js";
+import { teamFluencyFloor } from "../lib/workshop.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = join(__dirname, "..");
@@ -30,9 +34,8 @@ if (!process.env.ANTHROPIC_API_KEY) { console.error("ANTHROPIC_API_KEY missing")
 
 const JUDGE = "claude-opus-4-8";
 const GEN_MODEL = "claude-sonnet-4-6";
-const SINGLE_PROMPT = readFileSync(join(__dirname, "prompts", "primitives-singlepass-frozen-2026-07-03.txt"), "utf8");
-const DIVERGE_PROMPT = readFileSync(join(__dirname, "prompts", "primitives-diverge.txt"), "utf8");
-const CONVERGE_PROMPT = readFileSync(join(__dirname, "prompts", "primitives-generate.txt"), "utf8");
+const BASE_PROMPT = readFileSync(join(__dirname, "prompts", "primitives-singlepass-frozen-2026-07-03.txt"), "utf8");
+const NEW_PROMPT = readFileSync(join(__dirname, "prompts", "primitives-generate.txt"), "utf8");
 const PLAYBOOK_PROMPT = readFileSync(join(__dirname, "prompts", "playbook-generate.txt"), "utf8");
 
 const PERSONAS = [
@@ -91,8 +94,8 @@ const PERSONAS = [
 const CATS = ["content", "automation", "research", "data", "coding", "ideation"];
 const CATEGORY_TITLES = { content: "Content Creation", automation: "Task Automation", research: "Research & Synthesis", data: "Data & Insights", coding: "Technical Work", ideation: "Strategy & Ideation" };
 const catField = () => ({ type: "array", minItems: 1, maxItems: 3, items: { type: "string" } });
-// Legacy tool for the single-pass arm (faithful to what shipped with the
-// frozen prompt); the pipeline's converge arm adds the commitment fields.
+// Legacy tool for the frozen-baseline arm (faithful to what shipped with the
+// frozen prompt); the current arm adds the commitment fields.
 const USE_CASES_TOOL = {
   name: "submit_use_cases",
   description: "Submit the personalized AI use cases. Each field is an array of 1 to 3 idea sentences (12 ideas total across all fields), each 15 to 20 words, each starting with a verb.",
@@ -100,7 +103,7 @@ const USE_CASES_TOOL = {
 };
 // Mirrors api/primitives-generate.js: the preloadedAssistant family is only
 // required when someone (manager or team) could actually set one up.
-function convergeTool(vars) {
+function currentTool(vars) {
   const canPreload = !/^not yet/i.test(vars.managerFluency || "") || !/^not yet/i.test(vars.teamFluency || "");
   return {
     name: "submit_use_cases",
@@ -126,25 +129,6 @@ function convergeTool(vars) {
     },
   };
 }
-const CANDIDATES_TOOL = {
-  name: "propose_candidates",
-  description: "Propose the longlist of candidate AI use cases: 25 to 30 candidates spanning all six categories, both altitudes, and all modalities.",
-  input_schema: {
-    type: "object", required: ["candidates"],
-    properties: {
-      candidates: {
-        type: "array", minItems: 20, maxItems: 35,
-        items: {
-          type: "object", required: ["text", "categoryId"],
-          properties: {
-            text: { type: "string", description: "One sentence starting with a verb, naming the work it touches, 10 to 20 words" },
-            categoryId: { type: "string", enum: CATS },
-          },
-        },
-      },
-    },
-  },
-};
 const RULE_IDS = ["destination", "safe", "script", "small", "visible"];
 const PLAN_TOOL = {
   name: "submit_change_plan",
@@ -173,43 +157,29 @@ async function anthropic(body) {
   return data.content.find((b) => b.type === "tool_use").input;
 }
 
-async function generateSinglePass(vars) {
+async function generateBase(vars) {
   return anthropic({
     model: GEN_MODEL, max_tokens: 2048,
     tools: [USE_CASES_TOOL], tool_choice: { type: "tool", name: USE_CASES_TOOL.name },
-    messages: [{ role: "user", content: render(SINGLE_PROMPT, vars) }],
+    messages: [{ role: "user", content: render(BASE_PROMPT, vars) }],
   });
 }
 
-// Mirrors api/primitives-generate.js: diverge into a longlist, then converge.
-async function generatePipeline(vars) {
-  const div = await anthropic({
-    model: GEN_MODEL, max_tokens: 2048,
-    tools: [CANDIDATES_TOOL], tool_choice: { type: "tool", name: CANDIDATES_TOOL.name },
-    messages: [{ role: "user", content: render(DIVERGE_PROMPT, vars) }],
-  });
-  const candidates = (Array.isArray(div.candidates) ? div.candidates : [])
-    .filter((c) => c && typeof c.text === "string" && c.text.trim());
-  const candidatesBlock = candidates
-    .map((c, i) => {
-      const flag = flagsDownscope(c.text, vars.teamFluency) ? " (downscope: exceeds team fluency as written)" : "";
-      return `${i + 1}. [${CATEGORY_TITLES[c.categoryId] || "Uncategorized"}] ${c.text.trim()}${flag}`;
-    })
-    .join("\n");
-  const tool = convergeTool(vars);
+// Mirrors api/primitives-generate.js: current prompt with injected fluency
+// floor, then the server-side commitment trim.
+async function generateCurrent(vars) {
+  const tool = currentTool(vars);
   const raw = await anthropic({
     model: GEN_MODEL, max_tokens: 2048,
     tools: [tool], tool_choice: { type: "tool", name: tool.name },
-    messages: [{ role: "user", content: render(CONVERGE_PROMPT, { ...vars, candidatesBlock, teamFluencyFloor: teamFluencyFloor(vars.teamFluency) }) }],
+    messages: [{ role: "user", content: render(NEW_PROMPT, { ...vars, teamFluencyFloor: teamFluencyFloor(vars.teamFluency) }) }],
   });
-  // Mirror the server-side commitment trim in api/primitives-generate.js.
   const focus = Array.isArray(raw.focusCategories) ? raw.focusCategories.slice(0, 2) : [];
   const stretch = typeof raw.stretchCategory === "string" ? raw.stretchCategory : null;
-  const ideas = Object.fromEntries(CATS.map((c) => {
+  return Object.fromEntries(CATS.map((c) => {
     const limit = focus.includes(c) ? 3 : c === stretch ? 1 : 2;
     return [c, asArr(raw[c]).slice(0, limit)];
   }));
-  return { ideas, candidates };
 }
 
 // Tool schemas aren't strictly enforced; coerce whatever came back to string[].
@@ -307,15 +277,14 @@ const summary = [];
 
 for (const p of PERSONAS) {
   console.log(`\n=== ${p.label}`);
-  const [single, pipe] = await Promise.all([
-    generateSinglePass(p.vars),
-    generatePipeline(p.vars),
+  const [base, current] = await Promise.all([
+    generateBase(p.vars),
+    generateCurrent(p.vars),
   ]);
-  const [sSingle, sPipe] = await Promise.all([judgeAbs(p.vars, single), judgeAbs(p.vars, pipe.ideas)]);
-  const pipelineEffect = await judgePair(p.vars, single, pipe.ideas); // first = single-pass, second = pipeline
-  console.log(`  candidates from diverge: ${pipe.candidates.length}`);
-  console.log(`  scores: single-pass ${sSingle.score} | pipeline ${sPipe.score}`);
-  console.log(`  pairwise: ${pipelineEffect.result === "second" ? "PIPELINE wins" : pipelineEffect.result === "first" ? "SINGLE-PASS wins" : "tie"}`);
+  const [sBase, sCurrent] = await Promise.all([judgeAbs(p.vars, base), judgeAbs(p.vars, current)]);
+  const promptEffect = await judgePair(p.vars, base, current); // first = frozen baseline, second = current prompt
+  console.log(`  scores: baseline ${sBase.score} | current ${sCurrent.score}`);
+  console.log(`  pairwise: ${promptEffect.result === "second" ? "CURRENT wins" : promptEffect.result === "first" ? "BASELINE wins" : "tie"}`);
 
   // dominance re-check with the current playbook prompt on the production model
   const planVars = { ...p.vars, starredBlock: starredBlockFor(p.key) };
@@ -334,25 +303,25 @@ for (const p of PERSONAS) {
   });
   console.log(`  dominance (current plan prompt): ${dom.theme} in ${dom.count}/${dom.total}`);
 
-  report.push({ persona: p.label, key: p.key, ideas: { single, pipeline: pipe.ideas }, candidates: pipe.candidates, absolute: { single: sSingle, pipeline: sPipe }, pipelineEffect, plan, dominance: dom });
-  summary.push({ persona: p.label, single: sSingle.score, pipeline: sPipe.score, pipelineEffect: pipelineEffect.result, dominance: `${dom.theme} ${dom.count}/${dom.total}` });
+  report.push({ persona: p.label, key: p.key, ideas: { base, current }, absolute: { base: sBase, current: sCurrent }, promptEffect, plan, dominance: dom });
+  summary.push({ persona: p.label, base: sBase.score, current: sCurrent.score, promptEffect: promptEffect.result, dominance: `${dom.theme} ${dom.count}/${dom.total}` });
 }
 
 writeFileSync(join(OUT, "quality-ab.json"), JSON.stringify(report, null, 2));
 
-const md = [`# Idea Quality A/B: single-pass vs diverge/converge pipeline — ${new Date().toISOString().slice(0, 16)}`, "",
-  "| Persona | single-pass | pipeline | Pairwise | Dominance (plan prompt) |", "|---|---|---|---|---|",
-  ...summary.map((s) => `| ${s.persona} | ${s.single}/5 | ${s.pipeline}/5 | ${s.pipelineEffect === "second" ? "pipeline wins" : s.pipelineEffect === "first" ? "single-pass wins" : "tie"} | ${s.dominance} |`),
+const md = [`# Idea Quality A/B: frozen baseline vs current prompt — ${new Date().toISOString().slice(0, 16)}`, "",
+  "| Persona | baseline | current | Pairwise | Dominance (plan prompt) |", "|---|---|---|---|---|",
+  ...summary.map((s) => `| ${s.persona} | ${s.base}/5 | ${s.current}/5 | ${s.promptEffect === "second" ? "current wins" : s.promptEffect === "first" ? "baseline wins" : "tie"} | ${s.dominance} |`),
 ];
 for (const r of report) {
   md.push("", `## ${r.persona}`, "");
-  for (const [arm, label] of [["single", "Single-pass prompt (frozen 2026-07-03)"], ["pipeline", "Diverge/converge pipeline"]]) {
+  for (const [arm, label] of [["base", "Excellence-bar single-pass (frozen 2026-07-03)"], ["current", "Current prompt (transformative license + structural enforcement)"]]) {
     const a = r.absolute[arm];
     md.push(`### ${label} — ${a.score}/5`, `> ${a.verdict}`, "", listText(r.ideas[arm]).split("\n").map((l) => `- ${l.replace(/^\d+\. /, "")}`).join("\n"), "");
     if (a.standout?.length) md.push(`Standout: ${a.standout.join(" · ")}`, "");
     if (a.weak?.length) md.push(`Weak: ${a.weak.join(" · ")}`, "");
   }
-  md.push(`### Pairwise (single-pass vs pipeline): **${r.pipelineEffect.result === "second" ? "pipeline wins" : r.pipelineEffect.result === "first" ? "single-pass wins" : "tie"}** — ${r.pipelineEffect.detail[0].reason}`);
+  md.push(`### Pairwise (baseline vs current): **${r.promptEffect.result === "second" ? "current wins" : r.promptEffect.result === "first" ? "baseline wins" : "tie"}** — ${r.promptEffect.detail[0].reason}`);
   md.push("", `### Plan dominance under current playbook prompt: ${r.dominance.theme} in ${r.dominance.count}/${r.dominance.total}`);
   for (const rule of RULE_IDS) for (const a of r.plan[rule]) md.push(`- [${rule}] ${a}`);
 }

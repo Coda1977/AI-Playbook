@@ -1,12 +1,13 @@
 # AI Playbook — eval for api/primitives-generate.js
-# The endpoint is a two-call diverge/converge pipeline (July 2026). promptfoo
-# can't chain calls, so this config exercises the CONVERGE stage against
-# frozen diverge longlists in fixtures/ (regenerate them with
-# `node evals/make-candidate-fixtures.mjs` whenever prompts/primitives-diverge.txt
-# changes). The full two-call pipeline is gated by evals/quality-ab-model.mjs.
-# Synced to the prompts in api/primitives-generate.js (feat/quality-pass).
+# Single call with structural enforcement (July 2026): transformative license,
+# injected per-team fluency floor ({{teamFluencyFloor}} var mirrors what the
+# server computes via lib/workshop.js), focus/stretch commitment fields whose
+# counts the server trims (mirrored here by the transform), and forced
+# modalityCoverage. A diverge/converge pipeline was A/B-tested and dropped
+# (parity, slight pairwise losses; see evals/quality-ab-model.mjs).
+# Synced to the prompt in api/primitives-generate.js (feat/quality-pass).
 
-description: AI Playbook — primitives-generate (converge stage of the use-case pipeline)
+description: AI Playbook — primitives-generate (use case ideation via tool_use)
 
 providers:
   - id: anthropic:messages:claude-sonnet-4-6
@@ -80,7 +81,7 @@ providers:
 
 prompts:
   - id: file://prompts/primitives-generate.txt
-    label: primitives-converge
+    label: primitives-generate
 
 defaultTest:
   options:
@@ -215,7 +216,6 @@ tests:
       successVision: "Every engineer uses AI for at least one PR per week, and sprint planning prep takes half the time"
       failureRisks: "Two senior engineers dismiss AI-generated code as sloppy and will quietly disengage if it is pushed on them; quality on the payments module cannot regress"
       teamFluencyFloor: "This team has NOT YET STARTED with AI. Every team-run idea must work by pasting text into a chat tool or chatting with an assistant the manager preloads for them. Anything that integrates with, pulls from, posts to, triggers on, or runs on a schedule inside another system is infeasible for this team, as is anything embedded in an IDE, tracker, or pipeline. \"Task Automation\" ideas for this team are repeated chores moved into a chat routine (same prompt, same input, on a weekly or daily rhythm), described as the person acting, never as a system trigger."
-      candidatesBlock: file://fixtures/candidates-eng-manager.txt
     assert:
       - type: llm-rubric
         value: |
@@ -237,7 +237,6 @@ tests:
       successVision: "Campaign concepts go from brief to first draft in a day instead of a week"
       failureRisks: "Brand voice is sacred here; the CEO killed a past AI experiment after off-brand social copy went out unreviewed"
       teamFluencyFloor: "This team is CAPABLE: anything a person can set up themselves is feasible (reusable prompt templates, an assistant preloaded with reference documents, meeting transcription, AI features already inside their existing tools), but no custom engineering and no new integrations or pipelines. \"Task Automation\" ideas for this team are repeated chores moved into a reusable chat routine or template, described as the person acting, never as a system trigger."
-      candidatesBlock: file://fixtures/candidates-marketing-director.txt
     assert:
       - type: llm-rubric
         value: |
@@ -258,7 +257,6 @@ tests:
       successVision: "Every CSM uses AI to prep QBRs and we cut prep time in half"
       failureRisks: "Two veteran CSMs see AI-written customer emails as impersonal and beneath their craft, and the rest of the team follows their lead"
       teamFluencyFloor: "This team has NOT YET STARTED with AI. Every team-run idea must work by pasting text into a chat tool or chatting with an assistant the manager preloads for them. Anything that integrates with, pulls from, posts to, triggers on, or runs on a schedule inside another system is infeasible for this team, as is anything embedded in an IDE, tracker, or pipeline. \"Task Automation\" ideas for this team are repeated chores moved into a chat routine (same prompt, same input, on a weekly or daily rhythm), described as the person acting, never as a system trigger."
-      candidatesBlock: file://fixtures/candidates-cs-lead.txt
     assert:
       - type: llm-rubric
         value: |

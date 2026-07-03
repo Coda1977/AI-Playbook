@@ -1,4 +1,4 @@
-You are selecting the 12 highest-value AI use cases for one manager from a longlist of candidates.
+You are helping a manager brainstorm how to use AI. Generate the 12 highest-value AI use cases for this specific person.
 
 <manager_profile>
 - Role and team: {{role}}
@@ -10,10 +10,6 @@ You are selecting the 12 highest-value AI use cases for one manager from a longl
 - Failure risks and known resistance: {{failureRisks}}
 </manager_profile>
 
-<candidates>
-{{candidatesBlock}}
-</candidates>
-
 The 6 categories:
 1. Content Creation (Text, presentations, reports, communications)
 2. Task Automation (Repetitive processes, workflows, scheduling)
@@ -22,31 +18,34 @@ The 6 categories:
 5. Technical Work (Spreadsheets, scripts, tools, systems)
 6. Strategy & Ideation (Planning, brainstorming, problem-solving)
 
-STEP 1, FLOORS. Drop any candidate that fails one:
+WHAT COUNTS AS A USE CASE (strict):
+- Every idea serves outcomes this team already owns: their deliverables, analyses, decisions, and communications.
+- NEVER suggest ideas about the AI adoption effort itself: no AI adoption plans, no AI training sessions or exercises, no rollout strategies, no prompt libraries, no "teach the team to use AI" ideas. Driving adoption is a later phase of this workshop.
+- The 90-day vision tells you WHICH work matters most, not what to plan. If the vision says "every CSM uses AI to prep QBRs," the use case is AI-assisted QBR prep, never a plan for getting CSMs to use AI.
+
+THINK AT TWO ALTITUDES (both welcome, no quota either way):
+- ACCELERATORS: the same deliverable, produced better or faster.
+- TRANSFORMATIVE: change how the work itself happens. Replace a deliverable with something better, turn a periodic event into a continuous practice, invert who does the work, or make something possible the team never had capacity for. A transformative idea still fits one 15-20 word sentence, and its sentence must state or imply its first probe, the small experiment that tests it.
+
+FLOORS (every idea must clear all of them):
 - It serves an outcome this manager owns and can act on within their own authority.
 - Hard constraints in the failure risks are generation constraints. If veterans reject AI-written customer emails, nothing sends AI-written customer emails (drafting that a human rewrites is fine, and say so). If employee data must stay in approved tools, nothing feeds individual employee data to AI. An idea that brushes a named failure risk has near-zero adoption probability: its sentence must name the safe input form (anonymized, aggregated, no individual records), or drop it. When the named risk is about perception ("anything that smells like AI reading employee data"), mitigation is not enough; keep AI away from that data entirely.
 - Ideas the TEAM runs must be feasible for THIS team: {{teamFluencyFloor}} An idea only the manager runs personally may use the manager's fluency instead, and a tool the manager sets up once that the team then uses by simple chat counts as team-feasible.
-- Downscope, don't discard: when a candidate's value is real but its form exceeds the team's fluency, keep it and rewrite it as the version this team could run today. An automated tracker digest becomes a weekly habit (paste the board into chat, get the digest); a trigger-based alert becomes a standing question the owner asks a preloaded assistant each morning. The feasible version is the idea's first probe; the automated form can come later. Downscope into varied forms, never everything into pasting.
-- It applies AI to the work itself, never to the AI adoption effort (no AI training, rollout plans, prompt libraries).
+- When the valuable version of an idea exceeds the team's fluency, offer the version this team could run today (an automated digest becomes a weekly paste-into-chat habit); the feasible version is the idea's first probe.
 - This team could absorb it within a quarter.
 
-STEP 2, RANK the survivors by expected value for THIS manager:
-- Recurrence and reach of the pain it relieves: how often the work happens and how many people it touches.
-- Pain intensity: how much the manager or team suffers doing it today.
-- Proximity to the 90-day vision: work the vision names outranks work it does not.
-- Adoption probability: given the team's fluency, the failure risks, and the named resistance, how likely this is to actually get used.
-- Size is NOT a criterion in either direction. A small idea hitting a daily pain can outrank a grand one; a transformative idea that clears the floors can outrank ten accelerators. Let value decide.
-- When two candidates are equal on value, keep the more surprising one.
+CHOOSE BY EXPECTED VALUE for this manager:
+- Recurrence and reach of the pain it relieves; pain intensity; proximity to the 90-day vision; adoption probability given fluency and the named resistance.
+- Size is NOT a criterion in either direction. A small idea hitting a daily pain can outrank a grand one; a transformative idea that clears the floors can outrank ten accelerators. When two ideas are equal on value, keep the more surprising one.
 
-STEP 3, PORTFOLIO. Structural constraints on the final 12:
+PORTFOLIO (structural constraints on the 12):
 - 12 ideas total, every category gets at least 1. The one or two categories that best fit the role, responsibilities, help-with, and vision get 3 each; the category that is the biggest stretch for this role gets 1; the rest get 2. Commit your choices in the focusCategories and stretchCategory fields; the counts are enforced from that commitment.
 - At least one idea directly serves the work the 90-day vision names.
-- Anti-monoculture minimums for the final 12, all of which run in plain chat when the floor requires it: at least one preloaded-assistant idea (skip this family if neither the manager nor the team could set one up yet), one critique or red-team idea, one role-play or rehearsal idea, and one transcription-or-meeting-synthesis idea. Prove it in the modalityCoverage fields: each names the final idea that covers that family. At most six of the 12 may be paste-an-artifact, get-an-output transformations.
-- No near-duplicates. If no surviving candidate fits a category, write one yourself that clears the floors.
+- Anti-monoculture minimums, all of which run in plain chat when the floor requires it: at least one preloaded-assistant idea (skip this family if neither the manager nor the team could set one up yet), one critique or red-team idea, one role-play or rehearsal idea, and one transcription-or-meeting-synthesis idea. Prove it in the modalityCoverage fields: each names the final idea that covers that family. At most six of the 12 may be paste-an-artifact, get-an-output transformations.
+- No near-duplicates.
 
-STEP 4, REWRITE each selected idea as a single action sentence, 15 to 20 words:
-- Start with a verb. Name the input and the output, so the manager knows exactly what goes in and what comes back. "Turn last week's support tickets into a themed risk brief per account" is excellent; "use AI to analyze customer data" is filler.
-- If the idea is transformative (it changes how the work happens), the sentence must state or imply its first probe, the small experiment that tests it.
+IDEA FORMAT (strict):
+- A single action sentence, 15 to 20 words, starting with a verb. Name the input and the output, so the manager knows exactly what goes in and what comes back. "Turn last week's support tickets into a themed risk brief per account" is excellent; "use AI to analyze customer data" is filler.
 - No explanation of benefits, no "reducing X" or "saving Y." The action speaks for itself.
 - For teams below Adoptive fluency, every team-run sentence describes a person doing something in chat (paste, ask, rehearse, query, review); never "auto-generate", "trigger", "sync", "route", or any verb where the system acts on its own.
 - Do not template the phrasing: no more than two ideas may start with the same verb, and "paste" may appear in at most two ideas total.
