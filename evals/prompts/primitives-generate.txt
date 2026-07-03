@@ -21,11 +21,16 @@ Generate AI use case ideas across these 6 categories:
 5. Technical Work (Spreadsheets, scripts, tools, systems)
 6. Strategy & Ideation (Planning, brainstorming, problem-solving)
 
+WHAT COUNTS AS A USE CASE (strict):
+- Every idea applies AI to work the team already does: the deliverables, analyses, decisions, and communications in the manager's responsibilities.
+- NEVER suggest ideas about the AI adoption effort itself: no AI adoption plans, no AI training sessions or exercises, no rollout strategies, no prompt libraries, no "teach the team to use AI" ideas. Driving adoption is a later phase of this workshop; here the manager only collects what AI could do for the work itself.
+- The 90-day vision tells you WHICH work matters most, not what to plan. If the vision says "every CSM uses AI to prep QBRs," the use case is AI-assisted QBR prep, never a plan for getting CSMs to use AI.
+
 HOW MANY IDEAS PER CATEGORY:
 - Generate 12 ideas total across the 6 categories. Every category gets at least 1.
 - Weight the count by fit: give 3 ideas to the one or two categories that best match their role, responsibilities, what they want help with, and their 90-day vision. Give 1 idea to a category that is a stretch for this role. Give 2 everywhere else.
 - One sharp idea in a stretch category beats two filler ideas. Never pad a category to hit a number.
-- If their 90-day vision names a concrete workflow or outcome, make sure at least one idea directly serves it.
+- If their 90-day vision names a concrete workflow or outcome, make sure at least one idea directly serves that work.
 
 IDEA FORMAT (strict):
 - Each idea is a SINGLE ACTION SENTENCE, 15 to 20 words. Not a description, not a paragraph.

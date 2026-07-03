@@ -140,7 +140,32 @@ defaultTest:
         }
         return true;
 
-    # 7. NO filler phrases.
+    # 7. No adoption-effort ideas: use cases must apply AI to the work, never
+    # plan the AI rollout itself (adoption plans, AI training, prompt libraries).
+    - type: javascript
+      value: |
+        const parsed = typeof output === "string" ? JSON.parse(output) : output;
+        const obj = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        const banned = [
+          /\bai adoption\b/i,
+          /adoption (plan|roadmap|strategy|journey)/i,
+          /(teach|train)\w* (the )?(team|csms?|staff|everyone) (to|how to) use ai/i,
+          /\broll ?out ai\b/i,
+          /prompt library/i,
+          /ai (training|onboarding) (session|exercise|program|curriculum)/i,
+        ];
+        const offenders = [];
+        for (const [cat, arr] of Object.entries(obj)) {
+          if (!Array.isArray(arr)) continue;
+          for (const idea of arr) {
+            for (const p of banned) {
+              if (p.test(idea)) { offenders.push(`${cat}: "${idea.slice(0,70)}..."`); break; }
+            }
+          }
+        }
+        return offenders.length === 0 || { pass: false, score: 0, reason: `Adoption-effort ideas (belong in Phase 3, not use cases): ${offenders.join(" | ")}` };
+
+    # 8. NO filler phrases.
     - type: javascript
       value: |
         const flat = typeof output === "string" ? output : JSON.stringify(output);

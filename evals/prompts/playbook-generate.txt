@@ -43,6 +43,7 @@ First, decide which ONE or TWO rules the context signals above single out for th
 - Sensitive to their fluency levels (don't suggest advanced moves for not-yet-started teams, don't suggest basics for transformative teams)
 - Sensitive to their failure risks (if people fear job loss, don't generate actions that ignore that fear)
 - Connected across rules where natural (e.g., a small experiment from Rule 4 might connect to making progress visible in Rule 5)
+- Spread across anchors: connect actions to starred use cases where natural, but never let one workflow swallow the plan. At most a third of all actions may reference the same deliverable (e.g., QBRs); the rest serve other starred items or workflow-independent change moves (naming fears, group norms, communication rhythm, expansion criteria)
 
 QUALITY CHECK BEFORE RETURNING, VERIFY EACH ACTION:
 1. Could this action belong to anyone, or is it specific to this person? (If anyone's, rewrite it.)

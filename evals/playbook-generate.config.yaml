@@ -197,7 +197,8 @@ tests:
           1. Reference the starred use cases (AI call summaries and/or QBR drafts) concretely somewhere in the plan, as actual starting points rather than vague mentions.
           2. Address the previous failed rollout via Rule 4 (Start Small) — pilot with 1-2 willing CSMs, NOT mandate to all 15.
           3. Rule 5 (visible) actions commit to a recurring communication rhythm (not a one-off announcement), given the past failure.
-          Fail if starred items aren't referenced anywhere OR the plan ignores the previous-failure context.
+          4. Anchor variety: no single deliverable (e.g., QBRs or call summaries) may be the subject of more than a third of the actions; most actions should address the human side of change or other workflows.
+          Fail if starred items aren't referenced anywhere, OR the plan ignores the previous-failure context, OR one workflow dominates most of the actions.
 
   - description: "Transformative manager + Capable team, ambitious vision"
     vars:
