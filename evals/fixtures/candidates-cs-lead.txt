@@ -1,0 +1,30 @@
+1. [Content Creation] Draft personalized QBR narrative decks from CRM data, usage stats, and account history automatically. (downscope: exceeds team fluency as written)
+2. [Content Creation] Generate tailored renewal proposal emails using account health scores and contract details.
+3. [Content Creation] Produce first-draft onboarding playbooks customized to each customer's product tier and use case.
+4. [Content Creation] Synthesize escalation case notes into a structured executive summary for leadership review.
+5. [Content Creation] Convert raw QBR meeting transcripts into polished follow-up recaps with action items and owners.
+6. [Task Automation] Continuously monitor customer health signals and trigger escalation alerts before issues surface. (downscope: exceeds team fluency as written)
+7. [Task Automation] Auto-populate QBR slide templates by pulling live data from CRM, product analytics, and support tickets. (downscope: exceeds team fluency as written)
+8. [Task Automation] Route and prioritize incoming customer escalations to the right CSM based on account tier and issue type. (downscope: exceeds team fluency as written)
+9. [Task Automation] Schedule and sequence onboarding check-in tasks for each CSM based on customer go-live dates. (downscope: exceeds team fluency as written)
+10. [Task Automation] Scan every renewal in the pipeline weekly and flag accounts showing churn-risk behavioral patterns. (downscope: exceeds team fluency as written)
+11. [Research & Synthesis] Summarize a customer's entire support ticket history and NPS comments before each QBR preparation session.
+12. [Research & Synthesis] Analyze competitor positioning documents to help CSMs respond to churn threats during renewals.
+13. [Research & Synthesis] Digest industry news and surface relevant trends a CSM can reference in customer business reviews.
+14. [Research & Synthesis] Cross-reference a churned customer's history to identify failure patterns informing future playbooks.
+15. [Research & Synthesis] Synthesize qualitative feedback from multiple QBR transcripts to surface recurring customer themes.
+16. [Data & Insights] Build a living renewal forecast model that updates churn probability as new health signals arrive.
+17. [Data & Insights] Cluster the customer portfolio by health, usage, and growth potential to prioritize CSM attention.
+18. [Data & Insights] Detect leading indicators of expansion revenue by analyzing feature adoption patterns across accounts.
+19. [Data & Insights] Visualize CSM workload distribution across the team to surface capacity imbalances in real time.
+20. [Data & Insights] Score every onboarding in progress against milestone benchmarks and flag those falling behind pace.
+21. [Technical Work] Build a script that auto-generates a per-account health scorecard from multiple data source exports. (downscope: exceeds team fluency as written)
+22. [Technical Work] Create a reusable QBR data-prep spreadsheet that pulls and formats CRM exports with one click.
+23. [Technical Work] Write an integration that pushes Gainsight or Salesforce health scores into the team's Slack workspace. (downscope: exceeds team fluency as written)
+24. [Strategy & Ideation] Simulate a difficult renewal negotiation so CSMs can practice objection handling before the real call.
+25. [Strategy & Ideation] Red-team a CSM's proposed escalation response plan to find gaps before the customer call.
+26. [Strategy & Ideation] Pressure-test the current onboarding playbook against recent churn cases to find structural blind spots.
+27. [Strategy & Ideation] Brainstorm expansion talking points for each account tier based on product roadmap and usage gaps.
+28. [Strategy & Ideation] Role-play a QBR facilitation with an AI acting as a skeptical customer executive to sharpen delivery.
+29. [Strategy & Ideation] Design a continuous customer health rhythm that replaces the quarterly check-in with ongoing micro-touchpoints.
+30. [Data & Insights] Transcribe and analyze every QBR call to benchmark which CSM talk tracks correlate with renewal success. (downscope: exceeds team fluency as written)

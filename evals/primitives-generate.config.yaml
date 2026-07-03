@@ -1,8 +1,12 @@
 # AI Playbook — eval for api/primitives-generate.js
-# Forced tool_use. 12 ideas total, redistributed 1-3 per category by fit.
-# Synced to the prompt in api/primitives-generate.js (feat/quality-pass).
+# The endpoint is a two-call diverge/converge pipeline (July 2026). promptfoo
+# can't chain calls, so this config exercises the CONVERGE stage against
+# frozen diverge longlists in fixtures/ (regenerate them with
+# `node evals/make-candidate-fixtures.mjs` whenever prompts/primitives-diverge.txt
+# changes). The full two-call pipeline is gated by evals/quality-ab-model.mjs.
+# Synced to the prompts in api/primitives-generate.js (feat/quality-pass).
 
-description: AI Playbook — primitives-generate (use case ideation via tool_use)
+description: AI Playbook — primitives-generate (converge stage of the use-case pipeline)
 
 providers:
   - id: anthropic:messages:claude-sonnet-4-6
@@ -10,11 +14,30 @@ providers:
       max_tokens: 2048
       tools:
         - name: submit_use_cases
-          description: "Submit the personalized AI use cases. Each field is an array of 1 to 3 idea sentences (12 ideas total across all fields), each 15 to 20 words, each starting with a verb."
+          description: "Submit the personalized AI use cases. focusCategories names the 1-2 best-fit categories (3 ideas each) and stretchCategory the biggest stretch (1 idea); every other category gets 2. Each idea is a 15 to 20 word sentence starting with a verb."
           input_schema:
             type: object
-            required: ["content", "automation", "research", "data", "coding", "ideation"]
+            required: ["content", "automation", "research", "data", "coding", "ideation", "focusCategories", "stretchCategory"]
             properties:
+              focusCategories:
+                type: array
+                minItems: 1
+                maxItems: 2
+                items: { type: string, enum: ["content", "automation", "research", "data", "coding", "ideation"] }
+                description: "The 1-2 categories that best fit this manager; each gets 3 ideas"
+              stretchCategory:
+                type: string
+                enum: ["content", "automation", "research", "data", "coding", "ideation"]
+                description: "The category that is the biggest stretch for this role; it gets exactly 1 idea"
+              modalityCoverage:
+                type: object
+                required: ["preloadedAssistant", "critique", "rolePlay", "transcription"]
+                properties:
+                  preloadedAssistant: { type: string, description: "The final idea (quoted verbatim) where someone chats with an assistant preloaded with the team's context" }
+                  critique: { type: string, description: "The final idea (quoted verbatim) where AI critiques, red-teams, or pressure-tests something" }
+                  rolePlay: { type: string, description: "The final idea (quoted verbatim) where someone rehearses or role-plays with AI" }
+                  transcription: { type: string, description: "The final idea (quoted verbatim) where a meeting or conversation is transcribed and synthesized" }
+                description: "Proof of modality spread: name the final idea covering each family"
               content:
                 type: array
                 minItems: 1
@@ -57,9 +80,13 @@ providers:
 
 prompts:
   - id: file://prompts/primitives-generate.txt
-    label: primitives-generate
+    label: primitives-converge
 
 defaultTest:
+  options:
+    # Mirrors the server-side commitment trim in api/primitives-generate.js so
+    # assertions run on what the client actually receives.
+    transform: file://transforms/enforce-primitives-shape.js
   assert:
     # 1. Tool output parses; all 6 categories present with 1-3 ideas; 10-14 total.
     - type: javascript
@@ -122,7 +149,8 @@ defaultTest:
         }
         return offenders.length === 0 || { pass: false, score: 0, reason: `Ideas not starting with a capitalized verb: ${offenders.join(" | ")}` };
 
-    # 5. NO em dashes anywhere (project style rule).
+    # 5. NO em dashes anywhere (project style rule). The fixtures deliberately
+    # contain some; converge must rewrite them out.
     - type: javascript
       value: |
         const flat = typeof output === "string" ? output : JSON.stringify(output);
@@ -185,16 +213,19 @@ tests:
       managerFluency: "Capable"
       teamFluency: "Not yet started"
       successVision: "Every engineer uses AI for at least one PR per week, and sprint planning prep takes half the time"
+      failureRisks: "Two senior engineers dismiss AI-generated code as sloppy and will quietly disengage if it is pushed on them; quality on the payments module cannot regress"
+      teamFluencyFloor: "This team has NOT YET STARTED with AI. Every team-run idea must work by pasting text into a chat tool or chatting with an assistant the manager preloads for them. Anything that integrates with, pulls from, posts to, triggers on, or runs on a schedule inside another system is infeasible for this team, as is anything embedded in an IDE, tracker, or pipeline. \"Task Automation\" ideas for this team are repeated chores moved into a chat routine (same prompt, same input, on a weekly or daily rhythm), described as the person acting, never as a system trigger."
+      candidatesBlock: file://fixtures/candidates-eng-manager.txt
     assert:
       - type: llm-rubric
         value: |
-          The output is ~12 AI use case ideas across 6 categories for an Engineering Manager. Check:
+          The output is ~12 AI use case ideas across 6 categories for an Engineering Manager, selected from a longer candidate list.
           1. Ideas reference an Engineering Manager's specific responsibilities (sprint planning, 1:1s, OKRs, code review, hiring), not generic "use AI to help with emails."
-          2. Ideas are immediately actionable (a concrete workflow), not aspirational.
-          3. Ideas make sense for their named category (e.g., "Technical Work" ideas involve scripts/spreadsheets/tools).
-          4. At least one idea serves the stated 90-day vision (AI-assisted PRs or faster sprint prep).
-          Fail if more than 3 of the ideas are generic.
-          Also fail if more than half the ideas are paste-a-prompt transactions; the list should span multiple AI modalities (assistants with loaded context, critique/red-teaming, role-play, transcription, in-tool AI).
+          2. The team is "Not yet started": every idea aimed at the team must work by pasting text into a chat tool or chatting with an assistant the manager set up for them; no integrations, pipelines, or custom automation (ideas the manager runs personally are exempt and may use the manager's fluency). A recurring habit where a PERSON pastes something into chat on a rhythm (each Monday, weekly) is a valid low-barrier idea, not an automated pipeline.
+          3. At least one idea serves the stated 90-day vision (AI-assisted PRs or faster sprint prep).
+          4. Ideas respect the failure risk: nothing forces AI-generated code on the skeptical senior engineers as a mandate.
+          Judge value, not size: do not reward or penalize an idea for being ambitious or modest in itself.
+          Fail if more than 3 of the ideas are generic, or if fewer than four distinct AI modality families appear across the list (one-shot transformation, preloaded assistant, critique/red-team, role-play/simulation, transcription plus synthesis, AI inside existing tools, automated workflows).
 
   - description: "Marketing director — wants creative leverage"
     vars:
@@ -204,14 +235,18 @@ tests:
       managerFluency: "Adoptive"
       teamFluency: "Capable"
       successVision: "Campaign concepts go from brief to first draft in a day instead of a week"
+      failureRisks: "Brand voice is sacred here; the CEO killed a past AI experiment after off-brand social copy went out unreviewed"
+      teamFluencyFloor: "This team is CAPABLE: anything a person can set up themselves is feasible (reusable prompt templates, an assistant preloaded with reference documents, meeting transcription, AI features already inside their existing tools), but no custom engineering and no new integrations or pipelines. \"Task Automation\" ideas for this team are repeated chores moved into a reusable chat routine or template, described as the person acting, never as a system trigger."
+      candidatesBlock: file://fixtures/candidates-marketing-director.txt
     assert:
       - type: llm-rubric
         value: |
           Ideas must reference marketing-specific responsibilities (demand gen, content calendar, paid acquisition, events, website).
           Category fidelity: "Strategy & Ideation" ideas should focus on campaign concepts/positioning; "Data & Insights" on customer/funnel analytics.
           Given the manager wants creative leverage (helpWith), Content Creation or Strategy & Ideation should be among the categories with the MOST ideas, and a stretch category like Technical Work should have fewer.
-          Fail if ideas are interchangeable with a generic "marketer" template.
-          Also fail if more than half the ideas are paste-a-prompt transactions; the list should span multiple AI modalities.
+          Ideas respect the failure risk: no AI copy goes out unreviewed; drafts a human edits are fine.
+          Judge value, not size: do not reward or penalize an idea for being ambitious or modest in itself.
+          Fail if ideas are interchangeable with a generic "marketer" template, or if fewer than four distinct AI modality families appear across the list (one-shot transformation, preloaded assistant, critique/red-team, role-play/simulation, transcription plus synthesis, AI inside existing tools, automated workflows).
 
   - description: "Customer Success lead — wants team enablement"
     vars:
@@ -221,13 +256,17 @@ tests:
       managerFluency: "Capable"
       teamFluency: "Not yet started"
       successVision: "Every CSM uses AI to prep QBRs and we cut prep time in half"
+      failureRisks: "Two veteran CSMs see AI-written customer emails as impersonal and beneath their craft, and the rest of the team follows their lead"
+      teamFluencyFloor: "This team has NOT YET STARTED with AI. Every team-run idea must work by pasting text into a chat tool or chatting with an assistant the manager preloads for them. Anything that integrates with, pulls from, posts to, triggers on, or runs on a schedule inside another system is infeasible for this team, as is anything embedded in an IDE, tracker, or pipeline. \"Task Automation\" ideas for this team are repeated chores moved into a chat routine (same prompt, same input, on a weekly or daily rhythm), described as the person acting, never as a system trigger."
+      candidatesBlock: file://fixtures/candidates-cs-lead.txt
     assert:
       - type: llm-rubric
         value: |
           Ideas must reference CS-specific work (health monitoring, QBRs, renewals, onboarding, escalations).
           The "Research & Synthesis" category should produce ideas about prepping QBRs or summarizing account history, not generic research.
-          The team is "Not yet started": ideas must be low-barrier, things a CSM could try this week without special setup.
-          Fail if more than 3 ideas are generic across the 6 categories.
-          Also fail if more than half the ideas are paste-a-prompt transactions; the list should span multiple AI modalities.
+          The team is "Not yet started": ideas aimed at the team must be low-barrier, things a CSM could try this week by pasting text into a chat tool or by chatting with an assistant the manager set up for them; no integrations, triggers, or automated pipelines (ideas the manager runs personally are exempt). A recurring habit where a PERSON pastes something into chat on a rhythm (each Monday, weekly) is a valid low-barrier idea, not an automated pipeline.
+          Ideas respect the failure risk: nothing sends AI-written customer emails; drafting that a human rewrites is acceptable only if the idea says so.
+          Judge value, not size: do not reward or penalize an idea for being ambitious or modest in itself.
+          Fail if more than 3 ideas are generic, or if fewer than four distinct AI modality families appear across the list (one-shot transformation, preloaded assistant, critique/red-team, role-play/simulation, transcription plus synthesis, AI inside existing tools, automated workflows).
 
 outputPath: ./output/primitives-generate-results.json

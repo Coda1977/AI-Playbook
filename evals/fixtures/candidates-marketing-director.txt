@@ -1,0 +1,30 @@
+1. [Strategy & Ideation] Draft full campaign concepts from a creative brief in a single working session.
+2. [Content Creation] Maintain a persistent brand-voice assistant preloaded with tone guides and past copy.
+3. [Content Creation] Generate first-draft landing page copy, headlines, and CTAs from a campaign brief.
+4. [Task Automation] Repurpose one long-form blog post into emails, social posts, and ad copy automatically. (downscope: exceeds team fluency as written)
+5. [Research & Synthesis] Synthesize win/loss interview transcripts into recurring customer-insight reports for the team.
+6. [Strategy & Ideation] Simulate a skeptical CFO prospect to pressure-test messaging before a campaign launches.
+7. [Task Automation] Automatically tag and score inbound leads by ICP fit using CRM and intent data signals. (downscope: exceeds team fluency as written)
+8. [Data & Insights] Analyze paid acquisition performance across channels and surface optimization recommendations weekly.
+9. [Data & Insights] Build a live content-calendar dashboard that flags coverage gaps across topics and buyer stages. (downscope: exceeds team fluency as written)
+10. [Strategy & Ideation] Red-team a campaign concept by generating the strongest objections a target buyer would raise.
+11. [Research & Synthesis] Transcribe and synthesize every customer discovery call into a shared insight repository automatically. (downscope: exceeds team fluency as written)
+12. [Content Creation] Generate event session abstracts, speaker bios, and promotional copy from a single event brief.
+13. [Research & Synthesis] Monitor competitor messaging and websites weekly, delivering a summarized delta report.
+14. [Content Creation] Write and A/B-test subject-line variants for nurture emails using historical open-rate patterns.
+15. [Task Automation] Automate post-event follow-up sequences personalized by attendee session and engagement data. (downscope: exceeds team fluency as written)
+16. [Technical Work] Build a script that pulls paid-channel spend and CPL data into a single weekly reporting sheet.
+17. [Data & Insights] Continuously map customer language from reviews and calls onto current website and ad copy.
+18. [Content Creation] Draft a quarterly marketing board deck narrative from campaign metrics and strategic context.
+19. [Research & Synthesis] Create an always-on persona simulator trained on customer interview data for rapid message testing.
+20. [Strategy & Ideation] Generate a 90-day demand-gen calendar with channel mix and theme rationale from strategic goals.
+21. [Task Automation] Automate brand-consistency checks on every new asset before it enters the approval queue. (downscope: exceeds team fluency as written)
+22. [Data & Insights] Cluster and rank website visitor behavior patterns to reveal underperforming conversion paths.
+23. [Research & Synthesis] Produce a competitive-positioning matrix updated automatically as new competitor intel arrives. (downscope: exceeds team fluency as written)
+24. [Technical Work] Build a webhook-driven workflow that routes new form fills to the right nurture track instantly. (downscope: exceeds team fluency as written)
+25. [Strategy & Ideation] Practice delivering a new product narrative to a direct report playing a demanding journalist.
+26. [Research & Synthesis] Summarize third-party fintech industry reports into a two-page brief tailored to the team's ICP.
+27. [Task Automation] Auto-generate paid ad creative variations from a master campaign brief for rapid multivariate testing. (downscope: exceeds team fluency as written)
+28. [Data & Insights] Identify budget reallocation opportunities by modeling spend-to-pipeline attribution across campaigns. (downscope: exceeds team fluency as written)
+29. [Technical Work] Create a self-updating SEO content gap tracker that maps keyword opportunities to draft briefs.
+30. [Strategy & Ideation] Facilitate async team brainstorms by collecting ideas, clustering themes, and surfacing top concepts overnight.

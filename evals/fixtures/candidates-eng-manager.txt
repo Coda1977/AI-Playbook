@@ -1,0 +1,30 @@
+1. [Content Creation] Draft personalized 1:1 agendas by synthesizing recent PR activity, blockers, and prior meeting notes.
+2. [Content Creation] Generate first-draft quarterly OKRs from team roadmap, past OKR scores, and strategic priorities.
+3. [Content Creation] Write structured onboarding docs for new engineers by ingesting existing runbooks and codebase READMEs.
+4. [Task Automation] Produce weekly team status updates automatically from closed tickets, merged PRs, and incident logs. (downscope: exceeds team fluency as written)
+5. [Task Automation] Auto-triage and label incoming bug reports by severity and owning team using historical ticket patterns. (downscope: exceeds team fluency as written)
+6. [Task Automation] Schedule and pre-populate sprint ceremonies by pulling velocity data and team calendar availability continuously. (downscope: exceeds team fluency as written)
+7. [Research & Synthesis] Transcribe and summarize every 1:1 into action items, mood signals, and themes across the quarter.
+8. [Research & Synthesis] Synthesize competitor changelog and release notes weekly to surface relevant feature threats for planning.
+9. [Research & Synthesis] Analyze candidate resumes and map competencies against a scorecard before hiring-committee review.
+10. [Data & Insights] Mine sprint retrospective transcripts across quarters to identify recurring friction themes and unresolved blockers.
+11. [Data & Insights] Visualize individual engineer PR cycle-time trends to surface coaching opportunities before they become problems.
+12. [Data & Insights] Detect sprint scope-creep patterns by comparing initial commitment to mid-sprint ticket additions over time.
+13. [Data & Insights] Track OKR confidence scores weekly and flag at-risk key results before the quarter end crunch.
+14. [Technical Work] Generate boilerplate unit and integration test stubs from PR diffs to accelerate engineer review cycles. (downscope: exceeds team fluency as written)
+15. [Technical Work] Run an AI code-review pass on every PR flagging style, security, and logic issues before human review.
+16. [Technical Work] Auto-generate architecture decision record drafts from design-discussion threads in Slack or GitHub. (downscope: exceeds team fluency as written)
+17. [Technical Work] Build a persistent team assistant preloaded with sprint goals, runbooks, and coding standards for instant answers.
+18. [Strategy & Ideation] Red-team a proposed system design by simulating failure modes, scaling limits, and edge-case scenarios.
+19. [Strategy & Ideation] Pressure-test quarterly OKR drafts by critiquing ambiguity, measurability, and alignment to company strategy.
+20. [Strategy & Ideation] Simulate a difficult performance conversation so the manager can rehearse framing before the real 1:1.
+21. [Strategy & Ideation] Brainstorm sprint theme options each quarter by ingesting backlog debt, roadmap gaps, and team energy signals.
+22. [Strategy & Ideation] Continuously refine the hiring rubric by comparing interview feedback patterns to eventual engineer performance data.
+23. [Task Automation] Auto-cluster and prioritize the backlog each sprint by impact, effort estimates, and current OKR alignment. (downscope: exceeds team fluency as written)
+24. [Research & Synthesis] Transcribe live sprint planning meetings and instantly output a structured story-point commitment summary.
+25. [Research & Synthesis] Summarize lengthy technical RFCs into a one-page brief for the manager to review before design reviews.
+26. [Content Creation] Generate a candidate interview debrief template pre-filled with each interviewer's notes and scoring gaps.
+27. [Data & Insights] Identify knowledge-silo risk by mapping which engineers are sole reviewers on critical code modules.
+28. [Task Automation] Create an automated incident post-mortem draft within minutes of resolution using runbook and alert data. (downscope: exceeds team fluency as written)
+29. [Strategy & Ideation] Role-play a sprint retrospective facilitation session to help the manager test new formats before the real meeting.
+30. [Technical Work] Surface AI-assisted inline suggestions inside the team's IDE so every engineer gets real-time code guidance. (downscope: exceeds team fluency as written)

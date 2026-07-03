@@ -1,13 +1,21 @@
-// Idea-quality A/B: does the upgraded prompt help, and does Sonnet 5 help?
-//   Arms: base prompt @ sonnet-4-6  |  new prompt @ sonnet-4-6  |  new prompt @ sonnet-5
+// Idea-quality A/B: does the diverge/converge pipeline beat the single-pass prompt?
+//   Arms: single-pass excellence-bar prompt @ sonnet-4-6 (frozen 2026-07-03)
+//       | diverge+converge pipeline @ sonnet-4-6 (the live endpoint's two calls)
 //   Judge: claude-opus-4-8, absolute 1-5 score + order-swapped pairwise verdicts.
-// Also re-checks playbook workflow dominance under the new anchor-roles prompt.
+//   Judged by EXPECTED VALUE for the manager, never by idea size (Yonatan's
+//   2026-07-03 decision: size is a dimension, not a value).
+// Also re-checks playbook workflow dominance under the current playbook prompt.
+//
+// Earlier findings this file already settled (do not relitigate): Sonnet 5 is
+// not the quality lever (3-1-1 vs 4.6, flat absolute scores); the excellence-bar
+// prompt beat the pre-bar baseline 4/5.
 //
 // Run: node evals/quality-ab-model.mjs   (direct Anthropic calls, no dev server needed)
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { teamFluencyFloor, flagsDownscope } from "../lib/workshop.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = join(__dirname, "..");
@@ -21,8 +29,10 @@ if (!process.env.ANTHROPIC_API_KEY && existsSync(join(APP_ROOT, ".env"))) {
 if (!process.env.ANTHROPIC_API_KEY) { console.error("ANTHROPIC_API_KEY missing"); process.exit(1); }
 
 const JUDGE = "claude-opus-4-8";
-const BASE_PROMPT = readFileSync(join(__dirname, "prompts", "primitives-frozen-2026-07-03.txt"), "utf8");
-const NEW_PROMPT = readFileSync(join(__dirname, "prompts", "primitives-generate.txt"), "utf8");
+const GEN_MODEL = "claude-sonnet-4-6";
+const SINGLE_PROMPT = readFileSync(join(__dirname, "prompts", "primitives-singlepass-frozen-2026-07-03.txt"), "utf8");
+const DIVERGE_PROMPT = readFileSync(join(__dirname, "prompts", "primitives-diverge.txt"), "utf8");
+const CONVERGE_PROMPT = readFileSync(join(__dirname, "prompts", "primitives-generate.txt"), "utf8");
 const PLAYBOOK_PROMPT = readFileSync(join(__dirname, "prompts", "playbook-generate.txt"), "utf8");
 
 const PERSONAS = [
@@ -67,10 +77,54 @@ const PERSONAS = [
 const CATS = ["content", "automation", "research", "data", "coding", "ideation"];
 const CATEGORY_TITLES = { content: "Content Creation", automation: "Task Automation", research: "Research & Synthesis", data: "Data & Insights", coding: "Technical Work", ideation: "Strategy & Ideation" };
 const catField = () => ({ type: "array", minItems: 1, maxItems: 3, items: { type: "string" } });
+// Legacy tool for the single-pass arm (faithful to what shipped with the
+// frozen prompt); the pipeline's converge arm adds the commitment fields.
 const USE_CASES_TOOL = {
   name: "submit_use_cases",
   description: "Submit the personalized AI use cases. Each field is an array of 1 to 3 idea sentences (12 ideas total across all fields), each 15 to 20 words, each starting with a verb.",
   input_schema: { type: "object", required: CATS, properties: Object.fromEntries(CATS.map((c) => [c, catField()])) },
+};
+const CONVERGE_TOOL = {
+  name: "submit_use_cases",
+  description: "Submit the personalized AI use cases. focusCategories names the 1-2 best-fit categories (3 ideas each) and stretchCategory the biggest stretch (1 idea); every other category gets 2. Each idea is a 15 to 20 word sentence starting with a verb.",
+  input_schema: {
+    type: "object", required: [...CATS, "focusCategories", "stretchCategory"],
+    properties: {
+      ...Object.fromEntries(CATS.map((c) => [c, catField()])),
+      focusCategories: { type: "array", minItems: 1, maxItems: 2, items: { type: "string", enum: CATS }, description: "The 1-2 categories that best fit this manager; each gets 3 ideas" },
+      stretchCategory: { type: "string", enum: CATS, description: "The category that is the biggest stretch for this role; it gets exactly 1 idea" },
+      modalityCoverage: {
+        type: "object",
+        required: ["preloadedAssistant", "critique", "rolePlay", "transcription"],
+        properties: {
+          preloadedAssistant: { type: "string", description: "The final idea (quoted verbatim) where someone chats with an assistant preloaded with the team's context" },
+          critique: { type: "string", description: "The final idea (quoted verbatim) where AI critiques, red-teams, or pressure-tests something" },
+          rolePlay: { type: "string", description: "The final idea (quoted verbatim) where someone rehearses or role-plays with AI" },
+          transcription: { type: "string", description: "The final idea (quoted verbatim) where a meeting or conversation is transcribed and synthesized" },
+        },
+        description: "Proof of modality spread: name the final idea covering each family",
+      },
+    },
+  },
+};
+const CANDIDATES_TOOL = {
+  name: "propose_candidates",
+  description: "Propose the longlist of candidate AI use cases: 25 to 30 candidates spanning all six categories, both altitudes, and all modalities.",
+  input_schema: {
+    type: "object", required: ["candidates"],
+    properties: {
+      candidates: {
+        type: "array", minItems: 20, maxItems: 35,
+        items: {
+          type: "object", required: ["text", "categoryId"],
+          properties: {
+            text: { type: "string", description: "One sentence starting with a verb, naming the work it touches, 10 to 20 words" },
+            categoryId: { type: "string", enum: CATS },
+          },
+        },
+      },
+    },
+  },
 };
 const RULE_IDS = ["destination", "safe", "script", "small", "visible"];
 const PLAN_TOOL = {
@@ -100,17 +154,42 @@ async function anthropic(body) {
   return data.content.find((b) => b.type === "tool_use").input;
 }
 
-async function generateIdeas(promptTpl, vars, model) {
-  const body = {
-    model, max_tokens: 2048,
+async function generateSinglePass(vars) {
+  return anthropic({
+    model: GEN_MODEL, max_tokens: 2048,
     tools: [USE_CASES_TOOL], tool_choice: { type: "tool", name: USE_CASES_TOOL.name },
-    messages: [{ role: "user", content: render(promptTpl, vars) }],
-  };
-  // Sonnet 5 runs adaptive thinking when the field is omitted, which conflicts
-  // with forced tool_choice; disable explicitly (mirrors what a production
-  // migration would do).
-  if (model === "claude-sonnet-5") body.thinking = { type: "disabled" };
-  return anthropic(body);
+    messages: [{ role: "user", content: render(SINGLE_PROMPT, vars) }],
+  });
+}
+
+// Mirrors api/primitives-generate.js: diverge into a longlist, then converge.
+async function generatePipeline(vars) {
+  const div = await anthropic({
+    model: GEN_MODEL, max_tokens: 2048,
+    tools: [CANDIDATES_TOOL], tool_choice: { type: "tool", name: CANDIDATES_TOOL.name },
+    messages: [{ role: "user", content: render(DIVERGE_PROMPT, vars) }],
+  });
+  const candidates = (Array.isArray(div.candidates) ? div.candidates : [])
+    .filter((c) => c && typeof c.text === "string" && c.text.trim());
+  const candidatesBlock = candidates
+    .map((c, i) => {
+      const flag = flagsDownscope(c.text, vars.teamFluency) ? " (downscope: exceeds team fluency as written)" : "";
+      return `${i + 1}. [${CATEGORY_TITLES[c.categoryId] || "Uncategorized"}] ${c.text.trim()}${flag}`;
+    })
+    .join("\n");
+  const raw = await anthropic({
+    model: GEN_MODEL, max_tokens: 2048,
+    tools: [CONVERGE_TOOL], tool_choice: { type: "tool", name: CONVERGE_TOOL.name },
+    messages: [{ role: "user", content: render(CONVERGE_PROMPT, { ...vars, candidatesBlock, teamFluencyFloor: teamFluencyFloor(vars.teamFluency) }) }],
+  });
+  // Mirror the server-side commitment trim in api/primitives-generate.js.
+  const focus = Array.isArray(raw.focusCategories) ? raw.focusCategories.slice(0, 2) : [];
+  const stretch = typeof raw.stretchCategory === "string" ? raw.stretchCategory : null;
+  const ideas = Object.fromEntries(CATS.map((c) => {
+    const limit = focus.includes(c) ? 3 : c === stretch ? 1 : 2;
+    return [c, asArr(raw[c]).slice(0, limit)];
+  }));
+  return { ideas, candidates };
 }
 
 // Tool schemas aren't strictly enforced; coerce whatever came back to string[].
@@ -123,8 +202,8 @@ const ABS_TOOL = {
   input_schema: {
     type: "object", required: ["score", "standout", "weak", "verdict"],
     properties: {
-      score: { type: "integer", minimum: 1, maximum: 5, description: "5 = a sharp manager would call these excellent; 3 = competent but predictable; 1 = generic filler" },
-      standout: { type: "array", items: { type: "string" }, description: "Up to 3 ideas that clear the excellence bar, quoted" },
+      score: { type: "integer", minimum: 1, maximum: 5, description: "5 = the highest-value set available for this manager; 3 = competent but predictable; 1 = generic filler" },
+      standout: { type: "array", items: { type: "string" }, description: "Up to 3 ideas that clear the value bar, quoted" },
       weak: { type: "array", items: { type: "string" }, description: "Up to 3 weakest ideas with a short reason each" },
       verdict: { type: "string", description: "Two sentences: overall quality judgment" },
     },
@@ -143,12 +222,22 @@ const PAIR_TOOL = {
   },
 };
 
-const QUALITY_CRITERIA = `Judge by what a sharp, busy manager would consider EXCELLENT:
-1. Concrete input and output: the manager knows exactly what to paste and what comes back.
-2. Tryable at the TEAM's stated fluency (a "not yet started" team cannot run integrations, pipelines, or scripts; Technical Work ideas the manager builds personally are exempt).
-3. Specific to this person's actual work, never role-title filler.
-4. At least a couple of ideas are non-obvious: an overlooked corner of the workload, not the first thing anyone would say.
-5. Respects hard constraints stated in the failure risks (e.g. data privacy).`;
+const QUALITY_CRITERIA = `Judge by EXPECTED VALUE for this specific manager: is this the highest-value set available for this person?
+1. Recurrence and reach: how often the pain each idea hits occurs, and how many people it touches.
+2. Pain relief: how much the manager or team suffers doing that work today.
+3. Proximity to the stated 90-day vision: work the vision names outranks work it does not.
+4. Adoption probability: given the team's fluency, the failure risks, and named resistance, will this actually get used?
+
+FLOORS every idea must clear (a violation is a defect):
+- Serves an outcome the manager owns, within their own authority.
+- Feasible at the TEAM's stated fluency (a "not yet started" team runs ideas only by pasting text into a chat tool or chatting with an assistant the manager set up for them; ideas the manager runs personally are exempt and may use the manager's fluency).
+- Respects hard constraints stated in the failure risks (e.g. data privacy, no AI-written customer emails).
+- Applies AI to the work itself, never to the AI adoption effort.
+- Absorbable by this team within a quarter.
+
+Also value: concrete input and output per idea (the manager knows what goes in and what comes back); modality spread (a monoculture of paste-a-prompt transactions is a defect); a couple of genuinely non-obvious ideas.
+
+IMPORTANT: Do NOT reward or penalize an idea for its size or ambition in itself. A small idea hitting a daily pain can be the highest-value item on the list; a transformative idea that clears the floors and states its first probe is equally legitimate. Judge value, never altitude.`;
 
 async function judgeAbs(vars, ideas) {
   return anthropic({
@@ -198,24 +287,20 @@ const summary = [];
 
 for (const p of PERSONAS) {
   console.log(`\n=== ${p.label}`);
-  const [base46, new46, newS5] = await Promise.all([
-    generateIdeas(BASE_PROMPT, p.vars, "claude-sonnet-4-6"),
-    generateIdeas(NEW_PROMPT, p.vars, "claude-sonnet-4-6"),
-    generateIdeas(NEW_PROMPT, p.vars, "claude-sonnet-5"),
+  const [single, pipe] = await Promise.all([
+    generateSinglePass(p.vars),
+    generatePipeline(p.vars),
   ]);
-  const [sBase, sNew, sS5] = await Promise.all([judgeAbs(p.vars, base46), judgeAbs(p.vars, new46), judgeAbs(p.vars, newS5)]);
-  const [promptEffect, modelEffect] = await Promise.all([
-    judgePair(p.vars, base46, new46),   // first = base prompt, second = new prompt
-    judgePair(p.vars, new46, newS5),    // first = sonnet 4.6, second = sonnet 5
-  ]);
-  console.log(`  scores: base-4.6 ${sBase.score} | new-4.6 ${sNew.score} | new-S5 ${sS5.score}`);
-  console.log(`  prompt effect: ${promptEffect.result === "second" ? "NEW prompt wins" : promptEffect.result === "first" ? "BASE prompt wins" : "tie"}`);
-  console.log(`  model effect:  ${modelEffect.result === "second" ? "SONNET 5 wins" : modelEffect.result === "first" ? "SONNET 4.6 wins" : "tie"}`);
+  const [sSingle, sPipe] = await Promise.all([judgeAbs(p.vars, single), judgeAbs(p.vars, pipe.ideas)]);
+  const pipelineEffect = await judgePair(p.vars, single, pipe.ideas); // first = single-pass, second = pipeline
+  console.log(`  candidates from diverge: ${pipe.candidates.length}`);
+  console.log(`  scores: single-pass ${sSingle.score} | pipeline ${sPipe.score}`);
+  console.log(`  pairwise: ${pipelineEffect.result === "second" ? "PIPELINE wins" : pipelineEffect.result === "first" ? "SINGLE-PASS wins" : "tie"}`);
 
-  // dominance re-check with the new playbook prompt on the production model
+  // dominance re-check with the current playbook prompt on the production model
   const planVars = { ...p.vars, starredBlock: starredBlockFor(p.key) };
   const rawPlan = await anthropic({
-    model: "claude-sonnet-4-6", max_tokens: 4096,
+    model: GEN_MODEL, max_tokens: 4096,
     tools: [PLAN_TOOL], tool_choice: { type: "tool", name: PLAN_TOOL.name },
     messages: [{ role: "user", content: render(PLAYBOOK_PROMPT, planVars) }],
   });
@@ -223,32 +308,32 @@ for (const p of PERSONAS) {
   const plan = Object.fromEntries(RULE_IDS.map((r) => [r, asArr(rawPlan[r]).slice(0, pri.includes(r) ? 3 : 2)]));
   const actionsList = RULE_IDS.flatMap((r) => plan[r].map((a) => `[${r}] ${a}`)).join("\n");
   const dom = await anthropic({
-    model: "claude-sonnet-4-6", max_tokens: 500,
+    model: GEN_MODEL, max_tokens: 500,
     tools: [DOM_TOOL], tool_choice: { type: "tool", name: DOM_TOOL.name },
     messages: [{ role: "user", content: `Across these change-management actions, identify the single most-repeated deliverable or workflow and count how many actions center on it.\n\n${actionsList}` }],
   });
-  console.log(`  dominance (new prompt): ${dom.theme} in ${dom.count}/${dom.total}`);
+  console.log(`  dominance (current plan prompt): ${dom.theme} in ${dom.count}/${dom.total}`);
 
-  report.push({ persona: p.label, key: p.key, ideas: { base46, new46, newS5 }, absolute: { base46: sBase, new46: sNew, newS5: sS5 }, promptEffect, modelEffect, plan, dominance: dom });
-  summary.push({ persona: p.label, base46: sBase.score, new46: sNew.score, newS5: sS5.score, promptEffect: promptEffect.result, modelEffect: modelEffect.result, dominance: `${dom.theme} ${dom.count}/${dom.total}` });
+  report.push({ persona: p.label, key: p.key, ideas: { single, pipeline: pipe.ideas }, candidates: pipe.candidates, absolute: { single: sSingle, pipeline: sPipe }, pipelineEffect, plan, dominance: dom });
+  summary.push({ persona: p.label, single: sSingle.score, pipeline: sPipe.score, pipelineEffect: pipelineEffect.result, dominance: `${dom.theme} ${dom.count}/${dom.total}` });
 }
 
 writeFileSync(join(OUT, "quality-ab.json"), JSON.stringify(report, null, 2));
 
-const md = [`# Idea Quality A/B — ${new Date().toISOString().slice(0, 16)}`, "",
-  "| Persona | base@4.6 | new@4.6 | new@S5 | Prompt effect | Model effect | Dominance (new plan prompt) |", "|---|---|---|---|---|---|---|",
-  ...summary.map((s) => `| ${s.persona} | ${s.base46}/5 | ${s.new46}/5 | ${s.newS5}/5 | ${s.promptEffect === "second" ? "new wins" : s.promptEffect === "first" ? "base wins" : "tie"} | ${s.modelEffect === "second" ? "S5 wins" : s.modelEffect === "first" ? "4.6 wins" : "tie"} | ${s.dominance} |`),
+const md = [`# Idea Quality A/B: single-pass vs diverge/converge pipeline — ${new Date().toISOString().slice(0, 16)}`, "",
+  "| Persona | single-pass | pipeline | Pairwise | Dominance (plan prompt) |", "|---|---|---|---|---|",
+  ...summary.map((s) => `| ${s.persona} | ${s.single}/5 | ${s.pipeline}/5 | ${s.pipelineEffect === "second" ? "pipeline wins" : s.pipelineEffect === "first" ? "single-pass wins" : "tie"} | ${s.dominance} |`),
 ];
 for (const r of report) {
   md.push("", `## ${r.persona}`, "");
-  for (const [arm, label] of [["base46", "Base prompt @ Sonnet 4.6"], ["new46", "New prompt @ Sonnet 4.6"], ["newS5", "New prompt @ Sonnet 5"]]) {
+  for (const [arm, label] of [["single", "Single-pass prompt (frozen 2026-07-03)"], ["pipeline", "Diverge/converge pipeline"]]) {
     const a = r.absolute[arm];
     md.push(`### ${label} — ${a.score}/5`, `> ${a.verdict}`, "", listText(r.ideas[arm]).split("\n").map((l) => `- ${l.replace(/^\d+\. /, "")}`).join("\n"), "");
     if (a.standout?.length) md.push(`Standout: ${a.standout.join(" · ")}`, "");
     if (a.weak?.length) md.push(`Weak: ${a.weak.join(" · ")}`, "");
   }
-  md.push(`### Pairwise`, `- Prompt effect (base vs new, both 4.6): **${r.promptEffect.result === "second" ? "new prompt wins" : r.promptEffect.result === "first" ? "base prompt wins" : "tie"}** — ${r.promptEffect.detail[0].reason}`, `- Model effect (4.6 vs 5, new prompt): **${r.modelEffect.result === "second" ? "Sonnet 5 wins" : r.modelEffect.result === "first" ? "Sonnet 4.6 wins" : "tie"}** — ${r.modelEffect.detail[0].reason}`);
-  md.push("", `### Plan dominance under new anchor-roles prompt: ${r.dominance.theme} in ${r.dominance.count}/${r.dominance.total}`);
+  md.push(`### Pairwise (single-pass vs pipeline): **${r.pipelineEffect.result === "second" ? "pipeline wins" : r.pipelineEffect.result === "first" ? "single-pass wins" : "tie"}** — ${r.pipelineEffect.detail[0].reason}`);
+  md.push("", `### Plan dominance under current playbook prompt: ${r.dominance.theme} in ${r.dominance.count}/${r.dominance.total}`);
   for (const rule of RULE_IDS) for (const a of r.plan[rule]) md.push(`- [${rule}] ${a}`);
 }
 writeFileSync(join(OUT, "quality-ab.md"), md.join("\n"));
