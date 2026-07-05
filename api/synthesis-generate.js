@@ -59,7 +59,7 @@ Look across everything this manager starred. Find the ONE coherent move that tie
 2. actions: Array of 4 to 6 concrete actions that comprise this big move. Mix AI use cases to try AND change actions to take, ordered by priority (most important first). Each action is one imperative sentence starting with a verb. Preserve original wording from the starred items where possible, but tighten to under 20 words each.
 
 CRITICAL RULES:
-- The big move is ONE focus, not a summary of everything. Omit starred items that don't fit.
+- The big move is ONE focus, not a summary of everything. A thread is ONE workflow or deliverable family; if the title needs an "and" to cover your actions, that is two threads, so pick the one the manager's stars weight most and move the other to leftOut. Every starred item lands in exactly one place: in actions if it serves the title's single thread, in leftOut with a reason if it serves any other. Never both, never neither.
 - The starred items (marked *) are the manager's chosen priorities. Build the move around them and draw the actions primarily from starred items, both use cases and change actions. Use an unstarred item only when the move genuinely needs it to hold together.
 - Actions are ordered by priority. First action = most important thing to do tomorrow.
 - Mix use cases and change actions freely. The manager doesn't care about the distinction; they care about what to do.
@@ -71,6 +71,7 @@ CRITICAL RULES:
 
 QUALITY CHECKS:
 - Is the bigMoveTitle specific to this manager? If it could belong to anyone, rewrite.
+- Does every action serve the single thread the title names? If an action serves a different thread, move its source item to leftOut instead.
 - Would the manager know exactly what to do tomorrow from action #1?
 - Are there 4-6 actions, not more?
 
@@ -82,7 +83,7 @@ Use the submit_one_page_plan tool to return the big move.`;
       "Submit the manager's big move. bigMoveTitle is one specific sentence; actions is 4-6 prioritized imperative sentences mixing use cases and change actions.",
     input_schema: {
       type: "object",
-      required: ["bigMoveTitle", "actions"],
+      required: ["bigMoveTitle", "actions", "leftOut"],
       properties: {
         bigMoveTitle: {
           type: "string",
@@ -96,6 +97,12 @@ Use the submit_one_page_plan tool to return the big move.`;
           items: { type: "string" },
           description:
             "4 to 6 prioritized actions (mix of use cases and change actions), each an imperative sentence under 20 words.",
+        },
+        leftOut: {
+          type: "array",
+          items: { type: "string" },
+          description:
+            "Each starred item you excluded from the move (short quote) plus the reason it serves a different thread than the title. Empty ONLY if every starred item genuinely serves the title's single thread.",
         },
       },
     },
@@ -142,8 +149,14 @@ Use the submit_one_page_plan tool to return the big move.`;
         .json({ error: "Model did not return structured plan" });
     }
 
+    // leftOut is the model's self-commitment to a single thread, not plan
+    // content; log it for observability, keep it out of the response.
+    const { leftOut, ...move } = toolBlock.input;
+    if (Array.isArray(leftOut) && leftOut.length) {
+      console.log("Big Move leftOut:", leftOut.join(" | "));
+    }
     const synthesis = {
-      ...toolBlock.input,
+      ...move,
       generatedAt: new Date().toISOString(),
     };
     return res.status(200).json({ synthesis });
