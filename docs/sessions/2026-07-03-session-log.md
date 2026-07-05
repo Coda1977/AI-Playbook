@@ -60,6 +60,25 @@ Executed docs/superpowers/plans/2026-07-03-idea-quality-pipeline.md. Four more c
 - Yonatan's review of the branch result, then the ship path (push -> preview -> journey with BASE_URL -> real-workshop A/B -> PR).
 - Gold use-case library stays the strongest untried quality lever.
 
+## Session 3 (2026-07-04/05): live persona walkthroughs -> altitude, audience, and focus fixes -> SHIPPED
+
+Yonatan reviewed three full journeys in the app (OD director, internal executive coach, head of product marketing; Claude drove a fourth programmatically as a sales director) and each review produced a fix round. Five more commits; branch merged to master and deployed at session end.
+
+### What the walkthroughs found and what shipped
+- **OD run:** intake grounding created tunnel vision (podcast idea in 7/13 actions + Big Move); complaint refined to BIGNESS within named realms, not realm coverage, and "Capable" was silently shrinking ambition. Shipped: 4 committed `bigSwings` per list (schema field), floor-constrains-the-probe-not-the-destination language, Phase 2/3 disconnect (rules are the engine, use cases are the content), "go bigger" chat mode (server-side `BIG_ASK` detection).
+- **Coach run:** big mode's four-shape menu caused an inversion rut (same idea suggested in two tabs); the inversion star made coached leaders (clients!) the change audience. Shipped: destination-framed big mode with board-relative variety (no menu), team-only audience lock (clients only as pilot scope), synthesis human-move rule.
+- **Sales-director programmatic run:** big mode verified varied and floor-true; audience lock verified; exposed Big Move bolting a second thread onto the title. Shipped: `leftOut` commitment field (every starred item lands in actions or leftOut, never both/neither); the model countered by widening the title to "X and Y", closed by defining a thread as ONE workflow family.
+- **PMM run (final review):** everything held (variety, audience, spread, thread discipline); two residuals fixed: no Big Move action may start with Build/Create/Set up, no two actions cover the same work. bigSwings now logged server-side like leftOut. Accepted cosmetic quirk: big-mode replies reuse a "stops being X, becomes Y" opener across separate category chats (cross-tab, can't see itself repeating; revisit only if it grates in real workshops).
+
+### Ship
+- All suites green at merge (primitives 3/3, playbook 5/5, chat 4/4 + 3/3, synthesis 3/3 including new asserts).
+- feat/quality-pass (14 commits) merged to master, pushed, auto-deployed to Vercel.
+
+### Still open after ship
+- Journey review against the production deployment (`BASE_URL=<prod> node evals/journey-review.mjs`) before the next real workshop.
+- Gold per-function use-case library: still the strongest untried quality lever; feeds the bigSwings slots.
+- Parked: structural dominance second-pass, per-IP rate limiting, Anthropic console spend limit, big-mode floor clause after repeated escalation, big-mode reply-opener variety.
+
 ## Open / parked (deliberate)
 - **Push branch → Vercel preview → A/B in a real workshop → PR** (Yonatan's call; nothing pushed yet).
 - **Curated per-function gold use-case library** injected as background knowledge: the strongest remaining idea-quality lever (model swap isn't). Yonatan's expertise → content.
