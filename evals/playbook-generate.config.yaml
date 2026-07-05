@@ -170,8 +170,9 @@ defaultTest:
         2. Defaults beat broadcasts for Rules 3-5 (script/small/visible, where the intent is installing behavior): flag a STEP-FREE announcement, vision email, or reminder there if a default, template, checklist, or ownership change could carry the same intent with higher behavior-change probability. A specific scripted instruction (one artifact, one step, do it this week) is the script rule's signature move, not a broadcast; never flag it. Rules 1-2 legitimately live in conversation, story, and meetings; do not flag those.
         3. Stock moves are fit-checked: flag a move only when the profile CONTRADICTS its ingredient, e.g. "learn from the person who already uses AI" on a team explicitly described as not yet started, or a venue (offsite, lunch-and-learn series) the profile never mentions used as a linchpin. Asking who is most open to trying, or recruiting the most willing person, is a valid move, not an assumed ingredient.
         4. Change moves, not workflow implementation: flag any action whose real content is building, configuring, or operating the AI workflow itself (building prompt templates, setting up tools, the manager running the use case as a task). The human move around the workflow is what belongs here: assigning someone to try it, scripting the team's first attempt, reviewing the output together, changing the default that embeds it.
-        Do NOT reward or penalize the mix of move types itself, and do NOT count how many actions mention the same workflow; judge only whether each intent got the highest-leverage move available.
-        Fail if two or more actions have no operational content, or if a Rules 3-5 broadcast displaced an obvious default-change, or if a stock move contradicts the profile, or if two or more actions are workflow implementation rather than change moves.
+        Do NOT reward or penalize the mix of move types itself, and do NOT require or reward references to starred use cases; the plan is about leading people, and naming a use case is optional color.
+        5. Template check: the plan must be unmistakably THIS manager's. The tell is intake specifics inside the actions: the named fear, the team's actual rituals and deliverables, the fluency gap, the vision's finish line. Fail if the plan would fit any manager with the same job title.
+        Fail if two or more actions have no operational content, or if a Rules 3-5 broadcast displaced an obvious default-change, or if a stock move contradicts the profile, or if two or more actions are workflow implementation rather than change moves, or if the plan fails the template check.
 
 tests:
   - description: "Not-yet-started manager + team, low fluency"
@@ -209,14 +210,14 @@ tests:
     assert:
       - type: llm-rubric
         value: |
-          Note: the output contract caps every rule at 2 actions (3 for at most two prioritized rules), so judge quality within that budget, not by volume. Plan should:
-          1. Reference the starred use cases (AI call summaries and/or QBR drafts) concretely somewhere in the plan, as actual starting points rather than vague mentions.
-          2. Address the previous failed rollout via Rule 4 (Start Small) — pilot with 1-2 willing CSMs, NOT mandate to all 15.
-          3. Rule 5 (visible) actions commit to a recurring communication rhythm (not a one-off announcement), given the past failure.
-          4. Anchor placement: Rule 2 (safe) stays about people and fears, not workflow mechanics; Rule 1 (destination) names the pilot workflow in at most one action. Do NOT fail the plan for how many Rule 3-5 actions center on the pilot workflow: the one-pilot chain (script it, pilot it, expand it, review it, share it) is the methodology working as designed.
-          Fail if starred items aren't referenced anywhere, OR the plan ignores the previous-failure context, OR Rule 2 contains workflow mechanics instead of people work.
+          Note: action counts are enforced server-side AFTER this output (every rule trimmed to 2, prioritized rules to 3). IGNORE how many actions any rule has; never flag counts. The plan is about leading the CS team through change; starred use cases are optional color (a brief name is fine, a restated workflow is not; absence of any reference is also fine). Plan should:
+          1. Be built from the intake: the previous failed CRM rollout (CSMs felt forced) must visibly shape it via Rule 4 (Start Small) — a contained pilot with willing CSMs, NOT a mandate to all 15.
+          2. Rule 5 (visible) actions commit to a recurring communication rhythm (not a one-off announcement), given the past failure.
+          3. Rule 2 (safe) stays about people and fears, not workflow mechanics.
+          4. The plan is unmistakably this manager's: intake specifics (the failed-rollout memory, the CS team's actual work, the 90-day vision) appear inside the actions, not just role-generic change advice.
+          Fail if the plan ignores the previous-failure context, OR Rule 2 contains workflow mechanics instead of people work, OR the plan reads as generic change management for any director.
 
-  - description: "OD director — transformative starred use case must route to Rule 1 + Rule 4"
+  - description: "OD director — plan must be built from the intake, not from starred delivery or a stock template"
     vars:
       role: "Director of Organizational Development at a 400-person SaaS, leads 5 L&D partners"
       responsibilities: "Leadership programs, manager training curricula, org design projects, engagement surveys, executive coaching"
@@ -229,12 +230,12 @@ tests:
     assert:
       - type: llm-rubric
         value: |
-          The starred "always-on AI assistant between sessions" use case is TRANSFORMATIVE: it replaces a deliverable and changes how the work happens. Check the routing:
-          1. Rule 1 (destination) treats it as destination material: at least one action paints the concrete after-state built around it.
-          2. Rule 4 (small) pilots its first small probe (one cohort or one program), not a full rollout.
-          3. It is NOT scattered across all five rules; Rule 2 (safe) stays about the facilitators as people.
-          4. The facilitators' craft fear is engaged concretely in Rule 2 (what they personally stand to lose), not with generic reassurance.
-          Fail if the transformative starred item is absent from Rule 1, or piloted nowhere, or appears in more than 4 actions, or if Rule 2 never touches the craft fear.
+          This plan leads 5 L&D facilitators through change; the starred use cases are optional color only. Check:
+          1. The facilitators' craft fear (AI-generated content feeling generic, undercutting their craft) is engaged concretely in Rule 2: what they personally stand to lose, named, not generic reassurance.
+          2. The plan draws its specifics from the OD world of this intake (programs, curricula, facilitation, between-session practice, the vision's two goals), not from delivering the starred workflows: no action restates what a starred use case does or manages its production.
+          3. The plan is not a stock template: actions must contain details only this intake could produce (the craft fear, facilitator rituals, the practice-between-sessions finish line). Fail if the actions would fit any L&D director unchanged.
+          4. Change audience stays the manager's own team (the 5 facilitators); coached managers/participants may appear only as pilot scope.
+          Fail on any of: craft fear untouched in Rule 2, actions centered on producing starred workflows, a plan generic enough to transfer to another manager, or clients treated as the change audience.
 
   - description: "Transformative manager + Capable team, ambitious vision"
     vars:

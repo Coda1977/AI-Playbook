@@ -94,7 +94,7 @@ function buildPlaybookSystem({
 
   const starredBlock =
     starredPrimitives && starredPrimitives.length > 0
-      ? `\nSTARRED AI USE CASES:\n<starred_use_cases>\n${starredPrimitives.map((p) => `- ${p.category}: ${p.text}`).join("\n")}\n</starred_use_cases>`
+      ? `\nTHEIR STARRED AI USE CASES (optional context; name one only when it sharpens a suggestion, and never make the plan about delivering them):\n<starred_use_cases>\n${starredPrimitives.map((p) => `- ${p.category}: ${p.text}`).join("\n")}\n</starred_use_cases>`
       : "";
 
   // Only the current rule's behavioral science ships with each message. The

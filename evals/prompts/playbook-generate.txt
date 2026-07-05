@@ -19,18 +19,18 @@ CONTEXT, THIS SPECIFIC PERSON:
 - 90-day success vision: {{successVision}}
 </manager_profile>
 
-STARRED AI USE CASES (what the team is adopting):
+THEIR STARRED AI USE CASES (optional context, from the imagination phase):
 <starred_use_cases>
 {{starredBlock}}
 </starred_use_cases>
 
-These starred use cases are the CONTENT of the change, never the subject of your actions. This plan is not about building or operating them; it is about what the manager says, structures, and follows up on so their PEOPLE adopt the new way of working. The five rules are your engine; the use cases only tell you what the change is called. Name a workflow only where the methodology needs it: scripting the team's first step (Rule 3), containing the pilot (Rule 4), sharing its result (Rule 5), at most one destination line (Rule 1). If a starred use case is TRANSFORMATIVE (it replaces a deliverable or changes how the work happens), Rule 1 must paint the after-state around it and its first small probe IS the Rule 4 pilot; a transformative star outranks accelerator stars for the pilot slot.
+These tell you what kinds of new work this team is drawn to; nothing more. You MAY name one in a few words when it makes an action sharper ("the QBR-prep experiment"). Never restate what a use case does, never write actions about producing or delivering them, and never build the plan around them. Which ideas to pursue, and how, is the manager's own call; this plan is about how they lead their people to a new way of working.
 
 IMPORTANT CONTEXT SIGNALS TO PAY ATTENTION TO:
 - The gap between manager fluency and team fluency is critical. A Transformative manager with a Not Yet Started team needs to slow down and build safety. A Capable manager with a Capable team needs momentum and scripted steps.
 - If the manager is "Not yet started," their own AI learning is action #1 in Rule 1 (Start at the End), they must try it first before asking anyone else to.
 - If the failure risks mention senior people resisting, prioritize Rule 2 (Make It Safe), especially naming what those people personally stand to lose (expertise, identity, standing), not just their stated objection, and creating space for honest conversation.
-- If the failure risks mention previous failed attempts, prioritize Rule 4 (Start Small) and Rule 5 (Make Progress Visible), smaller scope, more communication.
+- If the failure risks mention previous failed attempts, prioritize Rule 4 (Start Small) and Rule 5 (Make Progress Visible), smaller scope, more communication, and name the failed attempt openly in one action; the team remembers it whether or not the plan does.
 - If the failure risks name a different loss than fear of failure (judgment atrophy from over-reliance, brand voice, privacy), Rule 2 (Make It Safe) must protect against THAT loss; do not default to the standard fear-of-failure moves.
 - If the 90-day vision is ambitious (e.g., "AI embedded in every workflow"), the plan needs concrete phasing via Rule 3 (Script the Steps) and Rule 4 (Start Small). If it's modest (e.g., "a few experiments"), match that energy.
 - All participants work in SaaS companies. Tailor examples and actions to SaaS contexts, product teams, customer success, engineering, marketing, sales, support.
@@ -42,18 +42,20 @@ MOVE PALETTE (a value preference, never a quota):
 - Operationalize the rule's lever, never generic hygiene: Rule 1 makes the destination concrete and felt, Rule 2 names specific losses, Rule 3 changes a default or replicates a bright spot, Rule 4 builds the small-win ladder, Rule 5 builds a visibility rhythm.
 - Fit-check stock moves: never assume an experimenting peer, a willing volunteer, or a venue the intake does not mention; a team that has not started has no bright spot to find yet. Use what is actually there.
 
+CREATIVE LATITUDE, FUELED BY THE INTAKE:
+- This plan is about leading THIS team to a new way of working. Ideate freely through each rule's lens; the raw material is the intake itself. Rule 1 speaks in the vision's own finish lines; Rule 2 names the fear the intake actually describes; Rules 3-5 take their scope from the rituals and deliverables in the responsibilities. The intake is your palette, the rules are your brushes.
+- Two managers with different intakes must get visibly different plans. If an action would fit any manager with the same job title, sharpen it with a detail from this intake or replace it. Standard moves (a leader demo, a 1:1, a pilot) earn their place only when fitted to this team's specific fear, ritual, or moment.
+- One vivid intake detail per action is enough; richness never excuses length. The 25-word discipline holds.
+
 TASK:
 First, decide which ONE or TWO rules the context signals above single out for this manager, and commit to them in the prioritizedRules field. Then generate EXACTLY 2 actions for every rule, except the prioritized rule(s) which get EXACTLY 3. That is 11 or 12 actions total, never more. Every action must be:
 - Specific to THIS person's role, team, and situation, not interchangeable with someone else's plan
-- Under 25 words each (hard limit). Quoted scripts count toward the limit; shorten the script rather than exceed it. Concise and punchy, no filler
+- Under 25 words each (hard limit). Quoted scripts count toward the limit and stay under ten words themselves; shorten the script rather than exceed it. Concise and punchy, no filler
 - Concrete enough to start this week (verbs like "schedule," "ask," "send," "create," "announce", never "consider," "think about," "explore the idea of")
 - Sensitive to their fluency levels (don't suggest advanced moves for not-yet-started teams, don't suggest basics for transformative teams)
 - Sensitive to their failure risks (if people fear job loss, don't generate actions that ignore that fear)
 - Connected across rules where natural (e.g., a small experiment from Rule 4 might connect to making progress visible in Rule 5)
-- A change move, never workflow implementation: every action's subject is a person or the team, and the AI workflow may only be its object. "Ask Dana to run the pilot on Thursday's debrief and bring it to review" is change work; "Build the prompt template" is Phase 2 work wearing an action's clothes. If an action's real content is configuring, building, or operating the AI workflow, replace it with the human move around it.
-- The change audience is the manager's OWN TEAM: their direct reports and day-to-day colleagues in the craft. It is never the clients, customers, or people the team serves. If a starred use case's users are clients (coached leaders, customers, stakeholders), the actions still script the TEAM's behavior in the new way of working; a client may appear inside the Rule 4 pilot's scope ("pilot it with one account"), never as the person whose feelings, first steps, or adoption the action manages.
-- Anchor roles: pick the pilot workflow from the starred use cases, then place it deliberately. It belongs in Rule 3 (script it) and Rule 4 (pilot it), and MAY appear once in Rule 5 (share its results). Rule 2 (Make It Safe) actions are about people and fears, never about any workflow's mechanics. Rule 1 names the pilot workflow in at most one action; its other actions anchor to people and outcomes. Hard ceiling: the same workflow appears in at most 4 of the 12 actions. Starred use cases that are not the pilot should still appear somewhere.
-- Transformative star routing: if a starred use case reshapes how the work happens (replaces a deliverable, turns a periodic event into a continuous practice, inverts who does the work), treat it as Rule 1 destination material (the vivid after-state) and make its first small probe the Rule 4 pilot; it outranks accelerator stars for the pilot slot. Do not scatter it across the other rules.
+- A change move about people, never workflow implementation: every action's subject is the manager or their team (their direct reports and day-to-day colleagues, never the clients, customers, or people the team serves), and any AI workflow is at most its object. If an action's real content is configuring, building, or operating an AI workflow, replace it with the human move around it: changing a default ("make the preloaded template the required starting point for launch briefs") is a change move; constructing the tooling ("build a prompt template") is not. Frame it as the default changing, never as the artifact being built. A client may appear inside a pilot's scope ("pilot it with one account"), never as the person whose feelings, first steps, or adoption the action manages.
 
 QUALITY CHECK BEFORE RETURNING, VERIFY EACH ACTION:
 1. Could this action belong to anyone, or is it specific to this person? (If anyone's, rewrite it.)
@@ -63,8 +65,8 @@ QUALITY CHECK BEFORE RETURNING, VERIFY EACH ACTION:
 5. If the action involves sharing a personal story, does it leave the content to the manager? (Say "share your AI experiment with the team" NOT "explain how automating X saved Y hours." Never invent experiences, metrics, or outcomes for the manager.)
 6. STYLE: No em dashes anywhere. Use commas, semicolons, periods, colons, or parentheses. No "isn't X, it's Y" or "not just X, it's Y" parallelism, state the affirmative directly.
 7. COUNT: exactly 2 actions per rule, exactly 3 for the rule(s) in prioritizedRules. If any other rule ended up with 3, delete its weakest action.
-8. ANCHOR COUNT: if the same workflow or deliverable appears in more than 4 actions, rewrite the excess to other starred items or people-focused moves.
-9. SUBJECT: is the action about people adopting the change? If its real content is configuring, building, or operating the AI workflow, replace it with the human move around it.
+8. SUBJECT: is the action about people adopting the change? If its real content is configuring, building, or operating an AI workflow, replace it with the human move around it.
+9. TEMPLATE CHECK: would this exact plan fit a different manager with the same title? If yes, it is not done; work the intake's specifics (the named fear, the actual ritual, the vision's finish line) deeper into the actions.
 
 RULES:
 Rule 1 (id: "destination"): Start at the End

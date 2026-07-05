@@ -349,6 +349,33 @@ function md(results) {
   return lines.join("\n");
 }
 
+// Cross-persona template check: near-identical plan actions across DIFFERENT
+// personas are the "everyone gets the same three moves" smell. Mechanical
+// token-set similarity, no judge.
+const STOPWORDS = new Set("the a an to of for with your their and or in on at one this that is it by into before after each every next week team ai".split(" "));
+const tokenSet = (s) => new Set(s.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((w) => w.length > 2 && !STOPWORDS.has(w)));
+function actionSimilarity(a, b) {
+  const A = tokenSet(a), B = tokenSet(b);
+  let inter = 0;
+  for (const w of A) if (B.has(w)) inter++;
+  return inter / (A.size + B.size - inter || 1);
+}
+function crossPersonaTemplates(results) {
+  const lists = results.filter((r) => r.stages.plan).map((r) => ({ key: r.key, actions: Object.values(r.stages.plan).flat() }));
+  const hits = [];
+  for (let i = 0; i < lists.length; i++) {
+    for (let j = i + 1; j < lists.length; j++) {
+      for (const a of lists[i].actions) {
+        for (const b of lists[j].actions) {
+          const s = actionSimilarity(a, b);
+          if (s >= 0.5) hits.push({ pair: `${lists[i].key} / ${lists[j].key}`, score: Math.round(s * 100), a, b });
+        }
+      }
+    }
+  }
+  return hits.sort((x, y) => y.score - x.score);
+}
+
 // ---------------------------------------------------------------- main
 mkdirSync(OUT_DIR, { recursive: true });
 const results = [];
@@ -357,8 +384,12 @@ for (const p of PERSONAS) {
   catch (e) { console.error(`FAILED ${p.key}: ${e.message}`); results.push({ key: p.key, label: p.label, error: e.message, stages: {}, scores: {}, issues: [`journey aborted: ${e.message}`] }); }
 }
 const ok = results.filter((r) => !r.error);
+const templates = crossPersonaTemplates(ok);
+console.log(`\nCross-persona template check: ${templates.length} near-identical action pair(s) across personas (>=50% token overlap)`);
+for (const t of templates.slice(0, 8)) console.log(`  ${t.score}% [${t.pair}]\n    A: ${t.a.slice(0, 90)}\n    B: ${t.b.slice(0, 90)}`);
 writeFileSync(join(OUT_DIR, "journey-review.json"), JSON.stringify(results, null, 2));
-writeFileSync(join(OUT_DIR, "journey-review.md"), md(ok));
+writeFileSync(join(OUT_DIR, "journey-templates.json"), JSON.stringify(templates, null, 2));
+writeFileSync(join(OUT_DIR, "journey-review.md"), md(ok) + (templates.length ? `\n\n---\n\n## Cross-persona template check\n${templates.length} near-identical action pair(s):\n` + templates.map((t) => `- ${t.score}% (${t.pair}): "${t.a}" ≈ "${t.b}"`).join("\n") : "\n\n---\n\n## Cross-persona template check\nNo near-identical actions across personas."));
 console.log(`\nWrote evals/output/journey-review.md and .json`);
 const flagged = ok.flatMap((r) => r.issues);
 console.log(`Personas: ${ok.length}/${PERSONAS.length} completed, total flags: ${flagged.length}`);
