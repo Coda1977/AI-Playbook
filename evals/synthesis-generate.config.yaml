@@ -99,7 +99,15 @@ defaultTest:
         }
         return true;
 
-    # 6. No invented deadline in the title (unless input stated one; both tests here don't).
+    # 6. Actions are human moves: never "Build/Create/Set up a system" starts.
+    - type: javascript
+      value: |
+        const parsed = typeof output === "string" ? JSON.parse(output) : output;
+        const r = (parsed && parsed.type === "tool_use" && parsed.input) ? parsed.input : parsed;
+        const offenders = (r.actions || []).filter(a => /^(build|create|set up)\b/i.test(a.trim()));
+        return offenders.length === 0 || { pass: false, score: 0, reason: `Workflow-implementation action starts: ${offenders.map(a => '"' + a.slice(0,50) + '"').join(" | ")}` };
+
+    # 7. No invented deadline in the title (unless input stated one; both tests here don't).
     - type: javascript
       value: |
         const parsed = typeof output === "string" ? JSON.parse(output) : output;

@@ -226,6 +226,11 @@ export default async function handler(req, res) {
     // commitment fields so the response shape stays exactly what the client
     // has always consumed.
     const raw = toolBlock.input;
+    // Observability: which four ideas the model committed as big swings
+    // (verifiable in Vercel logs; the field never reaches the client).
+    if (Array.isArray(raw.bigSwings) && raw.bigSwings.length) {
+      console.log("bigSwings:", raw.bigSwings.join(" | "));
+    }
     const focus = Array.isArray(raw.focusCategories)
       ? raw.focusCategories.slice(0, 2)
       : [];
