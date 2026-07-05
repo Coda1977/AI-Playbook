@@ -1,7 +1,18 @@
 import { RULES, CATEGORIES } from "../lib/workshop.js";
 import { rejectForeignOrigin } from "../lib/apiGuard.js";
 
-function buildPrimitivesSystem({ intake, category, currentItems, allPrimitives }) {
+// "Go bigger" is a spoken move in the workshop room: any request containing
+// big/bold flips this turn's suggestions to transformative reshapes. Detected
+// server-side because asking the model to notice is unreliable.
+const BIG_ASK = /\b(big|bigger|biggest|bold|bolder|boldest|huge)\b/i;
+
+function buildPrimitivesSystem({
+  intake,
+  category,
+  currentItems,
+  allPrimitives,
+  wantsBig,
+}) {
   const helpLabels = (intake.helpWith || []).join(", ");
   const currentBlock =
     currentItems && currentItems.length
@@ -53,7 +64,13 @@ YOUR STYLE:
 - NO em dashes. Use commas, semicolons, periods, colons, or parentheses.
 - NO "isn't X, it's Y" or "not just X, it's Y" parallelism. State the affirmative directly.
 
-RESPONSE FORMAT:
+${
+    wantsBig
+      ? `THE MANAGER JUST ASKED FOR BIGGER. This turn, every suggested idea must be a transformative reshape of work they already own: replace a deliverable with something better, turn a periodic event into a continuous practice, invert who does the work, or unlock something the team never had capacity for. State each idea's first probe within the sentence, and still keep every idea under 25 words. No incremental accelerations this turn; if only one idea is truly transformative, suggest that one alone.
+
+`
+      : ""
+  }RESPONSE FORMAT:
 Use the reply_with_ideas tool. Put your conversational reply in "content": 2-3 sentences, MAX 60 words total, no preamble, no recap, no filler. End it with a question that opens a DIFFERENT angle they haven't explored yet - don't keep drilling into the same direction. Put 1-2 suggested ideas in "ideas", each a 15-20 word action sentence starting with a verb. Use categoryId "${category.id}" unless an idea clearly belongs in another category, then use that category's id.`;
 }
 
@@ -63,6 +80,7 @@ function buildPlaybookSystem({
   currentItems,
   allPlan,
   starredPrimitives,
+  wantsBig,
 }) {
   const actBlock =
     currentItems && currentItems.length
@@ -134,7 +152,13 @@ INSTRUCTIONS:
 7. Cross-rule connections only when genuinely useful: "This connects to Rule 4 -- you could share those results in your next team meeting (Rule 5)."
 8. STYLE: No em dashes. Use commas, semicolons, periods, colons, or parentheses. No "isn't X, it's Y" or "not just X, it's Y" parallelism, state the affirmative directly.
 
-RESPONSE FORMAT:
+${
+    wantsBig
+      ? `THE MANAGER JUST ASKED FOR BOLDER. This turn, suggest braver change moves: a bigger pilot, a more ambitious default change, a harder conversation, a more public commitment. Still concrete and startable within 1-2 months, but stop playing safe this turn.
+
+`
+      : ""
+  }RESPONSE FORMAT:
 Use the reply_with_ideas tool. Put your conversational reply in "content": 60 words max, ending with a question. Put 1-2 suggested actions in "ideas", each under 25 words starting with a verb, with ruleId "${rule.id}".`;
 }
 
@@ -160,15 +184,23 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
+  const wantsBig = BIG_ASK.test(userMessage || "");
   const sys =
     mode === "primitives"
-      ? buildPrimitivesSystem({ intake, category, currentItems, allPrimitives })
+      ? buildPrimitivesSystem({
+          intake,
+          category,
+          currentItems,
+          allPrimitives,
+          wantsBig,
+        })
       : buildPlaybookSystem({
           intake,
           rule,
           currentItems,
           allPlan,
           starredPrimitives,
+          wantsBig,
         });
 
   // Replay the stored transcript. Two fidelity fixes over the raw store:

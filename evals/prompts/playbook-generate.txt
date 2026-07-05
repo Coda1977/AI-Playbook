@@ -19,12 +19,12 @@ CONTEXT, THIS SPECIFIC PERSON:
 - 90-day success vision: {{successVision}}
 </manager_profile>
 
-STARRED AI USE CASES (the manager chose these as most important):
+STARRED AI USE CASES (what the team is adopting):
 <starred_use_cases>
 {{starredBlock}}
 </starred_use_cases>
 
-IMPORTANT: Reference these specific AI use cases in your actions where natural. For example, if they starred a content creation idea, Rule 3 (Script the Steps) actions should mention that specific use case as a concrete starting point. Make the playbook connect to the AI use cases they actually care about. If a starred use case is TRANSFORMATIVE (it replaces a deliverable or changes how the work happens), Rule 1 must paint the after-state around it and its first small probe IS the Rule 4 pilot; a transformative star outranks accelerator stars for the pilot slot.
+These starred use cases are the CONTENT of the change, never the subject of your actions. This plan is not about building or operating them; it is about what the manager says, structures, and follows up on so their PEOPLE adopt the new way of working. The five rules are your engine; the use cases only tell you what the change is called. Name a workflow only where the methodology needs it: scripting the team's first step (Rule 3), containing the pilot (Rule 4), sharing its result (Rule 5), at most one destination line (Rule 1). If a starred use case is TRANSFORMATIVE (it replaces a deliverable or changes how the work happens), Rule 1 must paint the after-state around it and its first small probe IS the Rule 4 pilot; a transformative star outranks accelerator stars for the pilot slot.
 
 IMPORTANT CONTEXT SIGNALS TO PAY ATTENTION TO:
 - The gap between manager fluency and team fluency is critical. A Transformative manager with a Not Yet Started team needs to slow down and build safety. A Capable manager with a Capable team needs momentum and scripted steps.
@@ -50,6 +50,7 @@ First, decide which ONE or TWO rules the context signals above single out for th
 - Sensitive to their fluency levels (don't suggest advanced moves for not-yet-started teams, don't suggest basics for transformative teams)
 - Sensitive to their failure risks (if people fear job loss, don't generate actions that ignore that fear)
 - Connected across rules where natural (e.g., a small experiment from Rule 4 might connect to making progress visible in Rule 5)
+- A change move, never workflow implementation: every action's subject is a person or the team, and the AI workflow may only be its object. "Ask Dana to run the pilot on Thursday's debrief and bring it to review" is change work; "Build the prompt template" is Phase 2 work wearing an action's clothes. If an action's real content is configuring, building, or operating the AI workflow, replace it with the human move around it.
 - Anchor roles: pick the pilot workflow from the starred use cases, then place it deliberately. It belongs in Rule 3 (script it) and Rule 4 (pilot it), and MAY appear once in Rule 5 (share its results). Rule 2 (Make It Safe) actions are about people and fears, never about any workflow's mechanics. Rule 1 names the pilot workflow in at most one action; its other actions anchor to people and outcomes. Hard ceiling: the same workflow appears in at most 4 of the 12 actions. Starred use cases that are not the pilot should still appear somewhere.
 - Transformative star routing: if a starred use case reshapes how the work happens (replaces a deliverable, turns a periodic event into a continuous practice, inverts who does the work), treat it as Rule 1 destination material (the vivid after-state) and make its first small probe the Rule 4 pilot; it outranks accelerator stars for the pilot slot. Do not scatter it across the other rules.
 
@@ -62,6 +63,7 @@ QUALITY CHECK BEFORE RETURNING, VERIFY EACH ACTION:
 6. STYLE: No em dashes anywhere. Use commas, semicolons, periods, colons, or parentheses. No "isn't X, it's Y" or "not just X, it's Y" parallelism, state the affirmative directly.
 7. COUNT: exactly 2 actions per rule, exactly 3 for the rule(s) in prioritizedRules. If any other rule ended up with 3, delete its weakest action.
 8. ANCHOR COUNT: if the same workflow or deliverable appears in more than 4 actions, rewrite the excess to other starred items or people-focused moves.
+9. SUBJECT: is the action about people adopting the change? If its real content is configuring, building, or operating the AI workflow, replace it with the human move around it.
 
 RULES:
 Rule 1 (id: "destination"): Start at the End

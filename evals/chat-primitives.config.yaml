@@ -41,6 +41,10 @@ prompts:
     label: chat-primitives
 
 defaultTest:
+  vars:
+    # Mirrors the conditional big-mode injection in api/chat.js: empty on a
+    # normal turn, filled when the user's message matches BIG_ASK.
+    bigModeBlock: ""
   assert:
     # 1. Tool output parses to {content, ideas}.
     - type: javascript
@@ -185,5 +189,25 @@ tests:
           Response should reference HR-specific work (performance reviews, comp benchmarking, manager coaching) and propose research/synthesis use cases that pair with those.
           The manager is "Not yet started": ideas must be low-barrier, no special setup.
           Fail if ideas are generic AI-for-HR (e.g., "screen resumes faster" without role-specific framing).
+
+  - description: "OD director says go bigger — big mode must produce transformative reshapes"
+    vars:
+      role: "Director of Organizational Development at a 400-person SaaS, leads 5 L&D partners"
+      responsibilities: "Leadership programs, manager training curricula, org design, engagement surveys, executive coaching."
+      helpWith: "Improve the quality of what I produce, Take on things I can't do today"
+      managerFluency: "Capable"
+      teamFluency: "Capable"
+      categoryTitle: "Strategy & Ideation"
+      categoryDescription: "Planning, brainstorming, problem-solving"
+      categoryId: "ideation"
+      currentItemsBlock: "- Red-team a draft leadership program design against learning science evidence\n- Brainstorm between-session practice nudges mapped to each workshop module"
+      otherCategoriesBlock: "- Content Creation (categoryId \"content\"): Draft workshop facilitation guides from program outlines\n- Task Automation (categoryId \"automation\"): (none)\n- Research & Synthesis (categoryId \"research\"): (none)\n- Data & Insights (categoryId \"data\"): (none)\n- Technical Work (categoryId \"coding\"): (none)"
+      userMessage: "These all feel small. Go bigger."
+      bigModeBlock: "THE MANAGER JUST ASKED FOR BIGGER. This turn, every suggested idea must be a transformative reshape of work they already own: replace a deliverable with something better, turn a periodic event into a continuous practice, invert who does the work, or unlock something the team never had capacity for. State each idea's first probe within the sentence, and still keep every idea under 25 words. No incremental accelerations this turn; if only one idea is truly transformative, suggest that one alone.\n\n"
+    assert:
+      - type: llm-rubric
+        value: |
+          The manager asked to go bigger. Every suggested idea must be a genuine transformative reshape of OD/L&D work the manager already owns: replacing a deliverable with something better, turning a periodic event (program, survey, review) into a continuous practice, inverting who does the work, or unlocking capacity that never existed. Each suggestion should state or imply its first small probe.
+          Fail if any suggestion is an incremental acceleration (a faster draft, a better summary), or if the ideas leave the manager's stated realms entirely, or if no first probe is stated or implied.
 
 outputPath: ./output/chat-primitives-results.json

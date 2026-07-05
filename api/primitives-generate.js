@@ -36,20 +36,21 @@ WHAT COUNTS AS A USE CASE (strict):
 - NEVER suggest ideas about the AI adoption effort itself: no AI adoption plans, no AI training sessions or exercises, no rollout strategies, no prompt libraries, no "teach the team to use AI" ideas. Driving adoption is a later phase of this workshop.
 - The 90-day vision tells you WHICH work matters most, not what to plan. If the vision says "every CSM uses AI to prep QBRs," the use case is AI-assisted QBR prep, never a plan for getting CSMs to use AI.
 
-THINK AT TWO ALTITUDES (both welcome, no quota either way):
-- ACCELERATORS: the same deliverable, produced better or faster.
-- TRANSFORMATIVE: change how the work itself happens. Replace a deliverable with something better, turn a periodic event into a continuous practice, invert who does the work, or make something possible the team never had capacity for. A transformative idea still fits one 15-20 word sentence, and its sentence must state or imply its first probe, the small experiment that tests it.
+THINK AT TWO ALTITUDES:
+- ACCELERATORS: the same deliverable, produced better or faster. Eight of the 12 ideas are accelerators.
+- BIG SWINGS: FOUR of the 12 ideas must transform how the work itself happens, INSIDE realms the manager already named: replace a deliverable with something better, turn a periodic event into a continuous practice, invert who does the work, or make something possible the team never had capacity for. A big swing is not a new realm of work; it is a bigger destination for work the manager already wrote about. Each fits one 15-20 word sentence that states or implies its first probe, and each clears the floors. Commit all four in the bigSwings field.
 
 FLOORS (every idea must clear all of them):
 - It serves an outcome this manager owns and can act on within their own authority.
 - Hard constraints in the failure risks are generation constraints. If veterans reject AI-written customer emails, nothing sends AI-written customer emails (drafting that a human rewrites is fine, and say so). If employee data must stay in approved tools, nothing feeds individual employee data to AI. An idea that brushes a named failure risk has near-zero adoption probability: its sentence must name the safe input form (anonymized, aggregated, no individual records), or drop it. When the named risk is about perception ("anything that smells like AI reading employee data"), mitigation is not enough; keep AI away from that data entirely.
 - Ideas the TEAM runs must be feasible for THIS team: ${teamFluencyFloor(intake.teamFluency)} An idea only the manager runs personally may use the manager's fluency instead, and a tool the manager sets up once that the team then uses by simple chat counts as team-feasible.
 - When the valuable version of an idea exceeds the team's fluency, offer the version this team could run today (an automated digest becomes a weekly paste-into-chat habit); the feasible version is the idea's first probe.
+- The floor constrains an idea's FIRST PROBE, never its destination's size. A Capable team can adopt a transformative reshape whose probe is one preloaded assistant or one paste-into-chat habit. Fluency limits how an idea starts, not how big it is allowed to be.
 - This team could absorb it within a quarter.
 
 CHOOSE BY EXPECTED VALUE for this manager:
 - Recurrence and reach of the pain it relieves; pain intensity; proximity to the 90-day vision; adoption probability given fluency and the named resistance.
-- Size is NOT a criterion in either direction. A small idea hitting a daily pain can outrank a grand one; a transformative idea that clears the floors can outrank ten accelerators. When two ideas are equal on value, keep the more surprising one.
+- Within each altitude, let value decide; when two ideas are equal on value, keep the more surprising one. Never fill a big-swing slot with a dressed-up accelerator, and never pad an accelerator slot with a vague ambition.
 
 PORTFOLIO (structural constraints on the 12):
 - 12 ideas total, every category gets at least 1. The one or two categories that best fit the role, responsibilities, help-with, and vision get 3 each; the category that is the biggest stretch for this role gets 1; the rest get 2. Commit your choices in the focusCategories and stretchCategory fields; the counts are enforced from that commitment.
@@ -110,6 +111,7 @@ export default async function handler(req, res) {
         ...CATEGORIES.map((c) => c.id),
         "focusCategories",
         "stretchCategory",
+        "bigSwings",
       ],
       properties: {
         ...properties,
@@ -126,6 +128,14 @@ export default async function handler(req, res) {
           enum: CATEGORIES.map((c) => c.id),
           description:
             "The category that is the biggest stretch for this role; it gets exactly 1 idea",
+        },
+        bigSwings: {
+          type: "array",
+          minItems: 4,
+          maxItems: 4,
+          items: { type: "string" },
+          description:
+            "The four final ideas (quoted verbatim) that transform how the work happens inside realms the manager named, each with its first probe stated or implied",
         },
         modalityCoverage: {
           type: "object",

@@ -18,7 +18,7 @@ providers:
           description: "Submit the personalized AI use cases. focusCategories names the 1-2 best-fit categories (3 ideas each) and stretchCategory the biggest stretch (1 idea); every other category gets 2. Each idea is a 15 to 20 word sentence starting with a verb."
           input_schema:
             type: object
-            required: ["content", "automation", "research", "data", "coding", "ideation", "focusCategories", "stretchCategory"]
+            required: ["content", "automation", "research", "data", "coding", "ideation", "focusCategories", "stretchCategory", "bigSwings"]
             properties:
               focusCategories:
                 type: array
@@ -30,6 +30,12 @@ providers:
                 type: string
                 enum: ["content", "automation", "research", "data", "coding", "ideation"]
                 description: "The category that is the biggest stretch for this role; it gets exactly 1 idea"
+              bigSwings:
+                type: array
+                minItems: 4
+                maxItems: 4
+                items: { type: string }
+                description: "The four final ideas (quoted verbatim) that transform how the work happens inside realms the manager named, each with its first probe stated or implied"
               modalityCoverage:
                 type: object
                 required: ["preloadedAssistant", "critique", "rolePlay", "transcription"]
@@ -224,7 +230,7 @@ tests:
           2. The team is "Not yet started": every idea aimed at the team must work by pasting text into a chat tool or chatting with an assistant the manager set up for them; no integrations, pipelines, or custom automation (ideas the manager runs personally are exempt and may use the manager's fluency). A recurring habit where a PERSON pastes something into chat on a rhythm (each Monday, weekly) is a valid low-barrier idea, not an automated pipeline.
           3. At least one idea serves the stated 90-day vision (AI-assisted PRs or faster sprint prep).
           4. Ideas respect the failure risk: nothing forces AI-generated code on the skeptical senior engineers as a mandate.
-          Judge value, not size: do not reward or penalize an idea for being ambitious or modest in itself.
+          Altitude: roughly four of the ideas should be genuine BIG SWINGS, transformative reshapes of realms the manager named (replace a deliverable, turn a periodic event into a continuous practice, invert who does the work), each stating or implying a first probe that fits the team fluency floor. Fail if every idea is an incremental acceleration of an existing deliverable.
           Fail if more than 3 of the ideas are generic, or if fewer than four distinct AI modality families appear across the list (one-shot transformation, preloaded assistant, critique/red-team, role-play/simulation, transcription plus synthesis, AI inside existing tools, automated workflows).
 
   - description: "Marketing director — wants creative leverage"
@@ -244,7 +250,7 @@ tests:
           Category fidelity: "Strategy & Ideation" ideas should focus on campaign concepts/positioning; "Data & Insights" on customer/funnel analytics.
           Given the manager wants creative leverage (helpWith), Content Creation or Strategy & Ideation should be among the categories with the MOST ideas, and a stretch category like Technical Work should have fewer.
           Ideas respect the failure risk: no AI copy goes out unreviewed; drafts a human edits are fine.
-          Judge value, not size: do not reward or penalize an idea for being ambitious or modest in itself.
+          Altitude: roughly four of the ideas should be genuine BIG SWINGS, transformative reshapes of realms the manager named (replace a deliverable, turn a periodic event into a continuous practice, invert who does the work), each stating or implying a first probe that fits the team fluency floor. Fail if every idea is an incremental acceleration of an existing deliverable.
           Fail if ideas are interchangeable with a generic "marketer" template, or if fewer than four distinct AI modality families appear across the list (one-shot transformation, preloaded assistant, critique/red-team, role-play/simulation, transcription plus synthesis, AI inside existing tools, automated workflows).
 
   - description: "Customer Success lead — wants team enablement"
@@ -264,7 +270,7 @@ tests:
           The "Research & Synthesis" category should produce ideas about prepping QBRs or summarizing account history, not generic research.
           The team is "Not yet started": ideas aimed at the team must be low-barrier, things a CSM could try this week by pasting text into a chat tool or by chatting with an assistant the manager set up for them; no integrations, triggers, or automated pipelines (ideas the manager runs personally are exempt). A recurring habit where a PERSON pastes something into chat on a rhythm (each Monday, weekly) is a valid low-barrier idea, not an automated pipeline.
           Ideas respect the failure risk: nothing sends AI-written customer emails; drafting that a human rewrites is acceptable only if the idea says so.
-          Judge value, not size: do not reward or penalize an idea for being ambitious or modest in itself.
+          Altitude: roughly four of the ideas should be genuine BIG SWINGS, transformative reshapes of realms the manager named (replace a deliverable, turn a periodic event into a continuous practice, invert who does the work), each stating or implying a first probe that fits the team fluency floor. Fail if every idea is an incremental acceleration of an existing deliverable.
           Fail if more than 3 ideas are generic, or if fewer than four distinct AI modality families appear across the list (one-shot transformation, preloaded assistant, critique/red-team, role-play/simulation, transcription plus synthesis, AI inside existing tools, automated workflows).
 
 outputPath: ./output/primitives-generate-results.json

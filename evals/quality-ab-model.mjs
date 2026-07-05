@@ -109,11 +109,12 @@ function currentTool(vars) {
     name: "submit_use_cases",
     description: "Submit the personalized AI use cases. focusCategories names the 1-2 best-fit categories (3 ideas each) and stretchCategory the biggest stretch (1 idea); every other category gets 2. Each idea is a 15 to 20 word sentence starting with a verb.",
     input_schema: {
-      type: "object", required: [...CATS, "focusCategories", "stretchCategory"],
+      type: "object", required: [...CATS, "focusCategories", "stretchCategory", "bigSwings"],
       properties: {
         ...Object.fromEntries(CATS.map((c) => [c, catField()])),
         focusCategories: { type: "array", minItems: 1, maxItems: 2, items: { type: "string", enum: CATS }, description: "The 1-2 categories that best fit this manager; each gets 3 ideas" },
         stretchCategory: { type: "string", enum: CATS, description: "The category that is the biggest stretch for this role; it gets exactly 1 idea" },
+        bigSwings: { type: "array", minItems: 4, maxItems: 4, items: { type: "string" }, description: "The four final ideas (quoted verbatim) that transform how the work happens inside realms the manager named, each with its first probe stated or implied" },
         modalityCoverage: {
           type: "object",
           required: [...(canPreload ? ["preloadedAssistant"] : []), "critique", "rolePlay", "transcription"],
@@ -227,7 +228,7 @@ FLOORS every idea must clear (a violation is a defect):
 
 Also value: concrete input and output per idea (the manager knows what goes in and what comes back); modality spread (a monoculture of paste-a-prompt transactions is a defect); a couple of genuinely non-obvious ideas.
 
-IMPORTANT: Do NOT reward or penalize an idea for its size or ambition in itself. A small idea hitting a daily pain can be the highest-value item on the list; a transformative idea that clears the floors and states its first probe is equally legitimate. Judge value, never altitude.`;
+ALTITUDE MIX: the list should contain roughly four genuine big swings, transformative reshapes of realms the manager named (replace a deliverable, turn a periodic event into a continuous practice, invert who does the work), each with a first probe that fits the fluency floor, alongside grounded accelerators. A list where every idea is an incremental acceleration is a defect. Never reward ambition that violates the floors, and never penalize the accelerator ideas for being modest.`;
 
 async function judgeAbs(vars, ideas) {
   return anthropic({

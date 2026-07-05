@@ -41,6 +41,9 @@ prompts:
     label: chat-playbook
 
 defaultTest:
+  vars:
+    # Mirrors the conditional big-mode injection in api/chat.js.
+    bigModeBlock: ""
   assert:
     # 1. Tool output parses to {content, ideas}.
     - type: javascript
@@ -180,7 +183,7 @@ tests:
       ruleName: "Start at the End"
       ruleId: "destination"
       rulePrinciple: "Show the destination and create emotional resonance."
-      ruleGuidance: "Help them make the destination concrete and emotional. Two powerful techniques: (1) The Magic Question, ask them to imagine waking up after the change has happened overnight, what clues would they see and hear? This forces specificity. (2) Definition of Done, once the destination is clear, write it as a testable statement the whole team can point to. Push them to try it themselves first if they haven't, they can't show a destination they haven't visited."
+      ruleGuidance: "If the manager has not used AI themselves yet, that comes before everything: they cannot show a destination they have not visited, so their own first hands-on experience is action #1. Then help them make the destination concrete and emotional. Two powerful techniques: (1) The Magic Question, ask them to imagine waking up after the change has happened overnight, what clues would they see and hear? This forces specificity. (2) Definition of Done, once the destination is clear, write it as a testable statement the whole team can point to."
       actionsBlock: "(no actions yet)"
       allActionsBlock: "Rule 1 (Start at the End): (none)\nRule 2 (Make It Safe): (none)\nRule 3 (Script the Steps): (none)\nRule 4 (Start Small, to go Big): (none)\nRule 5 (Make Progress Visible): (none)"
       userMessage: "How do I describe what success looks like to my team?"
