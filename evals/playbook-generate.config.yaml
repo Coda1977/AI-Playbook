@@ -255,4 +255,24 @@ tests:
           3. Rule 3-5 should match the ambitious vision (embedded everywhere) with concrete scripts and metrics.
           Fail if actions are remedial (e.g., "schedule an AI 101 training") for a clearly advanced team.
 
+  - description: "Internal coach — client-serving starred pilot must not turn clients into the change audience"
+    vars:
+      role: "Internal Executive Coach at a 600-person SaaS company, coaching 30 senior leaders alongside two fellow internal coaches"
+      responsibilities: "One-on-one executive coaching sessions, 360 feedback debriefs, leadership assessments, development plans, offsite facilitation, growing the internal coaching program"
+      helpWith: "Improve the quality of what I produce, Scale my impact beyond my capacity"
+      managerFluency: "Capable, uses AI purposefully for specific tasks"
+      teamFluency: "Capable, the other coaches use AI individually and inconsistently"
+      failureRisks: "Coaching lives on confidentiality; if leaders suspect their session content touches an AI tool, candor dies instantly. My two fellow coaches also see AI-drafted development feedback as impersonal and beneath the craft"
+      successVision: "Every leader practices between sessions with structured reflection, and we coach twice as many leaders without losing depth"
+      starredBlock: "- Content Creation: Invert development plan authorship by having each leader draft their own plan in AI, then you refine and coach against it\n- Research & Synthesis: Query AI with anonymized leadership challenge patterns to surface relevant research for your debriefs"
+    assert:
+      - type: llm-rubric
+        value: |
+          The manager's "team" is the two fellow internal coaches. The 30 coached leaders are CLIENTS, and the starred pilot's users are those clients. Check the change audience:
+          1. Rule 2 (safe) actions engage the fellow coaches (craft fear, confidentiality red line), never the coached leaders.
+          2. No action manages a client's feelings, first steps, or adoption (e.g., "script a leader's first step", "share the vision with all 30 leaders"). A single leader may appear only as the Rule 4 pilot's scope (e.g., "pilot the inverted plan workflow with one leader").
+          3. Actions script the COACHES' behavior in the new way of working (how a coach runs the new session format, what the coaches review together), not the leaders' behavior.
+          4. Confidentiality is treated as a hard constraint somewhere in the plan.
+          Fail if two or more actions treat coached leaders as the change audience, or if Rule 2 is aimed at clients instead of the fellow coaches.
+
 outputPath: ./output/playbook-generate-results.json

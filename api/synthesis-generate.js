@@ -63,6 +63,8 @@ CRITICAL RULES:
 - The starred items (marked *) are the manager's chosen priorities. Build the move around them and draw the actions primarily from starred items, both use cases and change actions. Use an unstarred item only when the move genuinely needs it to hold together.
 - Actions are ordered by priority. First action = most important thing to do tomorrow.
 - Mix use cases and change actions freely. The manager doesn't care about the distinction; they care about what to do.
+- When an action draws on a use case, write it as a person DOING its first probe ("Run next week's 360 debrief through the new brief format"), never as a restated workflow description ("Build a standing knowledge base that..."). Every action is a human move.
+- Actions belong to the manager and their own team. Clients, customers, or the people the team serves may appear as the pilot's scope, never as the actor whose behavior an action manages.
 - Never invent experiences, metrics, outcomes, or stories.
 - NO EM DASHES anywhere. Use periods, commas, colons, semicolons, or parentheses.
 - NO "isn't X, it's Y" or "not just X, it's Y" parallelism. State the affirmative directly.

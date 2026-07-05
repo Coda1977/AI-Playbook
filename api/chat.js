@@ -66,7 +66,7 @@ YOUR STYLE:
 
 ${
     wantsBig
-      ? `THE MANAGER JUST ASKED FOR BIGGER. This turn, every suggested idea must be a transformative reshape of work they already own: replace a deliverable with something better, turn a periodic event into a continuous practice, invert who does the work, or unlock something the team never had capacity for. State each idea's first probe within the sentence, and still keep every idea under 25 words. No incremental accelerations this turn; if only one idea is truly transformative, suggest that one alone.
+      ? `THE MANAGER JUST ASKED FOR BIGGER. Bigger means the destination changes: what this work IS, who it serves, or what the team becomes capable of, not how fast today's version runs. Picture the best-run version of their function a few years out, and work backward to one idea they could start probing this week. Cast a wide net across everything they told you: each suggestion should open territory the board does not yet have, a different deliverable, rhythm, or owner than anything already visible. Keep each under 25 words with its first probe stated, and talk about their work, not your method. If only one idea is truly that big, suggest that one alone.
 
 `
       : ""
