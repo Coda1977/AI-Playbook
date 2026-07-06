@@ -79,6 +79,14 @@ Yonatan reviewed three full journeys in the app (OD director, internal executive
 - Gold per-function use-case library: still the strongest untried quality lever; feeds the bigSwings slots.
 - Parked: structural dominance second-pass, per-IP rate limiting, Anthropic console spend limit, big-mode floor clause after repeated escalation, big-mode reply-opener variety.
 
+## Session 4 (2026-07-06): knowledge experiments -> bold moves -> SHIPPED
+
+- Yonatan read the Phase 3 prompt and proposed a competitive prompt: intake + his full 5-rules article + creative freedom. Level 0 competition built (evals/playbook-ab.mjs + playbook-freeform.txt): article-with-freedom LOST 0-3-1; clean knowledge test (article inside identical engineering, playbook-article.txt) tied at noise level over two runs. Verdict: the condensed promptHints already carry the methodology; knowledge density is not the lever. Freshness scored 2-4 for every arm, exposing the real gap.
+- "Big" defined for change plans through two critique rounds. His definition: a bold move CHANGES an operating default the team runs on today (routine, process, deliverable form, ownership) with bounded but genuine risk; accepted risk is what commitment looks like. Rejected: publicity-as-proof, retreat-path removal, power handoffs, sacred rituals. Kept: the dinner test, slight-nervousness test, bold-never-broad (Start Small bounds blast radius), never trample the named fear.
+- Shipped: 3 committed `boldMoves` per plan (schema + server strip + log), chat playbook big-mode rewritten to the definition, boldness as a judged dimension in playbook-ab and the journey judge. Vs production: 3 wins / 5 ties / 0 losses overall, boldness won 7/8. Merged and deployed 2026-07-06.
+- Ops: the Anthropic API monthly usage limit was hit mid-eval (production generations were down until Yonatan raised it). Rate limiting per-IP still parked.
+- Open after this session: gold per-function use-case library (top lever, his authorship); Big Move verbatim-paste watch-item; HR chat near-restatement watch-item; real-workshop read of bold moves (courage vs recklessness in a live room).
+
 ## Open / parked (deliberate)
 - **Push branch → Vercel preview → A/B in a real workshop → PR** (Yonatan's call; nothing pushed yet).
 - **Curated per-function gold use-case library** injected as background knowledge: the strongest remaining idea-quality lever (model swap isn't). Yonatan's expertise → content.
