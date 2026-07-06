@@ -2,6 +2,7 @@ import {
   Star,
   ArrowLeft,
   Download,
+  Printer,
   Check,
   RotateCcw,
   Sparkles,
@@ -370,7 +371,7 @@ export default function CommitmentView({
                 onClick={() => window.print()}
                 className="btn-primary btn-lg"
               >
-                <Download size={15} /> Download as PDF
+                <Printer size={15} /> Print / Save as PDF
               </button>
             </div>
           </footer>

@@ -1,4 +1,4 @@
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Printer } from "lucide-react";
 import { exportSynthesisDocx } from "../../utils/export";
 
 export default function SynthesisView({ state, dispatch }) {
@@ -42,7 +42,7 @@ export default function SynthesisView({ state, dispatch }) {
           <Download size={15} /> Export Word
         </button>
         <button onClick={() => window.print()} className="btn-primary btn-lg">
-          <Download size={15} /> Download PDF
+          <Printer size={15} /> Print / Save as PDF
         </button>
       </div>
     </div>
