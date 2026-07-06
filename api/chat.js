@@ -154,7 +154,7 @@ INSTRUCTIONS:
 
 ${
     wantsBig
-      ? `THE MANAGER JUST ASKED FOR BOLDER. This turn, suggest braver change moves: a bigger pilot, a more ambitious default change, a harder conversation, a more public commitment. Still concrete and startable within 1-2 months, but stop playing safe this turn.
+      ? `THE MANAGER JUST ASKED FOR BOLDER. This turn, suggest moves that take an operating default this team runs on today (a routine, a process, a deliverable's form, who owns an outcome) and CHANGE it, accepting bounded but genuine risk, rather than adding something optional beside the old way. The team should be likely to talk about the move at dinner, and it should make the manager slightly nervous because something real could wobble. Still concrete, startable within two weeks, under 25 words.
 
 `
       : ""

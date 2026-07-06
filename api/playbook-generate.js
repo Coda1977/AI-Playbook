@@ -66,6 +66,12 @@ CREATIVE LATITUDE, FUELED BY THE INTAKE:
 - Two managers with different intakes must get visibly different plans. If an action would fit any manager with the same job title, sharpen it with a detail from this intake or replace it. Standard moves (a leader demo, a 1:1, a pilot) earn their place only when fitted to this team's specific fear, ritual, or moment.
 - One vivid intake detail per action is enough; richness never excuses length. The 25-word discipline holds.
 
+BOLD MOVES (three of the twelve):
+- Exactly THREE of the plan's actions must be BOLD: each takes an operating default this team runs on today (a routine, a process, a deliverable's form, who owns an outcome) and CHANGES it, accepting bounded but genuine risk. Changing how something works, never adding an optional alternative beside the old way.
+- The tests: would the team talk about this move at dinner? Does doing it make the manager slightly nervous because something real could wobble? Accepted risk is what commitment to the change looks like; a move that costs the manager nothing is communication, not commitment.
+- Bold never means broad: the risk is real but the blast radius stays bounded (one segment, one cycle, one workflow), exactly as Start Small demands. And bold never tramples the intake's named fear; a bold move that ignores it is recklessness, not courage.
+- Commit the three in the boldMoves field, quoted verbatim from your actions.
+
 TASK:
 First, decide which ONE or TWO rules the context signals above single out for this manager, and commit to them in the prioritizedRules field. Then generate EXACTLY 2 actions for every rule, except the prioritized rule(s) which get EXACTLY 3. That is 11 or 12 actions total, never more. Every action must be:
 - Specific to THIS person's role, team, and situation, not interchangeable with someone else's plan
@@ -106,7 +112,7 @@ Use the submit_change_plan tool to return your actions for each rule.`;
       "Submit the personalized change strategy. prioritizedRules names the 1-2 rules that get a third action; every other rule gets exactly 2 actions (11-12 total). Each action is under 25 words and starts with a concrete verb.",
     input_schema: {
       type: "object",
-      required: ["prioritizedRules", ...RULES.map((r) => r.id)],
+      required: ["prioritizedRules", "boldMoves", ...RULES.map((r) => r.id)],
       properties: {
         // Declared first so the model commits to its priorities before
         // writing actions; without this commitment it hands 3 actions to
@@ -118,6 +124,14 @@ Use the submit_change_plan tool to return your actions for each rule.`;
           items: { type: "string", enum: RULES.map((r) => r.id) },
           description:
             "The one or two rule ids the context signals prioritize for this manager. Only these rules get a third action.",
+        },
+        boldMoves: {
+          type: "array",
+          minItems: 3,
+          maxItems: 3,
+          items: { type: "string" },
+          description:
+            "The three actions (quoted verbatim) that change an operating default the team runs on today, accepting bounded but genuine risk",
         },
         ...Object.fromEntries(RULES.map((r) => [r.id, ruleField(r)])),
       },
@@ -171,7 +185,12 @@ Use the submit_change_plan tool to return your actions for each rule.`;
     // express "3 only for the rules named in prioritizedRules". Enforce the
     // lighter-output contract deterministically: 2 actions per rule, 3 for
     // the 1-2 prioritized rules, 10-12 total.
-    const { prioritizedRules, ...plan } = toolBlock.input;
+    const { prioritizedRules, boldMoves, ...plan } = toolBlock.input;
+    // Observability: which three actions the model committed as bold moves
+    // (Vercel logs only; never reaches the client).
+    if (Array.isArray(boldMoves) && boldMoves.length) {
+      console.log("boldMoves:", boldMoves.join(" | "));
+    }
     const prioritized = Array.isArray(prioritizedRules)
       ? prioritizedRules.slice(0, 2)
       : [];

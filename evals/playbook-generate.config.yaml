@@ -22,6 +22,12 @@ providers:
                 maxItems: 2
                 items: { type: string, enum: ["destination", "safe", "script", "small", "visible"] }
                 description: "The one or two rule ids the context signals prioritize. Only these rules get a third action."
+              boldMoves:
+                type: array
+                minItems: 3
+                maxItems: 3
+                items: { type: string }
+                description: "The three actions (quoted verbatim) that change an operating default the team runs on today, accepting bounded but genuine risk"
               destination:
                 type: array
                 minItems: 2
@@ -106,7 +112,7 @@ defaultTest:
         const offenders = [];
         let wayOver = false;
         for (const [rule, actions] of Object.entries(plan)) {
-          if (rule === "prioritizedRules" || !Array.isArray(actions)) continue;
+          if (["prioritizedRules","boldMoves"].includes(rule) || !Array.isArray(actions)) continue;
           for (const a of actions) {
             const wc = a.trim().split(/\s+/).length;
             // Target 25; the model estimates rather than counts, and actions
@@ -129,7 +135,7 @@ defaultTest:
         const bannedStarts = [/^consider\b/i, /^think about\b/i, /^explore the idea\b/i, /^try to\b/i, /^maybe\b/i];
         const offenders = [];
         for (const [rule, actions] of Object.entries(plan)) {
-          if (rule === "prioritizedRules" || !Array.isArray(actions)) continue;
+          if (["prioritizedRules","boldMoves"].includes(rule) || !Array.isArray(actions)) continue;
           for (const a of actions) {
             const first = a.trim().split(/\s+/)[0] || "";
             if (!/^[A-Z][a-z]+/.test(first)) offenders.push(`${rule}: doesn't start with capitalized verb: "${a.slice(0,40)}"`);
@@ -170,6 +176,7 @@ defaultTest:
         2. Defaults beat broadcasts for Rules 3-5 (script/small/visible, where the intent is installing behavior): flag a STEP-FREE announcement, vision email, or reminder there if a default, template, checklist, or ownership change could carry the same intent with higher behavior-change probability. A specific scripted instruction (one artifact, one step, do it this week) is the script rule's signature move, not a broadcast; never flag it. Rules 1-2 legitimately live in conversation, story, and meetings; do not flag those.
         3. Stock moves are fit-checked: flag a move only when the profile CONTRADICTS its ingredient, e.g. "learn from the person who already uses AI" on a team explicitly described as not yet started, or a venue (offsite, lunch-and-learn series) the profile never mentions used as a linchpin. Asking who is most open to trying, or recruiting the most willing person, is a valid move, not an assumed ingredient.
         4. Change moves, not workflow implementation: flag any action whose real content is building, configuring, or operating the AI workflow itself (building prompt templates, setting up tools, the manager running the use case as a task). The human move around the workflow is what belongs here: assigning someone to try it, scripting the team's first attempt, reviewing the output together, changing the default that embeds it.
+        6. Bold moves: roughly three actions should CHANGE an operating default the team runs on today (a routine, a process, a deliverable form, an ownership) with bounded but genuine risk, rather than adding optional things beside the old way. Fail if nothing in the plan risks anything.
         Do NOT reward or penalize the mix of move types itself, and do NOT require or reward references to starred use cases; the plan is about leading people, and naming a use case is optional color.
         5. Template check: the plan must be unmistakably THIS manager's. The tell is intake specifics inside the actions: the named fear, the team's actual rituals and deliverables, the fluency gap, the vision's finish line. Fail if the plan would fit any manager with the same job title.
         Fail if two or more actions have no operational content, or if a Rules 3-5 broadcast displaced an obvious default-change, or if a stock move contradicts the profile, or if two or more actions are workflow implementation rather than change moves, or if the plan fails the template check.

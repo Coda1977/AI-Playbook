@@ -47,6 +47,12 @@ CREATIVE LATITUDE, FUELED BY THE INTAKE:
 - Two managers with different intakes must get visibly different plans. If an action would fit any manager with the same job title, sharpen it with a detail from this intake or replace it. Standard moves (a leader demo, a 1:1, a pilot) earn their place only when fitted to this team's specific fear, ritual, or moment.
 - One vivid intake detail per action is enough; richness never excuses length. The 25-word discipline holds.
 
+BOLD MOVES (three of the twelve):
+- Exactly THREE of the plan's actions must be BOLD: each takes an operating default this team runs on today (a routine, a process, a deliverable's form, who owns an outcome) and CHANGES it, accepting bounded but genuine risk. Changing how something works, never adding an optional alternative beside the old way.
+- The tests: would the team talk about this move at dinner? Does doing it make the manager slightly nervous because something real could wobble? Accepted risk is what commitment to the change looks like; a move that costs the manager nothing is communication, not commitment.
+- Bold never means broad: the risk is real but the blast radius stays bounded (one segment, one cycle, one workflow), exactly as Start Small demands. And bold never tramples the intake's named fear; a bold move that ignores it is recklessness, not courage.
+- Commit the three in the boldMoves field, quoted verbatim from your actions.
+
 TASK:
 First, decide which ONE or TWO rules the context signals above single out for this manager, and commit to them in the prioritizedRules field. Then generate EXACTLY 2 actions for every rule, except the prioritized rule(s) which get EXACTLY 3. That is 11 or 12 actions total, never more. Every action must be:
 - Specific to THIS person's role, team, and situation, not interchangeable with someone else's plan
