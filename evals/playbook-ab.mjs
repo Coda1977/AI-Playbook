@@ -1,7 +1,7 @@
-// Phase 3 prompt competition: engineered prompt vs article-fueled freeform.
-//   Arm A: prompts/playbook-generate.txt (production: condensed hints, move
+// Phase 3 prompt competition: hints prompt vs article-fueled article.
+//   Arm A: prompts/playbook-generate.txt (production: condensed hints)
 //          palette, context signals, quality checks)
-//   Arm B: prompts/playbook-freeform.txt (Yonatan's full 5-rules article
+//   Arm B: prompts/playbook-article.txt (Yonatan's full 5-rules article
 //          verbatim as the knowledge base, minimal floors, creative freedom)
 // Same schema, same personas, same server trim. Judge: claude-opus-4-8,
 // balanced scorecard (behavior-change power, personalization, freshness),
@@ -27,7 +27,7 @@ if (!process.env.ANTHROPIC_API_KEY) { console.error("ANTHROPIC_API_KEY missing")
 const JUDGE = "claude-opus-4-8";
 const GEN_MODEL = "claude-sonnet-4-6";
 const PROMPT_A = readFileSync(join(__dirname, "prompts", "playbook-generate.txt"), "utf8");
-const PROMPT_B = readFileSync(join(__dirname, "prompts", "playbook-freeform.txt"), "utf8");
+const PROMPT_B = readFileSync(join(__dirname, "prompts", "playbook-article.txt"), "utf8");
 
 const PERSONAS = [
   {
@@ -181,7 +181,7 @@ async function judgePair(vars, plan1, plan2) {
     let v1 = 0, v2 = 0;
     if (ab[dim] === "A") v1++; else if (ab[dim] === "B") v2++;
     if (ba[dim] === "A") v2++; else if (ba[dim] === "B") v1++;
-    return v1 > v2 ? "engineered" : v2 > v1 ? "freeform" : "tie";
+    return v1 > v2 ? "hints" : v2 > v1 ? "article" : "tie";
   };
   return { behaviorChange: tally("behaviorChange"), personalization: tally("personalization"), freshness: tally("freshness"), overall: tally("overall"), detail: [ab, ba] };
 }
@@ -196,23 +196,23 @@ for (const p of PERSONAS) {
   const vars = { ...p.vars, starredBlock: starredBlockFor(p.key) };
   const [planA, planB] = await Promise.all([generatePlan(PROMPT_A, vars), generatePlan(PROMPT_B, vars)]);
   const [sA, sB] = await Promise.all([judgeAbs(p.vars, planA), judgeAbs(p.vars, planB)]);
-  const pair = await judgePair(p.vars, planA, planB); // 1 = engineered, 2 = freeform
+  const pair = await judgePair(p.vars, planA, planB); // 1 = hints, 2 = article
   const fmt = (s) => `bc${s.behaviorChange} pz${s.personalization} fr${s.freshness}`;
-  console.log(`  engineered: ${fmt(sA)} | freeform: ${fmt(sB)}`);
+  console.log(`  hints: ${fmt(sA)} | article: ${fmt(sB)}`);
   console.log(`  pairwise -> behaviorChange: ${pair.behaviorChange}, personalization: ${pair.personalization}, freshness: ${pair.freshness}, OVERALL: ${pair.overall}`);
-  report.push({ persona: p.label, key: p.key, plans: { engineered: planA, freeform: planB }, absolute: { engineered: sA, freeform: sB }, pair });
-  summary.push({ persona: p.label, engineered: fmt(sA), freeform: fmt(sB), overall: pair.overall });
+  report.push({ persona: p.label, key: p.key, plans: { hints: planA, article: planB }, absolute: { hints: sA, article: sB }, pair });
+  summary.push({ persona: p.label, hints: fmt(sA), article: fmt(sB), overall: pair.overall });
 }
 
 writeFileSync(join(OUT, "playbook-ab.json"), JSON.stringify(report, null, 2));
 
-const md = [`# Phase 3 prompt competition: engineered vs article-fueled freeform`, "",
+const md = [`# Phase 3 knowledge test: condensed hints vs full article, same engineering`, "",
   "| Persona | Engineered (bc/pz/fr) | Freeform (bc/pz/fr) | Overall winner |", "|---|---|---|---|",
-  ...summary.map((s) => `| ${s.persona} | ${s.engineered} | ${s.freeform} | ${s.overall} |`),
+  ...summary.map((s) => `| ${s.persona} | ${s.hints} | ${s.article} | ${s.overall} |`),
 ];
 for (const r of report) {
   md.push("", `## ${r.persona}`, "");
-  for (const [arm, label] of [["engineered", "Engineered (production)"], ["freeform", "Article-fueled freeform"]]) {
+  for (const [arm, label] of [["hints", "Engineered (production)"], ["article", "Article-fueled article"]]) {
     const a = r.absolute[arm];
     md.push(`### ${label} — behaviorChange ${a.behaviorChange}/5, personalization ${a.personalization}/5, freshness ${a.freshness}/5`, `> ${a.verdict}`, "");
     for (const rule of RULE_IDS) for (const act of r.plans[arm][rule]) md.push(`- [${RULE_NAMES[rule]}] ${act}`);
