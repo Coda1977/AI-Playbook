@@ -1,4 +1,4 @@
-import { ArrowLeft, Printer } from "lucide-react";
+import { ArrowLeft, Download, Printer } from "lucide-react";
 import { exportSynthesisDocx } from "../../utils/export";
 
 export default function SynthesisView({ state, dispatch }) {
