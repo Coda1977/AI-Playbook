@@ -89,7 +89,7 @@ body {
   outline-offset: 2px;
 }
 .phase-step:focus-visible {
-  outline-color: rgba(255, 255, 255, 0.85);
+  outline-color: var(--color-ink);
 }
 
 /* -- Animations -- */
@@ -556,7 +556,8 @@ body {
 .header-inner {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 10.25px 24px;
+  height: 57px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
