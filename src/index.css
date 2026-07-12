@@ -1,74 +1,76 @@
 @import "tailwindcss";
 
-/* Self-hosted Montserrat (variable font, weights 400-700) so the design
+/* Self-hosted Hanken Grotesk (variable font, weights 100-900) so the design
    survives venues where Google Fonts is slow or blocked. */
 @font-face {
-  font-family: "Montserrat";
+  font-family: "Hanken Grotesk";
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 100 900;
   font-display: swap;
-  src: url("./assets/fonts/montserrat-latin.woff2") format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
-    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
-    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  src: url("./assets/fonts/hanken-grotesk-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: "Montserrat";
+  font-family: "Hanken Grotesk";
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 100 900;
   font-display: swap;
-  src: url("./assets/fonts/montserrat-latin-ext.woff2") format("woff2");
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
-    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
-    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
-    U+A720-A7FF;
+  src: url("./assets/fonts/hanken-grotesk-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @theme {
   /* Core */
-  --color-black: #000000;
-  --color-charcoal: #222222;
-  --color-dark-gray: #333333;
+  --color-black: #1c1c1e;          /* ink everywhere; nothing is pure black */
+  --color-charcoal: #1c1c1e;
+  --color-dark-gray: #555a6a;
   --color-white: #ffffff;
-  --color-light-gray: #cccccc;
-  --color-surface: #f5f5f5;
-  --color-off-white: #fafafa;
+  --color-light-gray: #e0e2e8;
+  --color-surface: #f7f8fa;
+  --color-off-white: #fafbfc;
 
-  /* Accent */
-  --color-red: #e30613;
-  --color-red-hover: #c00510;
-  --color-red-light: #fff2f3;
-  --color-electric-blue: #00a3e0;
+  /* New semantic palette (spec section 3) */
+  --color-accent: #ffb5ab;         /* salmon */
+  --color-accent-light: #ffdeda;
+  --color-accent-surface: #fff0ee;
+  --color-accent-dark: #a8513f;
+  --color-star: #acd8ff;           /* star blue */
+  --color-star-light: #ddeeff;
+  --color-star-surface: #eff7ff;
+  --color-star-dark: #2f669d;
+  --color-danger: #c6453c;
 
-  /* Legacy aliases for Tailwind utility compat */
-  --color-ink: #000000;
-  --color-ink-light: #222222;
-  --color-accent: #e30613;
-  --color-accent-hover: #c00510;
-  --color-accent-glow: #f5b700;
-  --color-accent-faint: rgba(227, 6, 19, 0.06);
-  --color-muted: #333333;
+  /* Legacy aliases, re-pointed (do NOT delete; classes still reference them) */
+  --color-red: #c6453c;            /* red now ONLY means danger */
+  --color-red-hover: #a83a32;
+  --color-red-light: #fdeeed;
+  --color-electric-blue: #2f669d;  /* old blue accents become star-dark */
+  --color-ink: #1c1c1e;
+  --color-ink-light: #555a6a;
+  --color-accent-hover: #f8a196;
+  --color-accent-glow: #acd8ff;    /* old star amber -> star blue */
+  --color-accent-faint: rgba(255, 181, 171, 0.12);
+  --color-muted: #555a6a;
   --color-card: #ffffff;
-  --color-border: #cccccc;
-  --color-border-strong: #999999;
-  --color-starred-bg: #fff8e1;
-  --color-starred-border: #f5b700;
-  --color-success: #00a3e0;
+  --color-border: #e0e2e8;
+  --color-border-strong: #c7cad5;
+  --color-starred-bg: #ddeeff;     /* star-light */
+  --color-starred-border: #acd8ff; /* star */
+  --color-success: #2f669d;        /* no green: "success" reads as star-dark */
 
   /* Neutrals (legacy) */
-  --color-gray-200: #cccccc;
-  --color-gray-300: #999999;
-  --color-gray-500: #666666;
-  --color-gray-700: #333333;
-  --color-gray-900: #000000;
+  --color-gray-200: #e0e2e8;
+  --color-gray-300: #c7cad5;
+  --color-gray-500: #6b6f7e;
+  --color-gray-700: #555a6a;
+  --color-gray-900: #1c1c1e;
 
   /* Fonts */
-  --font-heading: "Montserrat", system-ui, sans-serif;
-  --font-sans: "Montserrat", system-ui, sans-serif;
-  --font-ui: "Montserrat", system-ui, sans-serif;
-  /* Legacy aliases */
-  --font-serif: "Montserrat", system-ui, sans-serif;
-  --font-mono: "Montserrat", monospace;
+  --font-heading: "Hanken Grotesk", system-ui, sans-serif;
+  --font-sans: "Hanken Grotesk", system-ui, sans-serif;
+  --font-ui: "Hanken Grotesk", system-ui, sans-serif;
+  --font-serif: "Hanken Grotesk", system-ui, sans-serif;
+  --font-mono: "Hanken Grotesk", monospace;
 }
 
 html,

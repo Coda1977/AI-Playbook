@@ -37,7 +37,7 @@ export default class ErrorBoundary extends Component {
           padding: 24,
           background: "#000000",
           color: "#ffffff",
-          fontFamily: "Montserrat, sans-serif",
+          fontFamily: "Hanken Grotesk, sans-serif",
           textAlign: "center",
         }}
       >
@@ -53,7 +53,7 @@ export default class ErrorBoundary extends Component {
             onClick={() => window.location.reload()}
             style={{
               padding: "12px 24px",
-              background: "#e30613",
+              background: "#c6453c",
               color: "#ffffff",
               border: "none",
               fontFamily: "inherit",
