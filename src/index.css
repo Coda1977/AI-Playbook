@@ -1415,39 +1415,6 @@ body {
 .canvas-inner-board {
   width: min(100% - 24px, 1180px);
 }
-.canvas-orientation {
-  padding: 28px 0 24px;
-  border-bottom: 1px solid var(--color-light-gray);
-  margin-bottom: 24px;
-}
-.orientation-stats {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
-}
-.orientation-stat {
-  font-size: 14px;
-  color: var(--color-black);
-}
-.orientation-stat strong {
-  font-weight: 700;
-}
-.orientation-dot {
-  color: var(--color-light-gray);
-  font-size: 16px;
-}
-.orientation-hint {
-  font-family: var(--font-ui);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-dark-gray);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  line-height: 1.5;
-}
-
 /* ========================================
    FOCUS PANEL (board3 middle column header --
    category/rule kicker + title + description)
@@ -1482,6 +1449,20 @@ body {
   color: var(--color-dark-gray);
   font-size: 15px;
   max-width: 60ch;
+}
+/* Rule principle, shown as an inset "the science" panel inside the
+   RuleSection focus head (Change Strategy board). */
+.rule-science {
+  margin: 10px 0 0;
+  padding: 14px 18px;
+  background: var(--color-surface);
+  border-radius: 12px;
+}
+.rule-science p {
+  margin: 0;
+  font-size: 14.5px;
+  color: var(--color-dark-gray);
+  line-height: 1.6;
 }
 .focus-foot {
   margin-top: 18px;
@@ -1558,81 +1539,8 @@ body {
   border-radius: 6px;
 }
 
-/* Legacy rule-section styling (compat) */
-.rule-section {
-  position: relative;
-  overflow: hidden;
-  padding: 28px 24px;
-  background: var(--color-white);
-  border: 1px solid var(--color-charcoal);
-  border-radius: 8px;
-  transition: box-shadow 0.25s ease;
-  animation: fadeInUp 0.5s ease-out both;
-}
-.rule-section:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-}
-.rule-active {
-  box-shadow: 0 0 0 2px var(--color-red);
-}
 .rule-flashing {
   animation: flashPulse 1.2s ease-out;
-}
-.rule-watermark {
-  display: none;
-}
-.rule-content {
-  position: relative;
-  z-index: 10;
-}
-.rule-header {
-  margin-bottom: 8px;
-}
-.rule-number-label {
-  font-family: var(--font-ui);
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.rule-check {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-}
-.rule-name {
-  font-family: var(--font-heading);
-  font-size: 26px;
-  font-weight: 700;
-  margin: 0 0 12px;
-  line-height: 1.15;
-  color: var(--color-black);
-}
-.rule-principle {
-  padding: 14px 20px;
-  margin-bottom: 24px;
-  background: var(--color-surface);
-  border-radius: 6px;
-}
-.rule-principle p {
-  font-size: 15px;
-  font-style: italic;
-  color: var(--color-dark-gray);
-  margin: 0;
-  line-height: 1.6;
-}
-
-/* Rule list */
-.rule-list {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
 }
 
 /* ========================================
@@ -1772,57 +1680,9 @@ body {
   color: var(--color-danger);
   background: var(--color-red-light);
 }
-.action-confirm-delete {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 4px;
-  background: var(--color-red-light);
-  border: 1px solid var(--color-red);
-  color: #c53030;
-  font-size: 12px;
-  font-weight: 500;
-  font-family: var(--font-sans);
-  cursor: pointer;
-  animation: fadeIn 0.15s ease-out;
-  transition: all 0.15s;
-}
-.action-confirm-delete:hover {
-  background: #fee2e2;
-  border-color: #f87171;
-}
-
 /* ========================================
    RULE/CATEGORY EMPTY & FOOTER
    ======================================== */
-.rule-empty {
-  border: 2px dashed var(--color-light-gray);
-  border-radius: 8px;
-  padding: 36px 24px;
-  text-align: center;
-  margin-bottom: 18px;
-  transition: all 0.2s;
-}
-.rule-empty:hover {
-  background: var(--color-surface);
-  border-color: var(--color-gray-300);
-}
-.rule-empty-title {
-  font-weight: 600;
-  font-size: 14px;
-  margin: 0 0 6px;
-  color: var(--color-black);
-}
-.rule-empty-hint {
-  font-size: 13px;
-  color: var(--color-dark-gray);
-  margin: 0;
-  line-height: 1.5;
-  max-width: 360px;
-  margin-left: auto;
-  margin-right: auto;
-}
 .rule-footer {
   display: flex;
   gap: 10px;
@@ -1968,39 +1828,6 @@ body {
 /* ========================================
    CHAT PANEL
    ======================================== */
-.chat-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 60;
-}
-.chat-panel {
-  width: 440px;
-  flex-shrink: 0;
-  border-left: 1px solid rgba(255, 255, 255, 0.06);
-  height: 100%;
-  z-index: 61;
-  background: var(--color-charcoal);
-  animation: slideInLeft 0.3s ease-out;
-}
-@media (min-width: 768px) {
-  .chat-backdrop {
-    display: none !important;
-  }
-  .chat-panel {
-    position: relative !important;
-  }
-}
-@media (max-width: 767px) {
-  .chat-panel {
-    position: fixed !important;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: min(440px, 100vw) !important;
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.2);
-  }
-}
 .chat-drawer {
   display: flex;
   flex-direction: column;

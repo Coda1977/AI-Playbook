@@ -35,7 +35,7 @@ export default function AddActionInput({ ruleId, dispatch }) {
         placeholder="Type an action..."
         className="add-action-input"
       />
-      <button onClick={submit} className="btn-primary btn-sm">Add</button>
+      <button onClick={submit} className="btn-pill-sm">Add</button>
       <button onClick={() => { setText(""); setOpen(false); }} className="btn-icon">
         <X size={16} color={C.muted} />
       </button>

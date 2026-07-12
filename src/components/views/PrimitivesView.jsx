@@ -116,7 +116,10 @@ export default function PrimitivesView({
                       item={activeCategory}
                       state={state}
                       dispatch={dispatch}
-                      onClose={() => setActiveCategory(null)}
+                      onClose={() => {
+                        setActiveCategory(null);
+                        setChatExpanded(false);
+                      }}
                       expanded={chatExpanded}
                       onToggleExpand={() => setChatExpanded((v) => !v)}
                     />
