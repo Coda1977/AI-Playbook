@@ -7,6 +7,8 @@ import { exportPrimitivesDocx } from "../../utils/export";
 import CategorySection from "../primitives/CategorySection";
 import ChatDrawer from "../shared/ChatDrawer";
 import GateBar from "../shared/GateBar";
+import BoardRail from "../shared/BoardRail";
+import CommitmentTray from "../shared/CommitmentTray";
 
 export default function PrimitivesView({
   state,
@@ -15,6 +17,7 @@ export default function PrimitivesView({
   onStartOver,
 }) {
   const [activeCategory, setActiveCategory] = useState(null);
+  const [focusedId, setFocusedId] = useState(CATEGORIES[0].id);
   const [counterPulse, setCounterPulse] = useState(false);
   const prevStarredRef = useRef(0);
   const scrollRef = useRef(null);
@@ -29,10 +32,21 @@ export default function PrimitivesView({
       sum + (state.primitives[c.id] || []).filter((i) => i.starred).length,
     0,
   );
-  const categoriesWithIdeas = CATEGORIES.filter(
-    (c) => (state.primitives[c.id] || []).length > 0,
-  ).length;
   const canContinue = starredCount >= MIN_STARS_FOR_PLAYBOOK;
+
+  // Flat-mapped starred ideas across every category, in category order, each
+  // tagged with its category title for the tray's source label.
+  const allStarred = CATEGORIES.flatMap((c) =>
+    (state.primitives[c.id] || [])
+      .filter((i) => i.starred)
+      .map((i) => ({ ...i, categoryTitle: c.title })),
+  );
+
+  const focusedCategory =
+    CATEGORIES.find((c) => c.id === focusedId) || CATEGORIES[0];
+  const focusedIndex = CATEGORIES.findIndex((c) => c.id === focusedId);
+  const nextCategory =
+    CATEGORIES[(focusedIndex + 1) % CATEGORIES.length];
 
   useEffect(() => {
     if (
@@ -49,50 +63,63 @@ export default function PrimitivesView({
     <FlashProvider>
       <div className="canvas-layout">
         <div className="canvas-rules" ref={scrollRef}>
-          <div className="canvas-inner">
-            <div className="canvas-orientation animate-fade-in">
-              <div className="orientation-stats">
-                <span className="orientation-stat">
-                  <strong>{totalIdeas}</strong> ideas
-                </span>
-                <span className="orientation-dot">&middot;</span>
-                <span className="orientation-stat">
-                  <strong>{categoriesWithIdeas}</strong> of 6 categories
-                </span>
-                {starredCount > 0 && (
-                  <>
-                    <span className="orientation-dot">&middot;</span>
-                    <span className="orientation-stat">
-                      <Star
-                        size={14}
-                        fill={C.accentGlow}
-                        color={C.accentGlow}
-                        style={{ verticalAlign: "text-bottom" }}
-                      />{" "}
-                      <strong>{starredCount}</strong> starred
-                    </span>
-                  </>
-                )}
-              </div>
-              <p className="orientation-hint">
-                Star every idea that resonates. The more you star, the richer
-                your change strategy.
-              </p>
-            </div>
+          <div className="canvas-inner canvas-inner-board">
+            <h2 className="board-title">AI Use Cases</h2>
+            <p className="board-coach">
+              Star every idea that resonates. The more you star, the richer
+              your change strategy.
+            </p>
 
-            <div className="card-stack">
-              {CATEGORIES.map((c, i) => (
+            <div className="board3">
+              <BoardRail
+                label="Six categories"
+                items={CATEGORIES.map((c) => ({
+                  id: c.id,
+                  number: c.number,
+                  title: c.title,
+                  count: (state.primitives[c.id] || []).length,
+                  starredCount: (state.primitives[c.id] || []).filter(
+                    (i) => i.starred,
+                  ).length,
+                }))}
+                activeId={focusedId}
+                onSelect={setFocusedId}
+                note="12 ideas total. Visit every category; star freely."
+              />
+
+              <section className="board-focus">
                 <CategorySection
-                  key={c.id}
-                  category={c}
-                  ideas={state.primitives[c.id] || []}
+                  category={focusedCategory}
+                  ideas={state.primitives[focusedId] || []}
                   dispatch={dispatch}
-                  isActive={activeCategory?.id === c.id}
                   onGoDeeper={setActiveCategory}
-                  delay={i * 0.05}
-                  isLast={i === CATEGORIES.length - 1}
+                  focusIndex={focusedIndex}
+                  total={CATEGORIES.length}
+                  onNext={() => setFocusedId(nextCategory.id)}
+                  nextTitle={nextCategory.title}
                 />
-              ))}
+              </section>
+
+              <CommitmentTray
+                title="Your starred ideas"
+                countLabel={`${starredCount} of ${totalIdeas}`}
+                groups={[
+                  {
+                    items: allStarred.map((s) => ({
+                      id: s.id,
+                      text: s.text,
+                      sourceLabel: s.categoryTitle,
+                    })),
+                  },
+                ]}
+                status={
+                  <p className="tray-status">
+                    <b>{starredCount} starred</b> · every star enriches the
+                    plan.
+                  </p>
+                }
+                emptyText="Star ideas and they collect here."
+              />
             </div>
           </div>
 
@@ -102,20 +129,17 @@ export default function PrimitivesView({
               <span className={counterPulse ? "counter-pulse" : ""}>
                 <Star
                   size={14}
-                  fill={C.accentGlow}
-                  color={C.accentGlow}
+                  fill={C.star}
+                  color={C.star}
                   style={{ verticalAlign: "text-bottom" }}
                 />{" "}
-                <strong>{starredCount}</strong> of {totalIdeas}
+                <strong>{starredCount}</strong> of {totalIdeas} starred
+                {starredCount >= MIN_STARS_FOR_PLAYBOOK
+                  ? " · strategy unlocked"
+                  : ` · star at least ${MIN_STARS_FOR_PLAYBOOK} to unlock strategy`}
               </span>
             }
-            hint={
-              starredCount === 0
-                ? "Star the ideas that matter to you"
-                : starredCount < MIN_STARS_FOR_PLAYBOOK
-                  ? `Star at least ${MIN_STARS_FOR_PLAYBOOK} to continue`
-                  : "Ready when you are"
-            }
+            hint="Ready when you are"
           >
             <button
               onClick={() => exportPrimitivesDocx(state)}
