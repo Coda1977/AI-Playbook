@@ -59,6 +59,7 @@ const CONTENT_ACTIONS = new Set([
   "UPDATE_ACTION",
   "DELETE_ACTION",
   "TOGGLE_STAR",
+  "RESTORE_ITEM",
 ]);
 
 function reducer(state, action) {
@@ -242,6 +243,15 @@ function baseReducer(state, action) {
         ...state,
         playbookChat: { ...state.playbookChat, [action.ruleId]: msgs },
       };
+    }
+
+    // --- Shared (delete-undo) ---
+    case "RESTORE_ITEM": {
+      const key = action.kind === "primitive" ? "primitives" : "plan";
+      const list = [...(state[key][action.containerId] || [])];
+      const i = Math.max(0, Math.min(action.index, list.length));
+      list.splice(i, 0, action.item);
+      return { ...state, [key]: { ...state[key], [action.containerId]: list } };
     }
 
     case "SET_SYNTHESIS":

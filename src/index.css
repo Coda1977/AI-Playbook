@@ -455,32 +455,17 @@ body {
   border-color: var(--color-black);
 }
 .btn-danger {
-  padding: 10px 20px;
-  font-size: 16px;
-  font-weight: 700;
-  border-radius: 6px;
+  padding: 11px 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-danger);
+  color: #fff;
+  font: 600 14px var(--font-ui);
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
   white-space: nowrap;
-  font-family: var(--font-ui);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.15s ease;
-  min-height: 44px;
-  line-height: 1.3;
-  border: none;
-  background: var(--color-red);
-  color: white;
 }
 .btn-danger:hover {
   background: var(--color-red-hover);
-  transform: scale(1.05);
-  box-shadow: 0 4px 20px rgba(227, 6, 19, 0.3);
-}
-.btn-danger:active {
-  transform: scale(0.95);
 }
 .btn-sm {
   padding: 8px 14px;
@@ -758,7 +743,7 @@ body {
 }
 .modal-content {
   background: white;
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 32px;
   max-width: 420px;
   width: 100%;
@@ -798,12 +783,12 @@ body {
   margin: 16px auto;
   padding: 16px 20px;
   border-radius: 8px;
-  background: var(--color-red-light);
-  border: 1px solid var(--color-red);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  color: #991b1b;
+  color: var(--color-ink);
 }
 .error-banner-inner svg {
   flex-shrink: 0;
@@ -819,8 +804,7 @@ body {
 }
 .error-banner-hint {
   font-size: 13px;
-  color: #991b1b;
-  opacity: 0.8;
+  color: var(--color-gray-500);
 }
 .error-banner-actions {
   display: flex;
@@ -844,7 +828,7 @@ body {
   align-items: center;
   gap: 10px;
   padding: 14px 18px;
-  background: var(--color-black);
+  background: var(--color-ink);
   color: white;
   border-radius: 6px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
@@ -859,6 +843,20 @@ body {
 }
 .toast-message {
   flex: 1;
+}
+.toast-action {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 4px 2px;
+  color: #fff;
+  font: 600 14px var(--font-ui);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.toast-action:hover {
+  opacity: 0.85;
 }
 .toast-close {
   background: none;

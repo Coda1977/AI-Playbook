@@ -7,8 +7,16 @@ const ToastContext = createContext(null);
 export function ToastProvider({ children }) {
   const [toast, setToast] = useState(null);
 
-  const showToast = useCallback((message) => {
-    setToast(message);
+  // Backward compatible: showToast("plain string") still works. Callers that
+  // want the action-button variant pass showToast(message, { actionLabel,
+  // onAction, duration }).
+  const showToast = useCallback((message, opts = {}) => {
+    setToast({
+      message,
+      actionLabel: opts.actionLabel,
+      onAction: opts.onAction,
+      duration: opts.duration,
+    });
   }, []);
 
   const hideToast = useCallback(() => {
@@ -20,7 +28,13 @@ export function ToastProvider({ children }) {
       {children}
       {toast && (
         <div className="toast-container">
-          <Toast message={toast} onClose={hideToast} />
+          <Toast
+            message={toast.message}
+            actionLabel={toast.actionLabel}
+            onAction={toast.onAction}
+            duration={toast.duration}
+            onClose={hideToast}
+          />
         </div>
       )}
     </ToastContext.Provider>

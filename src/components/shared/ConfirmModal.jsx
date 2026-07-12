@@ -6,7 +6,7 @@ export default function ConfirmModal({ open, title, message, confirmLabel, cance
         <h3 className="modal-title">{title}</h3>
         <p className="modal-message">{message}</p>
         <div className="modal-buttons">
-          <button onClick={onCancel} className="btn-ghost">{cancelLabel || "Cancel"}</button>
+          <button onClick={onCancel} className="btn-pill-ghost">{cancelLabel || "Cancel"}</button>
           <button onClick={onConfirm} className="btn-danger">{confirmLabel}</button>
         </div>
       </div>
