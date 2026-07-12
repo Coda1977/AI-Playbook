@@ -17,6 +17,7 @@ export const C = {
   redLight: "#fdeeed",
   electricBlue: "#2f669d",
   ink: "#1c1c1e",
+  inkHover: "#2c2c34",
   inkLight: "#555a6a",
   accent: "#ffb5ab",
   accentHover: "#f8a196",

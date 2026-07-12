@@ -1,5 +1,6 @@
 import { Component } from "react";
 import { clearState } from "../../utils/storage";
+import { C } from "../../config/constants";
 
 // Last-resort catch for render crashes. Without it, an unexpected error
 // (e.g. malformed persisted state) is a blank white page with no way out,
@@ -35,8 +36,8 @@ export default class ErrorBoundary extends Component {
           justifyContent: "center",
           gap: 16,
           padding: 24,
-          background: "#000000",
-          color: "#ffffff",
+          background: C.ink,
+          color: C.white,
           fontFamily: "Hanken Grotesk, sans-serif",
           textAlign: "center",
         }}

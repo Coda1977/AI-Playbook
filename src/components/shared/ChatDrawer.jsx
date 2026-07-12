@@ -141,7 +141,7 @@ export default function ChatDrawer({
       <div className="chat-header">
         <div className="chat-header-bg" />
         {isInline ? (
-          <div className="chat-header-content chat-header-content-inline">
+          <div className="chat-header-content">
             <span className="chat-inline-title">
               Brainstorm with AI · {badgeName}
             </span>

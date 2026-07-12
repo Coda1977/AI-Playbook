@@ -135,7 +135,7 @@ export default function GeneratingIndicator({ mode, onReady }) {
                 return (
                   <div
                     key={i}
-                    className={`gen-step ${done ? "gen-done" : active ? "gen-active" : "gen-future"}`}
+                    className={`gen-step ${done ? "gen-done" : active ? "gen-active" : ""}`}
                   >
                     <div className="gen-step-icon">
                       {done ? (
