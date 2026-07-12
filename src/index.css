@@ -544,20 +544,19 @@ body {
 }
 
 /* ========================================
-   HEADER (dark)
+   HEADER (white)
    ======================================== */
 .header {
   position: sticky;
   top: 0;
-  z-index: 50;
-  background: rgba(0, 0, 0, 0.97);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 30;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-gray-200);
 }
 .header-inner {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 16px 24px;
+  padding: 10.25px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -567,30 +566,38 @@ body {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
   min-width: 0;
   flex: 1;
 }
+.brand-mark {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: var(--color-accent);
+  display: inline-block;
+  flex-shrink: 0;
+}
 .header-title {
-  font-family: var(--font-heading);
-  font-size: 20px;
+  font-family: var(--font-ui);
+  font-size: 17px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: -0.02em;
   white-space: nowrap;
-  color: white;
+  color: var(--color-ink);
 }
 .header-divider {
-  color: rgba(255, 255, 255, 0.2);
-  font-size: 18px;
+  display: none;
 }
 .header-role {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-gray-300);
   font-size: 13px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 280px;
+  border-left: 1px solid var(--color-gray-200);
+  padding-left: 12px;
 }
 .header-actions {
   display: flex;
@@ -604,7 +611,7 @@ body {
 }
 @media (max-width: 576px) {
   .header-inner {
-    padding: 12px 16px;
+    padding: 10px 16px;
     gap: 8px;
   }
   .header-title {
@@ -612,7 +619,6 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .header-divider,
   .header-role {
     display: none;
   }
@@ -629,18 +635,18 @@ body {
     display: none;
   }
 }
-/* Dark-mode header buttons */
+/* Header buttons (light) */
 .header .btn-ghost,
 .header .btn-secondary {
-  border-color: rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.8);
+  border-color: var(--color-gray-300);
+  color: var(--color-ink);
   background: transparent;
 }
 .header .btn-ghost:hover,
 .header .btn-secondary:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.06);
-  color: white;
+  border-color: var(--color-ink);
+  background: var(--color-surface);
+  color: var(--color-ink);
 }
 .header .btn-primary {
   background: var(--color-red);
@@ -651,62 +657,62 @@ body {
 }
 
 /* ========================================
-   PHASE PROGRESS (numbered badge stepper)
+   PHASE PROGRESS (pill stepper)
    ======================================== */
 .phase-progress {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  font-weight: 600;
+  gap: 6px;
   font-family: var(--font-ui);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 .phase-step {
   display: flex;
   align-items: center;
   gap: 7px;
-  min-height: 44px;
-  padding: 6px 14px 6px 7px;
-  border-radius: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
   transition: all 0.2s;
-  border: none;
+  border: 1px solid var(--color-border);
   background: none;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--color-gray-500);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 .phase-step-number {
-  width: 28px;
-  height: 28px;
+  width: 17px;
+  height: 17px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 600;
   flex-shrink: 0;
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.35);
+  border: 1px solid currentColor;
+  color: inherit;
   background: transparent;
   transition: all 0.2s;
 }
 .phase-step-active {
-  color: white;
+  border-color: var(--color-ink);
+  background: var(--color-ink);
+  color: var(--color-white);
 }
 .phase-step-active .phase-step-number {
-  background: var(--color-red);
-  border-color: var(--color-red);
-  color: white;
+  border-color: var(--color-white);
+  color: var(--color-white);
 }
 .phase-step-done {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-ink);
 }
 .phase-step-done .phase-step-number {
-  background: var(--color-black);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: white;
+  border: 0;
+  background: var(--color-ink);
+  color: var(--color-accent);
 }
 .phase-step-generating {
+  border-color: var(--color-red);
   color: var(--color-red);
 }
 .phase-step-generating .phase-step-number {
@@ -726,15 +732,13 @@ body {
   cursor: pointer !important;
 }
 .phase-step-clickable:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-.phase-step-clickable:hover .phase-step-number {
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: var(--color-gray-300);
+  background: var(--color-surface);
 }
 .phase-connector {
-  width: 10px;
+  width: 8px;
   height: 1.5px;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--color-gray-200);
 }
 
 /* ========================================

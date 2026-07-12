@@ -19,6 +19,7 @@ export default function Header({ state, dispatch }) {
     <header className="header no-print">
       <div className="header-inner">
         <div className="header-left">
+          <span className="brand-mark" />
           <span className="header-title">AI Playbook</span>
           {showRole && (
             <>
