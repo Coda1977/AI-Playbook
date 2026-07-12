@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { Check } from "lucide-react";
 import { HELP_OPTIONS } from "../../config/categories";
 import { FLUENCY_OPTIONS } from "../../config/rules";
-import { C } from "../../config/constants";
 import GateBar from "../shared/GateBar";
 
 function TextareaWithGuide({
@@ -21,7 +20,7 @@ function TextareaWithGuide({
         : words <= 15
           ? "Good start - keep going for best results."
           : "Great detail - this will help create a strong plan.";
-  const hintColor = words <= 15 ? "#b45309" : "#059669";
+  const isGreat = words > 15;
   return (
     <div>
       <textarea
@@ -32,7 +31,7 @@ function TextareaWithGuide({
         className={`input-textarea ${hasError ? "input-error" : ""}`}
       />
       {hint && (
-        <p className="input-hint" style={{ color: hintColor }}>
+        <p className={`input-hint ${isGreat ? "input-hint-great" : ""}`}>
           {hint}
         </p>
       )}
@@ -143,17 +142,6 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
   const ok = Object.values(fieldOk).every(Boolean);
   const doneCount = Object.values(fieldOk).filter(Boolean).length;
 
-  const RAIL_FIELDS = [
-    { key: "role", label: "Role" },
-    { key: "helpWith", label: "Focus", isArray: true },
-    { key: "responsibilities", label: "Tasks" },
-    { key: "managerFluency", label: "Your AI" },
-    { key: "teamFluency", label: "Team AI" },
-    { key: "failureRisks", label: "Risks" },
-    { key: "successVision", label: "Vision" },
-  ];
-  const fieldDone = (field) => fieldOk[field.key];
-
   const missing = (field) => attempted && !fieldOk[field];
   const missingArray = (field) => attempted && !fieldOk[field];
 
@@ -173,37 +161,15 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
   return (
     <div className="intake-container" ref={formRef}>
       <div className="intake-body">
-        <nav className="intake-rail" aria-label="Form progress">
-          {RAIL_FIELDS.map((field, i) => (
-            <div key={field.key} className="rail-segment">
-              {i > 0 && <div className="rail-line" />}
-              <div
-                className={`rail-dot ${fieldDone(field) ? "rail-dot-done" : ""}`}
-                title={field.label}
-              >
-                {fieldDone(field) && <Check size={10} strokeWidth={3} />}
-              </div>
-              <span className="rail-label">{field.label}</span>
-            </div>
-          ))}
-        </nav>
         <div className="intake-split">
           <div className="intake-main">
-            {/* Hero panel -- dark */}
+            {/* Hero -- light, on the page background */}
             <div className="intake-hero animate-fade-in">
-              <div
-                className="intake-label"
-                style={{ color: "rgba(255,255,255,0.6)" }}
-              >
-                Personalized AI Playbook
-              </div>
-              <h1 className="intake-title" style={{ color: C.white }}>
+              <span className="eyebrow-badge">Personalized AI Playbook</span>
+              <h1 className="intake-title">
                 Map Your AI Potential & Build Your Change Strategy
               </h1>
-              <p
-                className="intake-subtitle"
-                style={{ color: "rgba(255,255,255,0.65)" }}
-              >
+              <p className="intake-subtitle">
                 Answer seven questions about your role and team. AI will
                 discover use cases tailored to you, then build a personalized
                 change strategy grounded in behavioral science.
@@ -349,52 +315,16 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
 
           <aside className="intake-aside">
             <div className="intake-aside-sticky">
-              <article
-                className="panel animate-fade-in"
-                style={{
-                  background: C.charcoal,
-                  color: C.white,
-                  borderColor: C.charcoal,
-                }}
-              >
-                <h3
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontWeight: 700,
-                    fontSize: 18,
-                    marginBottom: 12,
-                  }}
-                >
-                  Input Guidance
-                </h3>
-                <p
-                  style={{
-                    fontSize: 14,
-                    lineHeight: 1.6,
-                    color: "rgba(255,255,255,0.7)",
-                    marginBottom: 16,
-                  }}
-                >
+              <article className="intake-guidance animate-fade-in">
+                <h3 className="intake-guidance-heading">Input Guidance</h3>
+                <p className="intake-guidance-intro">
                   The more specific you are, the better AI can personalize your
                   use cases and change strategy.
                 </p>
-                <ul
-                  style={{
-                    fontSize: 13,
-                    lineHeight: 1.7,
-                    color: "rgba(255,255,255,0.6)",
-                    paddingLeft: 16,
-                  }}
-                >
-                  <li style={{ marginBottom: 8 }}>
-                    Name your actual role and team size
-                  </li>
-                  <li style={{ marginBottom: 8 }}>
-                    Describe real tasks, not categories
-                  </li>
-                  <li style={{ marginBottom: 8 }}>
-                    Be honest about resistance factors
-                  </li>
+                <ul className="intake-guidance-tips">
+                  <li>Name your actual role and team size</li>
+                  <li>Describe real tasks, not categories</li>
+                  <li>Be honest about resistance factors</li>
                   <li>Paint a concrete 90-day picture</li>
                 </ul>
               </article>
