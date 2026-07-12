@@ -9,8 +9,20 @@ const CATEGORY_TITLES = Object.fromEntries(
   CATEGORIES.map((c) => [c.id, c.title]),
 );
 
-export default function ChatDrawer({ type, item, state, dispatch, onClose }) {
+export default function ChatDrawer({
+  type,
+  item,
+  state,
+  dispatch,
+  onClose,
+  expanded,
+  onToggleExpand,
+}) {
   const isPrimitive = type === "primitive";
+  // Presence of onToggleExpand marks the caller as the new inline board
+  // panel (Task 9); the overlay drawer (PlaybookView) never passes it, so
+  // its header renders exactly as before.
+  const isInline = typeof onToggleExpand === "function";
   const { triggerFlash } = useFlash();
 
   const chatStore = isPrimitive ? state.primitivesChat : state.playbookChat;
@@ -128,18 +140,42 @@ export default function ChatDrawer({ type, item, state, dispatch, onClose }) {
     <div className="chat-drawer" style={{ "--rule-color": item.color || C.accent }}>
       <div className="chat-header">
         <div className="chat-header-bg" />
-        <div className="chat-header-content">
-          <div className="chat-rule-badge" style={{ borderColor: `${item.color || C.accent}40`, color: item.color || C.accent }}>
-            {badgeNumber}
+        {isInline ? (
+          <div className="chat-header-content chat-header-content-inline">
+            <span className="chat-inline-title">
+              Brainstorm with AI · {badgeName}
+            </span>
           </div>
-          <div>
-            <span className="chat-rule-name">{badgeName}</span>
-            <span className="chat-rule-principle">{badgePrinciple}</span>
+        ) : (
+          <div className="chat-header-content">
+            <div className="chat-rule-badge" style={{ borderColor: `${item.color || C.accent}40`, color: item.color || C.accent }}>
+              {badgeNumber}
+            </div>
+            <div>
+              <span className="chat-rule-name">{badgeName}</span>
+              <span className="chat-rule-principle">{badgePrinciple}</span>
+            </div>
           </div>
+        )}
+        <div className="chat-header-actions">
+          {isInline && (
+            <button
+              onClick={onToggleExpand}
+              className="chat-expand-btn"
+              type="button"
+            >
+              {expanded ? "Collapse" : "⤢ Expand"}
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className={isInline ? "chat-close-btn-text" : "chat-close-btn"}
+            aria-label="Close chat"
+            type="button"
+          >
+            {isInline ? "✕ Close" : <X size={18} />}
+          </button>
         </div>
-        <button onClick={onClose} className="chat-close-btn" aria-label="Close chat">
-          <X size={18} />
-        </button>
       </div>
 
       <div className="chat-messages">

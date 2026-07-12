@@ -18,10 +18,10 @@ export default function PrimitivesView({
 }) {
   const [activeCategory, setActiveCategory] = useState(null);
   const [focusedId, setFocusedId] = useState(CATEGORIES[0].id);
+  const [chatExpanded, setChatExpanded] = useState(false);
   const [counterPulse, setCounterPulse] = useState(false);
   const prevStarredRef = useRef(0);
   const scrollRef = useRef(null);
-  const chatOpen = activeCategory !== null;
 
   const totalIdeas = CATEGORIES.reduce(
     (sum, c) => sum + (state.primitives[c.id] || []).length,
@@ -58,6 +58,13 @@ export default function PrimitivesView({
     }
     prevStarredRef.current = starredCount;
   }, [starredCount]);
+
+  // Switching rail category closes any open chat instead of leaving it
+  // pinned to a category that's no longer in focus.
+  useEffect(() => {
+    setActiveCategory(null);
+    setChatExpanded(false);
+  }, [focusedId]);
 
   return (
     <FlashProvider>
@@ -98,6 +105,23 @@ export default function PrimitivesView({
                   onNext={() => setFocusedId(nextCategory.id)}
                   nextTitle={nextCategory.title}
                 />
+
+                {activeCategory && activeCategory.id === focusedId && (
+                  <div
+                    className={`chat-inline${chatExpanded ? " chat-expanded" : ""}`}
+                  >
+                    <ChatDrawer
+                      key={activeCategory.id}
+                      type="primitive"
+                      item={activeCategory}
+                      state={state}
+                      dispatch={dispatch}
+                      onClose={() => setActiveCategory(null)}
+                      expanded={chatExpanded}
+                      onToggleExpand={() => setChatExpanded((v) => !v)}
+                    />
+                  </div>
+                )}
               </section>
 
               <CommitmentTray
@@ -159,25 +183,6 @@ export default function PrimitivesView({
             </button>
           </GateBar>
         </div>
-
-        {chatOpen && (
-          <>
-            <div
-              onClick={() => setActiveCategory(null)}
-              className="chat-backdrop"
-            />
-            <div className="chat-panel">
-              <ChatDrawer
-                key={activeCategory.id}
-                type="primitive"
-                item={activeCategory}
-                state={state}
-                dispatch={dispatch}
-                onClose={() => setActiveCategory(null)}
-              />
-            </div>
-          </>
-        )}
       </div>
     </FlashProvider>
   );
