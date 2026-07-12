@@ -832,7 +832,7 @@ body {
   position: fixed;
   bottom: 90px;
   right: 24px;
-  z-index: 200;
+  z-index: 300;
   pointer-events: none;
 }
 .toast {

@@ -1,11 +1,50 @@
 // src/components/shared/CommitmentTray.jsx
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Star, X } from "lucide-react";
+
+const FOCUSABLE_SELECTOR =
+  'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 export default function CommitmentTray({ title, countLabel, groups, status, emptyText }) {
   const [open, setOpen] = useState(false);
+  const closeButtonRef = useRef(null);
+  const fabRef = useRef(null);
   const empty = groups.every((g) => g.items.length === 0);
   const totalCount = groups.reduce((sum, g) => sum + g.items.length, 0);
+
+  useEffect(() => {
+    if (!open) return;
+    const closeBtn = closeButtonRef.current;
+    const fabBtn = fabRef.current;
+    const sheetEl = closeBtn?.closest(".tray-sheet");
+    closeBtn?.focus();
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (e.key === "Tab" && sheetEl) {
+        const focusables = sheetEl.querySelectorAll(FOCUSABLE_SELECTOR);
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      fabBtn?.focus();
+    };
+  }, [open]);
 
   const body = (
     <>
@@ -43,9 +82,10 @@ export default function CommitmentTray({ title, countLabel, groups, status, empt
           with the identical tray content. */}
       <button
         type="button"
+        ref={fabRef}
         className="tray-fab no-print"
         onClick={() => setOpen(true)}
-        aria-haspopup="true"
+        aria-haspopup="dialog"
         aria-expanded={open}
         aria-label={`${title}: ${countLabel}`}
       >
@@ -69,6 +109,7 @@ export default function CommitmentTray({ title, countLabel, groups, status, empt
               <span className="tray-count">{countLabel}</span>
               <button
                 type="button"
+                ref={closeButtonRef}
                 className="tray-sheet-close"
                 onClick={() => setOpen(false)}
                 aria-label="Close"
