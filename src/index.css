@@ -1807,6 +1807,9 @@ body {
 }
 .btn-pill:hover { background: #2c2c34; }
 .btn-pill:disabled { background: var(--color-border); color: var(--color-gray-500); cursor: not-allowed; }
+/* White pill on an ink surface (Big Move callout, Big Move poster footer). */
+.btn-pill.on-dark { background: var(--color-white); color: var(--color-ink); }
+.btn-pill.on-dark:hover { background: var(--color-surface); }
 .btn-pill-ghost {
   padding: 11px 22px; border: 1px solid var(--color-border-strong); border-radius: 999px;
   background: transparent; color: var(--color-ink);
@@ -2279,37 +2282,13 @@ body {
   margin: 0 auto;
   padding: 48px 12px 96px;
 }
-.commitment-hero {
-  background: var(--color-black);
-  color: var(--color-white);
-  border: 1px solid var(--color-charcoal);
-  border-radius: 8px;
-  padding: 32px 28px;
-  margin-bottom: 24px;
-}
-.commitment-step {
-  font-family: var(--font-ui);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--color-dark-gray);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 8px;
-}
 .commitment-header-print {
   display: none;
 }
-.commitment-title {
-  font-family: var(--font-heading);
-  font-size: 36px;
-  font-weight: 700;
-  margin: 0 0 6px;
-  color: var(--color-black);
-}
-.commitment-role {
-  color: var(--color-dark-gray);
-  font-size: 15px;
-  margin-bottom: 0;
+.commitment-byline {
+  color: var(--color-gray-500);
+  font-size: 14px;
+  margin: 0 0 32px;
 }
 .commitment-empty {
   text-align: center;
@@ -2321,115 +2300,165 @@ body {
   margin-bottom: 16px;
 }
 
-/* 3-column stat grid */
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 32px;
-}
-.stat {
-  background: var(--color-black);
-  border: 1px solid var(--color-charcoal);
-  border-radius: 8px;
-  padding: 24px 20px;
-  text-align: center;
-}
-.stat strong {
-  display: block;
-  font-family: var(--font-heading);
-  font-size: 38px;
-  font-weight: 700;
-  color: var(--color-white);
-  margin-bottom: 4px;
-}
-.stat span {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-family: var(--font-ui);
-  font-weight: 500;
-}
-@media (max-width: 640px) {
-  .summary-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Legacy stat cards */
-.commitment-stats {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-}
-.commitment-stat-card {
-  flex: 1;
-  min-width: 100px;
-  padding: 20px;
-  border-radius: 8px;
-  background: var(--color-white);
-  border: 1px solid var(--color-charcoal);
-  text-align: center;
-}
-.commitment-stat-number {
-  font-family: var(--font-heading);
-  font-size: 35px;
-  color: var(--color-black);
-  margin-bottom: 4px;
-  font-weight: 700;
-}
-.commitment-stat-label {
-  font-family: var(--font-ui);
-  font-size: 12px;
-  color: var(--color-dark-gray);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 500;
-}
-
-/* 2-column review */
-.review-columns {
+/* -- Priorities: starred use cases + starred actions, two columns -- */
+.prior-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: 20px;
   margin-bottom: 32px;
 }
 @media (max-width: 768px) {
-  .review-columns {
+  .prior-cols {
     grid-template-columns: 1fr;
   }
 }
-
-.commitment-priorities {
-  border: 2px solid var(--color-red);
-  border-radius: 8px;
-  padding: 22px 24px;
-  margin-bottom: 36px;
-  background: var(--color-red-light);
+.prior-card {
+  padding: 22px 26px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
 }
-.commitment-priorities-label {
-  font-family: var(--font-ui);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--color-red);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 14px;
+.prior-card h3 {
+  margin: 0 0 4px;
+  font-family: var(--font-heading);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-ink);
 }
-.commitment-priority-item {
-  padding: 7px 0;
-  font-size: 14px;
-  line-height: 1.55;
+.prior-empty {
+  padding: 10px 0 14px;
+  font-size: 13.5px;
+  font-style: italic;
+  color: var(--color-gray-300);
+}
+.prow {
   display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 0;
+}
+.prow + .prow {
+  border-top: 1px solid var(--color-light-gray);
+}
+.prow-star {
+  flex: none;
+  color: var(--color-star-dark);
+  font-size: 13px;
+}
+.prow p {
+  margin: 0;
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-ink);
+}
+.prow-src {
+  flex: none;
+  color: var(--color-gray-300);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.prow-more {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 10px 0 12px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-gray-500);
+  cursor: pointer;
+}
+.prow-more:hover {
+  color: var(--color-ink);
+}
+
+/* -- Actions row: back / more exports / download PDF --
+   position+z-index (not just flex) so this row's stacking context wins over
+   later no-print siblings that also carry .animate-fade-in -- a fade-in's
+   transform gives its own element a stacking context too, and without an
+   explicit z-index here a later sibling's transparent box can end up
+   stacked above (and hit-test-intercepting) the exports popover below. */
+.review-actions {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.review-actions .review-back {
+  margin-right: auto;
+}
+.exports-menu {
+  position: relative;
+}
+.exports-menu-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 10;
+  min-width: 200px;
+  padding: 6px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(28, 28, 30, 0.12);
+}
+.exports-menu-item {
+  display: flex;
+  align-items: center;
   gap: 8px;
-  align-items: flex-start;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--color-ink);
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: left;
 }
-.commitment-rule-ref {
+.exports-menu-item:hover {
+  background: var(--color-surface);
+}
+
+.commitment-reset {
+  text-align: center;
+  padding: 24px 0 0;
+}
+.btn-reset-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
   color: var(--color-dark-gray);
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 }
+.btn-reset-link:hover {
+  color: var(--color-ink);
+  background: var(--color-surface);
+}
+
+/* -- Full detail: kept in the DOM for print/export fidelity, hidden on
+   screen via .print-only (the columns above summarize this on screen). -- */
 .commitment-section-title {
   font-family: var(--font-heading);
   font-size: 26px;
@@ -2454,11 +2483,6 @@ body {
   font-weight: 700;
   margin: 0 0 12px;
   color: var(--color-black);
-}
-.commitment-no-actions {
-  color: var(--color-dark-gray);
-  font-size: 14px;
-  font-style: italic;
 }
 .commitment-actions {
   display: flex;
@@ -2485,63 +2509,8 @@ body {
   justify-content: center;
   color: white;
 }
-.commitment-reflection {
-  border: 1px solid var(--color-light-gray);
-  border-radius: 8px;
-  padding: 24px;
-  margin-top: 8px;
-  margin-bottom: 36px;
-  background: var(--color-surface);
-}
-.commitment-reflection p {
-  font-size: 15px;
-  font-style: italic;
-  color: var(--color-dark-gray);
-  margin: 0;
-  line-height: 1.55;
-}
 .commitment-footer-print {
   display: none;
-}
-.commitment-buttons {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-}
-.commitment-back-link {
-  flex-shrink: 0;
-}
-.commitment-export-group {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-left: auto;
-}
-.commitment-reset {
-  text-align: center;
-  padding: 24px 0 0;
-}
-.btn-reset-link {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: var(--font-ui);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-dark-gray);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: 6px;
-  transition: all 0.15s;
-}
-.btn-reset-link:hover {
-  color: var(--color-red);
-  background: var(--color-red-light);
 }
 
 /* -- Commitment: section divider -- */
@@ -2583,6 +2552,55 @@ body {
   flex-direction: column;
   gap: 6px;
   padding-left: 44px;
+}
+
+/* -- Big move callout: ink card, bottom of the page -- */
+.bigmove-callout {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin: 40px 0 0;
+  padding: 34px 38px;
+  border-radius: 28px;
+  background: var(--color-ink);
+  color: var(--color-white);
+}
+.bigmove-callout h3 {
+  margin: 0 0 4px;
+  font-family: var(--font-heading);
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  color: var(--color-white);
+}
+.bigmove-callout-desc {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.bigmove-callout-desc .btn-reset-link {
+  color: rgba(255, 255, 255, 0.85);
+  padding: 0 0 0 4px;
+}
+.bigmove-callout-desc .btn-reset-link:hover {
+  color: var(--color-white);
+  background: none;
+}
+.bigmove-callout > button {
+  flex: none;
+  margin-left: auto;
+}
+@media (max-width: 640px) {
+  .bigmove-callout {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .bigmove-callout > button {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* ========================================
@@ -2817,68 +2835,6 @@ body {
   flex-wrap: wrap;
 }
 
-.synthesis-cta {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  background: var(--color-black);
-  color: var(--color-white);
-  border: 1px solid var(--color-charcoal);
-  border-radius: 8px;
-  padding: 22px 28px;
-  margin-bottom: 28px;
-}
-.synthesis-cta-text {
-  flex: 1;
-  min-width: 0;
-}
-.synthesis-cta-eyebrow {
-  font-family: var(--font-ui);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-red);
-  margin-bottom: 6px;
-}
-.synthesis-cta-title {
-  font-family: var(--font-heading);
-  font-size: 22px;
-  font-weight: 700;
-  margin: 0 0 6px;
-  color: var(--color-white);
-  letter-spacing: -0.015em;
-}
-.synthesis-cta-desc {
-  font-size: 14px;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.6);
-  margin: 0;
-  max-width: 640px;
-}
-.synthesis-cta-btn {
-  flex-shrink: 0;
-}
-.badge-experimental {
-  margin-left: 10px;
-  padding: 2px 7px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-white);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  border-radius: 3px;
-  white-space: nowrap;
-}
-.synthesis-cta-experimental {
-  margin-left: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  font-style: italic;
-  opacity: 0.7;
-}
-
 @media (max-width: 768px) {
   .synthesis-evidence {
     grid-template-columns: 1fr;
@@ -2895,19 +2851,6 @@ body {
   }
   .synthesis-story-headline {
     font-size: 22px;
-  }
-  .synthesis-cta {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .synthesis-cta-btn {
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
-    row-gap: 4px;
-  }
-  .badge-experimental {
-    margin-left: 6px;
   }
 }
 
@@ -3121,6 +3064,13 @@ body {
   }
 }
 
+/* Hidden on screen, shown in print (the CommitmentView per-category/per-rule
+   detail sections -- the on-screen columns summarize them, but export/PDF
+   fidelity needs the full lists). Opposite of .no-print. */
+.print-only {
+  display: none;
+}
+
 /* ========================================
    PRINT STYLES
    ======================================== */
@@ -3130,6 +3080,9 @@ body {
   }
   .no-print {
     display: none !important;
+  }
+  .print-only {
+    display: block !important;
   }
   .paper-grain {
     display: none !important;
@@ -3161,38 +3114,8 @@ body {
     display: block !important;
     margin-bottom: 8px;
   }
-  .commitment-hero {
-    background: white !important;
-    border-color: var(--color-light-gray) !important;
-  }
-  .commitment-hero * {
-    color: black !important;
-  }
-  .stat {
-    background: white !important;
-    border-color: var(--color-light-gray) !important;
-  }
-  .stat strong,
-  .stat span {
-    color: black !important;
-  }
-  .use-card-header {
-    background: white !important;
-  }
-  .use-card-header * {
-    color: black !important;
-  }
-  .commitment-reflection {
-    page-break-inside: avoid;
-  }
-  .commitment-priorities {
-    page-break-inside: avoid;
-  }
   .commitment-rule {
     page-break-inside: avoid;
-  }
-  .commitment-buttons {
-    display: none !important;
   }
   .commitment-footer-print {
     display: block !important;
@@ -3200,9 +3123,6 @@ body {
     padding-top: 16px;
     border-top: 1px solid var(--color-light-gray);
     font-size: 12px;
-  }
-  .summary-grid {
-    grid-template-columns: repeat(3, 1fr);
   }
   .synthesis-actions {
     display: none !important;
