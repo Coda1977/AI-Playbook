@@ -1431,9 +1431,6 @@ body {
 .playbook-canvas {
   background: #f7f8fa;
 }
-.playbook-canvas .gate-bar {
-  background: #f5f6f9;
-}
 .canvas-inner {
   width: min(100% - 24px, 900px);
   margin: 0 auto;
@@ -1951,102 +1948,33 @@ body {
 .gate-bar {
   position: sticky;
   bottom: 0;
-  z-index: 10;
-  margin-top: 24px;
-  border: 1px solid var(--color-charcoal);
-  border-radius: 8px 8px 0 0;
-  padding: 0 24px;
-  height: 60px;
+  z-index: 20;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  background: var(--color-white);
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+  gap: 18px;
+  padding: 14px clamp(20px, 4vw, 48px);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-off-white);
 }
-.gate-counter {
-  font-size: 13px;
-  color: var(--color-dark-gray);
-  transition: all 0.3s;
+.gate-left { font-size: 14px; color: var(--color-gray-500); }
+.gate-left strong, .gate-left b { color: var(--color-ink); font-weight: 700; }
+/* Preserves the existing star-count pulse (PrimitivesView) now that the
+   counter no longer has its own wrapper class. */
+.counter-pulse { animation: counterPulse 0.6s ease-out; }
+.gate-hint { margin: 0 auto; font-size: 14px; color: var(--color-gray-300); }
+.gate-actions { display: flex; gap: 10px; margin-left: auto; }
+.gate-hint + .gate-actions { margin-left: 0; }
+.btn-pill {
+  padding: 11px 22px; border: 0; border-radius: 999px;
+  background: var(--color-ink); color: #fff;
+  font: 600 14px var(--font-ui); cursor: pointer; white-space: nowrap;
 }
-.gate-counter strong {
-  color: var(--color-black);
-  font-weight: 700;
-}
-.counter-pulse {
-  animation: counterPulse 0.6s ease-out;
-}
-.btn-gate {
-  padding: 12px 24px;
-  font-size: 13px;
-  font-weight: 700;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: var(--font-ui);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.2s;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--color-black);
-  color: white;
-}
-.btn-gate:hover {
-  background: var(--color-charcoal);
-}
-.btn-gate-disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-.btn-gate-disabled:hover {
-  background: var(--color-black);
-}
-.btn-gate-active {
-  animation: glowPulse 2s ease-in-out infinite;
-  background: var(--color-red);
-}
-.btn-gate-active:hover {
-  background: var(--color-red-hover);
-}
-.gate-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.gate-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.gate-export-btn {
-  border-color: rgba(0, 0, 0, 0.15) !important;
-}
-@media (max-width: 768px) {
-  .gate-bar {
-    height: auto;
-    min-height: 56px;
-    padding: 10px 12px;
-    flex-wrap: wrap;
-    row-gap: 10px;
-  }
-  .gate-hint {
-    display: none;
-  }
-  /* Flatten gate-actions so the small buttons share the counter's row
-     and the primary CTA drops to its own full-width row. */
-  .gate-actions {
-    display: contents;
-  }
-  .gate-bar .btn-gate {
-    order: 10;
-    width: 100%;
-    justify-content: center;
-  }
+.btn-pill:hover { background: #2c2c34; }
+.btn-pill:disabled { background: var(--color-border); color: var(--color-gray-500); cursor: not-allowed; }
+.btn-pill-ghost {
+  padding: 11px 22px; border: 1px solid var(--color-border-strong); border-radius: 999px;
+  background: transparent; color: var(--color-ink);
+  font: 600 14px var(--font-ui); cursor: pointer; white-space: nowrap;
 }
 
 /* ========================================

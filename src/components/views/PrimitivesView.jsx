@@ -6,6 +6,7 @@ import { FlashProvider } from "../../context/AppContext";
 import { exportPrimitivesDocx } from "../../utils/export";
 import CategorySection from "../primitives/CategorySection";
 import ChatDrawer from "../shared/ChatDrawer";
+import GateBar from "../shared/GateBar";
 
 export default function PrimitivesView({
   state,
@@ -96,11 +97,9 @@ export default function PrimitivesView({
           </div>
 
           {/* Gate - direct child of canvas-rules for sticky to work */}
-          <footer className="gate-bar" aria-label="Phase progress and actions">
-            <div className="gate-left">
-              <div
-                className={`gate-counter ${counterPulse ? "counter-pulse" : ""}`}
-              >
+          <GateBar
+            left={
+              <span className={counterPulse ? "counter-pulse" : ""}>
                 <Star
                   size={14}
                   fill={C.accentGlow}
@@ -108,41 +107,33 @@ export default function PrimitivesView({
                   style={{ verticalAlign: "text-bottom" }}
                 />{" "}
                 <strong>{starredCount}</strong> of {totalIdeas}
-              </div>
-            </div>
-            <div
-              className="gate-hint"
-              style={{
-                fontSize: 13,
-                color: "var(--color-dark-gray)",
-                textAlign: "center",
-              }}
-            >
-              {starredCount === 0
+              </span>
+            }
+            hint={
+              starredCount === 0
                 ? "Star the ideas that matter to you"
                 : starredCount < MIN_STARS_FOR_PLAYBOOK
                   ? `Star at least ${MIN_STARS_FOR_PLAYBOOK} to continue`
-                  : "Ready when you are"}
-            </div>
-            <div className="gate-actions">
-              <button
-                onClick={() => exportPrimitivesDocx(state)}
-                className="btn-ghost btn-sm"
-              >
-                <Download size={14} /> Export
-              </button>
-              <button onClick={onStartOver} className="btn-ghost btn-sm">
-                <RotateCcw size={12} /> Start over
-              </button>
-              <button
-                onClick={canContinue ? onContinue : undefined}
-                className={`btn-gate ${canContinue ? "btn-gate-active" : "btn-gate-disabled"}`}
-                disabled={!canContinue}
-              >
-                Continue to Strategy <ChevronRight size={16} />
-              </button>
-            </div>
-          </footer>
+                  : "Ready when you are"
+            }
+          >
+            <button
+              onClick={() => exportPrimitivesDocx(state)}
+              className="btn-pill-ghost"
+            >
+              <Download size={14} /> Export
+            </button>
+            <button onClick={onStartOver} className="btn-pill-ghost">
+              <RotateCcw size={12} /> Start over
+            </button>
+            <button
+              onClick={canContinue ? onContinue : undefined}
+              className="btn-pill"
+              disabled={!canContinue}
+            >
+              Continue to Strategy <ChevronRight size={16} />
+            </button>
+          </GateBar>
         </div>
 
         {chatOpen && (

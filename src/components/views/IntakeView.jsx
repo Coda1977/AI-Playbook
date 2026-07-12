@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { Sparkles, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { HELP_OPTIONS } from "../../config/categories";
 import { FLUENCY_OPTIONS } from "../../config/rules";
 import { C } from "../../config/constants";
+import GateBar from "../shared/GateBar";
 
 function TextareaWithGuide({
   value,
@@ -403,29 +404,28 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
       </div>
 
       {/* Sticky gate bar */}
-      <footer className="gate-bar" aria-label="Phase progress and actions">
-        <div className="gate-counter">
-          <strong>{doneCount}</strong> of 7 fields
-        </div>
-        <div
-          className="gate-hint"
-          style={{
-            fontSize: 13,
-            color: "var(--color-dark-gray)",
-            textAlign: "center",
-          }}
-        >
-          {ok
+      <GateBar
+        left={
+          <>
+            <strong>{doneCount}</strong> of 7 fields
+          </>
+        }
+        hint={
+          ok
             ? "Ready to discover your use cases"
-            : "Complete all fields to continue"}
-        </div>
+            : "Complete all fields to continue"
+        }
+      >
+        {/* No `disabled` attribute: clicking while invalid is what flips
+            `attempted` to true, which drives the field-level error
+            highlighting, the validation banner, and this shake. */}
         <button
           onClick={handleSubmit}
-          className={`btn-gate ${ok ? "btn-gate-active" : "btn-gate-disabled"} ${attempted && !ok ? "btn-shake" : ""}`}
+          className={`btn-pill ${attempted && !ok ? "btn-shake" : ""}`}
         >
-          <Sparkles size={16} /> Discover Use Cases
+          Discover Use Cases
         </button>
-      </footer>
+      </GateBar>
     </div>
   );
 }

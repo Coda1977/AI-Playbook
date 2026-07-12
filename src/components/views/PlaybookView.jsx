@@ -5,6 +5,7 @@ import { MIN_STARS_FOR_REVIEW, C } from "../../config/constants";
 import { FlashProvider } from "../../context/AppContext";
 import RuleSection from "../playbook/RuleSection";
 import ChatDrawer from "../shared/ChatDrawer";
+import GateBar from "../shared/GateBar";
 
 export default function PlaybookView({ state, dispatch, onStartOver }) {
   const [activeRule, setActiveRule] = useState(null);
@@ -70,9 +71,9 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
           </div>
 
           {/* Gate -- sticky bottom bar */}
-          <footer className="gate-bar" aria-label="Phase progress and actions">
-            <div className="gate-left">
-              <div className="gate-counter">
+          <GateBar
+            left={
+              <>
                 <Star
                   size={14}
                   fill={C.accentGlow}
@@ -80,39 +81,31 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
                   style={{ verticalAlign: "text-bottom" }}
                 />{" "}
                 <strong>{starred}</strong> of {totalActions}
-              </div>
-            </div>
-            <div
-              className="gate-hint"
-              style={{
-                fontSize: 13,
-                color: "var(--color-dark-gray)",
-                textAlign: "center",
-              }}
-            >
-              {starred === 0
+              </>
+            }
+            hint={
+              starred === 0
                 ? "Star the actions that matter most to you"
                 : starred < MIN_STARS_FOR_REVIEW
                   ? `Star at least ${MIN_STARS_FOR_REVIEW} to continue`
-                  : "Ready when you are"}
-            </div>
-            <div className="gate-actions">
-              <button onClick={onStartOver} className="btn-ghost btn-sm">
-                <RotateCcw size={12} /> Start over
-              </button>
-              <button
-                onClick={
-                  canContinue
-                    ? () => dispatch({ type: "SET_PHASE", phase: "commitment" })
-                    : undefined
-                }
-                className={`btn-gate ${canContinue ? "btn-gate-active" : "btn-gate-disabled"}`}
-                disabled={!canContinue}
-              >
-                Continue to Review <ChevronRight size={16} />
-              </button>
-            </div>
-          </footer>
+                  : "Ready when you are"
+            }
+          >
+            <button onClick={onStartOver} className="btn-pill-ghost">
+              <RotateCcw size={12} /> Start over
+            </button>
+            <button
+              onClick={
+                canContinue
+                  ? () => dispatch({ type: "SET_PHASE", phase: "commitment" })
+                  : undefined
+              }
+              className="btn-pill"
+              disabled={!canContinue}
+            >
+              Continue to Review <ChevronRight size={16} />
+            </button>
+          </GateBar>
         </div>
 
         {chatOpen && (
