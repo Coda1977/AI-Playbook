@@ -43,6 +43,7 @@
   /* Legacy aliases, re-pointed (do NOT delete; classes still reference them) */
   --color-red: #c6453c;            /* red now ONLY means danger */
   --color-red-hover: #a83a32;
+  --color-ink-hover: #2c2c34;      /* one token for every ink-surface hover state */
   --color-red-light: #fdeeed;
   --color-electric-blue: #2f669d;  /* old blue accents become star-dark */
   --color-ink: #1c1c1e;
@@ -83,13 +84,15 @@ body {
   margin: 0;
 }
 
-/* -- Global focus-visible for keyboard users -- */
+/* -- Global focus-visible for keyboard users --
+   Ink, not danger-red: red is reserved for destructive/error states only
+   (spec section 3). This single rule already covers every interactive
+   element in the app; the selector list below is kept explicit for the
+   handful the accessibility pass calls out by name, so the contract is
+   grep-able even though it resolves to the same value. */
 :focus-visible {
-  outline: 2px solid var(--color-red);
+  outline: 2px solid var(--color-ink);
   outline-offset: 2px;
-}
-.phase-step:focus-visible {
-  outline-color: var(--color-ink);
 }
 
 /* -- Animations -- */
@@ -169,26 +172,15 @@ body {
     transform: rotate(360deg);
   }
 }
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.6;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
-}
 @keyframes flashPulse {
   0% {
-    box-shadow: inset 0 0 0 0 rgba(227, 6, 19, 0);
+    box-shadow: inset 0 0 0 0 rgba(255, 181, 171, 0);
   }
   40% {
-    box-shadow: inset 0 0 40px 0 rgba(227, 6, 19, 0.06);
+    box-shadow: inset 0 0 40px 0 rgba(255, 181, 171, 0.16);
   }
   100% {
-    box-shadow: inset 0 0 0 0 rgba(227, 6, 19, 0);
+    box-shadow: inset 0 0 0 0 rgba(255, 181, 171, 0);
   }
 }
 @keyframes scaleIn {
@@ -213,15 +205,6 @@ body {
   40%,
   80% {
     transform: translateX(6px);
-  }
-}
-@keyframes glowPulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(227, 6, 19, 0);
-  }
-  50% {
-    box-shadow: 0 0 16px 4px rgba(227, 6, 19, 0.3);
   }
 }
 @keyframes slideUp {
@@ -279,6 +262,35 @@ body {
   animation: spin 1s linear infinite;
 }
 
+/* -- Reduced motion: kill every bloom/entrance/spinner/pulse effect in one
+   place. None of these animate anything load-bearing (no static `opacity:0`
+   sits outside the keyframes), so `animation: none` just leaves each element
+   in its resting state. -- */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-slide-left,
+  .animate-slide-right,
+  .action-entering,
+  .action-removing,
+  .action-blooming,
+  .star-popping,
+  .rule-flashing,
+  .counter-pulse,
+  .btn-shake,
+  .pill.on,
+  .spinning,
+  .gen-step-spinner,
+  .phase-step-pulse,
+  .thinking-dot,
+  .ready-check,
+  .modal-backdrop,
+  .modal-content,
+  .tray-sheet {
+    animation: none !important;
+  }
+}
+
 /* -- App root -- */
 .app-root {
   font-family: var(--font-sans);
@@ -312,7 +324,7 @@ body {
   border-radius: 3px;
 }
 ::selection {
-  background: rgba(227, 6, 19, 0.12);
+  background: rgba(255, 181, 171, 0.35);
 }
 
 /* ========================================
@@ -399,7 +411,7 @@ body {
 .btn-primary:hover {
   background: var(--color-red-hover);
   transform: scale(1.05);
-  box-shadow: 0 4px 20px rgba(227, 6, 19, 0.3);
+  box-shadow: 0 4px 20px rgba(198, 69, 60, 0.3);
 }
 .btn-primary:active {
   transform: scale(0.95);
@@ -459,7 +471,7 @@ body {
   border: 0;
   border-radius: 999px;
   background: var(--color-danger);
-  color: #fff;
+  color: var(--color-white);
   font: 600 14px var(--font-ui);
   cursor: pointer;
   white-space: nowrap;
@@ -583,7 +595,7 @@ body {
   white-space: nowrap;
   max-width: 280px;
   border-left: 1px solid var(--color-gray-200);
-  padding-left: 12px;
+  padding-left: 16px;
 }
 .header-actions {
   display: flex;
@@ -849,7 +861,7 @@ body {
   background: none;
   border: none;
   padding: 4px 2px;
-  color: #fff;
+  color: var(--color-white);
   font: 600 14px var(--font-ui);
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -915,10 +927,14 @@ body {
   .intake-aside {
     grid-column: span 1;
   }
-  /* Keep the hero + questions first on small screens; the guidance
-     panel follows the form instead of hijacking the opening. */
   .intake-aside-sticky {
     position: static;
+  }
+  /* Guidance reads before the fields on mobile (visual order only; the
+     hero still opens the page and the card has no focusable controls, so
+     tab order following the fields is unaffected). */
+  .intake-aside {
+    order: -1;
   }
 }
 
@@ -953,6 +969,7 @@ body {
 
 .intake-hero {
   padding: 0;
+  margin-bottom: 24px;
 }
 .intake-title {
   font-family: var(--font-heading);
@@ -980,20 +997,6 @@ body {
   letter-spacing: 0.12em;
   margin-bottom: 8px;
 }
-.intake-step {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  font-family: var(--font-ui);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-dark-gray);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 12px;
-}
-
 .intake-fields {
   display: flex;
   flex-direction: column;
@@ -1031,8 +1034,8 @@ body {
   line-height: 1.6;
 }
 .input-textarea:focus {
-  border-color: var(--color-red);
-  box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.08);
+  border-color: var(--color-ink);
+  box-shadow: 0 0 0 3px rgba(28, 28, 30, 0.08);
 }
 .input-hint {
   font-size: 12px;
@@ -1207,7 +1210,7 @@ body {
 .btn-generate:hover {
   background: var(--color-red-hover);
   transform: scale(1.02);
-  box-shadow: 0 4px 20px rgba(227, 6, 19, 0.3);
+  box-shadow: 0 4px 20px rgba(198, 69, 60, 0.3);
 }
 .btn-generate:active {
   transform: scale(0.98);
@@ -1373,8 +1376,8 @@ body {
   margin-top: 12px;
   padding: 12px 18px;
   border-radius: 10px;
-  background: #fff8e1;
-  border: 1px solid #f5b700;
+  background: var(--color-accent-surface);
+  border: 1px solid var(--color-accent-dark);
   font-size: 13px;
   line-height: 1.5;
   color: var(--color-ink);
@@ -1385,12 +1388,6 @@ body {
 }
 .ready-check {
   animation: scaleIn 0.4s ease-out;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .gen-step-spinner {
-    animation: none;
-  }
 }
 
 /* ========================================
@@ -1497,13 +1494,6 @@ body {
   line-height: 1.5;
 }
 
-/* Card stack (PlaybookView; PrimitivesView now uses the board3 focus panel) */
-.card-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
 /* ========================================
    RULE CARD (bordered white card)
    ======================================== */
@@ -1583,18 +1573,6 @@ body {
 }
 .action-removing {
   animation: fadeOut 0.28s ease-in forwards;
-}
-
-/* Dark card context -- ideas inside use-card (legacy, kept in case any
-   remaining old-styled context nests an action-card; PrimitivesView no
-   longer does after the board3 restructure) */
-.use-card-body .action-card {
-  background: var(--color-surface);
-  border-color: var(--color-light-gray);
-}
-.use-card-body .action-starred {
-  background: var(--color-starred-bg);
-  border-color: var(--color-starred-border);
 }
 
 .star-btn {
@@ -1808,10 +1786,10 @@ body {
 .gate-hint + .gate-actions { margin-left: 0; }
 .btn-pill {
   padding: 11px 22px; border: 0; border-radius: 999px;
-  background: var(--color-ink); color: #fff;
+  background: var(--color-ink); color: var(--color-white);
   font: 600 14px var(--font-ui); cursor: pointer; white-space: nowrap;
 }
-.btn-pill:hover { background: #2c2c34; }
+.btn-pill:hover { background: var(--color-ink-hover); }
 .btn-pill:disabled { background: var(--color-border); color: var(--color-gray-500); cursor: not-allowed; }
 /* White pill on an ink surface (Big Move callout, Big Move poster footer). */
 .btn-pill.on-dark { background: var(--color-white); color: var(--color-ink); }
@@ -1823,15 +1801,47 @@ body {
 }
 .btn-pill-sm {
   padding: 8px 16px; border: 0; border-radius: 999px;
-  background: var(--color-ink); color: #fff;
+  background: var(--color-ink); color: var(--color-white);
   font: 600 13px var(--font-ui); cursor: pointer; white-space: nowrap;
 }
-.btn-pill-sm:hover { background: #2c2c34; }
+.btn-pill-sm:hover { background: var(--color-ink-hover); }
 
-@media (max-width: 760px) {
+.star-btn:focus-visible,
+.rail-item:focus-visible,
+.btn-pill:focus-visible,
+.btn-pill-ghost:focus-visible,
+.btn-pill-sm:focus-visible,
+.chat-input:focus-visible,
+.chat-send-btn:focus-visible,
+.chat-expand-btn:focus-visible,
+.chat-close-btn:focus-visible,
+.chat-close-btn-text:focus-visible,
+.tray-fab:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* Star buttons are already 44px at rest; this makes the floor an explicit,
+   grep-able contract for coarse (touch) pointers rather than an accident of
+   the current base size. */
+@media (pointer: coarse) {
+  .star-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 700px) {
   .gate-bar { flex-wrap: wrap; row-gap: 10px; }
   .gate-hint { display: none; }
   .gate-actions { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
+  /* The one ink primary pill always gets its own full-width row; ghost
+     secondaries (Export, Start over) share whatever room is left above it. */
+  .gate-actions .btn-pill {
+    flex: 1 1 100%;
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* ========================================
@@ -2052,12 +2062,12 @@ body {
   gap: 10px;
   padding: 11px 14px;
   border-radius: 6px;
-  background: rgba(227, 6, 19, 0.06);
-  border: 1px solid rgba(227, 6, 19, 0.2);
+  background: rgba(255, 181, 171, 0.06);
+  border: 1px solid rgba(255, 181, 171, 0.2);
 }
 .chat-idea-added {
-  background: rgba(227, 6, 19, 0.12);
-  border-color: rgba(227, 6, 19, 0.32);
+  background: rgba(255, 181, 171, 0.12);
+  border-color: rgba(255, 181, 171, 0.32);
 }
 .chat-idea-text {
   flex: 1;
@@ -2089,7 +2099,7 @@ body {
   color: var(--color-red);
 }
 .chat-idea-btn-added {
-  background: rgba(227, 6, 19, 0.08);
+  background: rgba(255, 181, 171, 0.08);
   border-color: var(--color-red);
   color: var(--color-red);
   cursor: default;
@@ -2100,8 +2110,8 @@ body {
   gap: 8px;
   padding: 10px 14px;
   border-radius: 6px;
-  background: rgba(227, 6, 19, 0.08);
-  border: 1px solid rgba(227, 6, 19, 0.2);
+  background: rgba(198, 69, 60, 0.08);
+  border: 1px solid rgba(198, 69, 60, 0.2);
   color: #fca5a5;
   font-size: 13px;
 }
@@ -2131,7 +2141,7 @@ body {
 }
 .chat-input:focus {
   border-color: var(--color-red);
-  box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.1);
+  box-shadow: 0 0 0 3px rgba(255, 181, 171, 0.15);
 }
 .chat-input::placeholder {
   color: rgba(255, 255, 255, 0.3);
@@ -2200,7 +2210,7 @@ body {
 }
 .chat-inline .chat-bubble-user {
   background: var(--color-ink);
-  color: #fff;
+  color: var(--color-white);
   border-radius: 16px 16px 4px 16px;
 }
 .chat-inline .chat-bubble-ai {
@@ -2274,10 +2284,10 @@ body {
 }
 .chat-inline .chat-send-active {
   background: var(--color-ink);
-  color: #fff;
+  color: var(--color-white);
 }
 .chat-inline .chat-send-active:hover {
-  background: #2c2c34;
+  background: var(--color-ink-hover);
 }
 
 /* ========================================
@@ -2761,10 +2771,6 @@ body {
 .rail-item:hover {
   background: var(--color-surface);
 }
-.rail-item:focus-visible {
-  outline: 2px solid var(--color-ink);
-  outline-offset: 2px;
-}
 .rail-idx {
   width: 18px;
   font-size: 11px;
@@ -2893,18 +2899,48 @@ body {
   color: var(--color-ink);
 }
 
-@media (max-width: 980px) {
+/* -- Mobile tray: floating fab + bottom sheet, replacing the sticky
+   always-visible .tray-desktop below the board3 breakpoint. Hidden above
+   it via the media query further down; see CommitmentTray.jsx. -- */
+.tray-fab {
+  display: none;
+  position: fixed;
+  right: 16px;
+  bottom: 76px;
+  z-index: 45;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-star);
+  color: var(--color-ink);
+  box-shadow: 0 8px 24px rgba(28, 28, 30, 0.2);
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font: 700 12.5px var(--font-ui);
+}
+.tray-sheet-scrim {
+  display: none;
+}
+.tray-sheet-handle {
+  display: none;
+}
+
+@media (max-width: 999px) {
   .board3 {
     grid-template-columns: minmax(0, 1fr);
   }
-  .rail,
-  .tray {
-    position: static;
-  }
   .rail {
+    position: static;
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
   }
   .rail-label,
   .rail-note {
@@ -2912,6 +2948,98 @@ body {
   }
   .rail-item {
     width: auto;
+    flex: none;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+  }
+  .rail-item.rail-active {
+    border-color: var(--color-ink);
+  }
+
+  /* Tray collapses to the fab + bottom sheet; the always-on desktop card
+     is hidden entirely. */
+  .tray-desktop {
+    display: none;
+  }
+  .tray-fab {
+    display: flex;
+  }
+  .tray-sheet-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 210;
+    background: rgba(28, 28, 30, 0.32);
+  }
+  .tray-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 211;
+    max-height: 76vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--color-white);
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -8px 32px rgba(28, 28, 30, 0.28);
+    animation: slideUp 0.3s ease-out both;
+  }
+  .tray-sheet .tray-body {
+    flex: 1;
+    max-height: none;
+    overflow-y: auto;
+  }
+  .tray-sheet-handle {
+    display: block;
+    width: 36px;
+    height: 4px;
+    margin: 10px auto 0;
+    border-radius: 2px;
+    background: var(--color-border-strong);
+  }
+  .tray-sheet-close {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border: none;
+    background: none;
+    color: var(--color-gray-500);
+    cursor: pointer;
+  }
+
+  /* Inline chat: Expand covers the full screen below the header (57px);
+     the tray fab (z-index 45) stays visible above this overlay (40). */
+  .chat-inline.chat-expanded {
+    position: fixed;
+    inset: 57px 0 0 0;
+    z-index: 40;
+    margin-top: 0;
+    border-width: 0;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .chat-inline.chat-expanded .chat-drawer {
+    height: 100%;
+  }
+  .chat-inline.chat-expanded .chat-messages {
+    min-height: 0;
+    max-height: none;
+    flex: 1;
+  }
+}
+
+/* Below 700px the gate bar itself wraps to 2-3 rows (status line, ghost
+   pills, then the full-width primary), well past the 76px clearance that's
+   correct for its normal single-row height between 700-999px. Must come
+   after the base .tray-fab rule above so the cascade (equal specificity)
+   picks this one up at these narrower widths. */
+@media (max-width: 700px) {
+  .tray-fab {
+    bottom: 250px;
   }
 }
 
@@ -2980,7 +3108,7 @@ body {
     display: none !important;
   }
   .synthesis-container {
-    background: #fff !important;
+    background: var(--color-white) !important;
     padding: 0 !important;
   }
   .synthesis-hero {

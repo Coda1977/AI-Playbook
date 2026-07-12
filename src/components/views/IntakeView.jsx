@@ -161,21 +161,23 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
   return (
     <div className="intake-container" ref={formRef}>
       <div className="intake-body">
+        {/* Hero -- light, on the page background. Kept outside .intake-split
+            (rather than as .intake-main's first child) so the mobile
+            guidance-above-fields reorder can move the guidance card above
+            the fields without also displacing the page title. */}
+        <div className="intake-hero animate-fade-in">
+          <span className="eyebrow-badge">Personalized AI Playbook</span>
+          <h1 className="intake-title">
+            Map Your AI Potential & Build Your Change Strategy
+          </h1>
+          <p className="intake-subtitle">
+            Answer seven questions about your role and team. AI will
+            discover use cases tailored to you, then build a personalized
+            change strategy grounded in behavioral science.
+          </p>
+        </div>
         <div className="intake-split">
           <div className="intake-main">
-            {/* Hero -- light, on the page background */}
-            <div className="intake-hero animate-fade-in">
-              <span className="eyebrow-badge">Personalized AI Playbook</span>
-              <h1 className="intake-title">
-                Map Your AI Potential & Build Your Change Strategy
-              </h1>
-              <p className="intake-subtitle">
-                Answer seven questions about your role and team. AI will
-                discover use cases tailored to you, then build a personalized
-                change strategy grounded in behavioral science.
-              </p>
-            </div>
-
             {attempted && !ok && (
               <div className="intake-validation-msg animate-fade-in">
                 Please complete the highlighted fields. Short answers need a
