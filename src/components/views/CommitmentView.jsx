@@ -211,7 +211,7 @@ export default function CommitmentView({
               )}
             </div>
             <button onClick={() => window.print()} className="btn-pill">
-              <Printer size={15} /> Download as PDF
+              <Printer size={15} /> Print / Save as PDF
             </button>
           </div>
 
