@@ -20,8 +20,9 @@ export default function ChatDrawer({
 }) {
   const isPrimitive = type === "primitive";
   // Presence of onToggleExpand marks the caller as the new inline board
-  // panel (Task 9); the overlay drawer (PlaybookView) never passes it, so
-  // its header renders exactly as before.
+  // panel; both PrimitivesView and PlaybookView render inline now, so this
+  // only distinguishes the (currently unused) overlay header from the
+  // inline one.
   const isInline = typeof onToggleExpand === "function";
   const { triggerFlash } = useFlash();
 
@@ -137,7 +138,7 @@ export default function ChatDrawer({
   const placeholder = isPrimitive ? "Ask anything about this category..." : "Ask anything about this rule...";
 
   return (
-    <div className="chat-drawer" style={{ "--rule-color": item.color || C.accent }}>
+    <div className="chat-drawer" style={{ "--rule-color": C.accent }}>
       <div className="chat-header">
         <div className="chat-header-bg" />
         {isInline ? (
@@ -148,7 +149,7 @@ export default function ChatDrawer({
           </div>
         ) : (
           <div className="chat-header-content">
-            <div className="chat-rule-badge" style={{ borderColor: `${item.color || C.accent}40`, color: item.color || C.accent }}>
+            <div className="chat-rule-badge" style={{ borderColor: `${C.accent}40`, color: C.accent }}>
               {badgeNumber}
             </div>
             <div>
@@ -206,7 +207,7 @@ export default function ChatDrawer({
                 {msg.ideas.map((idea, ii) => (
                   <div key={ii} className={`chat-idea animate-fade-in ${idea.added ? "chat-idea-added" : ""}`}
                     style={{ animationDelay: `${ii * 0.12}s` }}>
-                    <Sparkles size={14} color={item.color || C.accent} style={{ flexShrink: 0, marginTop: 2, opacity: 0.7 }} />
+                    <Sparkles size={14} color={C.accent} style={{ flexShrink: 0, marginTop: 2, opacity: 0.7 }} />
                     <p className="chat-idea-text">{idea.text}</p>
                     <button onClick={() => addIdea(mi, ii, idea)} disabled={idea.added}
                       className={`chat-idea-btn ${idea.added ? "chat-idea-btn-added" : ""}`}>

@@ -237,7 +237,7 @@ export default function CommitmentView({
               <div key={c.id} className="commitment-rule print-only">
                 <div
                   className="commitment-rule-number"
-                  style={{ color: c.color || C.accent }}
+                  style={{ color: C.accent }}
                 >
                   Category {c.number}
                 </div>
@@ -283,7 +283,7 @@ export default function CommitmentView({
                     <div className="commitment-rule-anchor">
                       <span
                         className="commitment-rule-num"
-                        style={{ color: r.color || C.accent }}
+                        style={{ color: C.accent }}
                       >
                         {String(r.number).padStart(2, "0")}
                       </span>

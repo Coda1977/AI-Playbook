@@ -182,7 +182,7 @@ export default function PrimitivesView({
               className="btn-pill"
               disabled={!canContinue}
             >
-              Continue to Strategy <ChevronRight size={16} />
+              Continue to strategy <ChevronRight size={16} />
             </button>
           </GateBar>
         </div>

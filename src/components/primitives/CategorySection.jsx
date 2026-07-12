@@ -64,7 +64,7 @@ export default function CategorySection({
         <div className="use-card-empty">
           <Sparkles
             size={22}
-            color={category.color || C.accent}
+            color={C.accent}
             style={{ opacity: 0.5, marginBottom: 10 }}
           />
           <p className="use-card-empty-title">No ideas yet</p>

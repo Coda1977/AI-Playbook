@@ -355,7 +355,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
           onClick={handleSubmit}
           className={`btn-pill ${attempted && !ok ? "btn-shake" : ""}`}
         >
-          Discover Use Cases
+          Discover use cases
         </button>
       </GateBar>
     </div>

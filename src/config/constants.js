@@ -41,6 +41,7 @@ export const C = {
   danger: "#c6453c",
   gray200: "#e0e2e8",
   gray300: "#c7cad5",
+  gray400: "#8e91a0",
   gray500: "#6b6f7e",
   gray700: "#555a6a",
   gray900: "#1c1c1e",

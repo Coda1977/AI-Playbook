@@ -145,4 +145,4 @@ Current design is the white/ink/salmon/star-blue redesign (rail-focus-tray board
 
 ---
 
-**Maintainer**: Yonat | **AI**: Opus 4.6 (dev) / Sonnet 4.5 (API)
+**Maintainer**: Yonat | **AI**: Claude Fable 5 (dev) / Sonnet 4.6 (API)
