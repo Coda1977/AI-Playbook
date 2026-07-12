@@ -1266,49 +1266,58 @@ body {
 }
 
 /* ========================================
-   GENERATING VIEW -- Card-based
+   EYEBROW BADGE -- shared pill label
+   ======================================== */
+.eyebrow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--color-accent-surface);
+  color: var(--color-accent-dark);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+/* ========================================
+   GENERATING VIEW -- Light checklist
    ======================================== */
 .generating-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 57px);
   padding: 32px;
   transition: opacity 0.5s ease;
 }
 .gen-card {
-  background: var(--color-white);
-  border: 1px solid var(--color-light-gray);
-  border-radius: 8px;
-  padding: 48px 40px;
-  max-width: 520px;
+  max-width: 480px;
   width: 100%;
   text-align: center;
 }
-.generating-icon {
-  margin-bottom: 32px;
-  animation: pulse 2s ease-in-out infinite;
-}
 .generating-title {
   font-family: var(--font-heading);
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: var(--color-black);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 600;
+  letter-spacing: -0.6px;
+  margin: 18px 0 6px;
+  color: var(--color-ink);
 }
 .generating-subtitle {
   font-family: var(--font-ui);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-dark-gray);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 36px;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--color-gray-700);
+  margin-bottom: 32px;
 }
 .generating-steps {
-  max-width: 400px;
+  display: inline-grid;
+  gap: 12px;
   width: 100%;
+  max-width: 400px;
   margin: 0 auto;
   text-align: left;
 }
@@ -1316,44 +1325,61 @@ body {
   display: flex;
   gap: 14px;
   align-items: flex-start;
-  padding: 10px 0;
-  transition:
-    opacity 0.5s ease,
-    transform 0.3s ease;
-}
-.gen-done {
-  opacity: 0.5;
-}
-.gen-active {
-  opacity: 1;
-}
-.gen-future {
-  opacity: 0.2;
+  padding: 4px 0;
 }
 .gen-step-icon {
   flex-shrink: 0;
-  margin-top: 2px;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  display: grid;
+  place-items: center;
+}
+.gen-step-check {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-ink);
+}
+.gen-step-spinner {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2.5px solid var(--color-accent-light);
+  border-top-color: var(--color-accent);
+  animation: spin 0.9s linear infinite;
+}
+.gen-step-empty {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
 }
 .gen-step-name {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-gray-300);
 }
-.gen-done .gen-step-name {
-  color: var(--color-dark-gray);
+.gen-done .gen-step-name,
+.gen-active .gen-step-name {
+  color: var(--color-ink);
 }
 .gen-active .gen-step-name {
-  color: var(--color-black);
+  font-weight: 600;
 }
 .gen-step-tip {
   font-size: 13px;
-  color: var(--color-dark-gray);
+  color: var(--color-gray-700);
   font-style: italic;
   margin-top: 3px;
   line-height: 1.4;
 }
 .gen-active .gen-step-tip {
-  color: var(--color-dark-gray);
-  opacity: 0.7;
+  opacity: 0.8;
 }
 .gen-building {
   display: flex;
@@ -1362,62 +1388,35 @@ body {
   justify-content: center;
   margin-top: 32px;
   padding: 14px 20px;
-  border-radius: 6px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-light-gray);
+  border-radius: 10px;
+  background: var(--color-accent-surface);
+  border: 1px solid var(--color-accent-light);
   font-size: 14px;
-  color: var(--color-red);
+  color: var(--color-accent-dark);
   font-weight: 600;
 }
 .gen-slow {
   margin-top: 12px;
   padding: 12px 18px;
-  border-radius: 6px;
+  border-radius: 10px;
   background: #fff8e1;
   border: 1px solid #f5b700;
   font-size: 13px;
   line-height: 1.5;
-  color: #333333;
+  color: var(--color-ink);
   text-align: center;
-}
-.gen-progress-bar {
-  width: 100%;
-  height: 3px;
-  background: var(--color-light-gray);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-top: 24px;
-}
-.gen-progress-fill {
-  height: 100%;
-  width: 100%;
-  background: var(--color-red);
-  border-radius: 3px;
-  transform-origin: left;
-  transform: scaleX(var(--progress, 0));
-  transition: transform 0.4s ease;
-}
-.gen-progress-label {
-  text-align: center;
-  margin-top: 8px;
-  font-family: var(--font-ui);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-dark-gray);
-  letter-spacing: 0.04em;
-}
-.gen-step-icon-active {
-  animation: glowPulse 2s ease-in-out infinite;
-  border-radius: 50%;
-}
-.gen-active .gen-step-name {
-  animation: slideInRight 0.3s ease-out;
 }
 .ready-beat {
   text-align: center;
 }
 .ready-check {
   animation: scaleIn 0.4s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gen-step-spinner {
+    animation: none;
+  }
 }
 
 /* ========================================
