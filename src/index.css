@@ -1977,6 +1977,12 @@ body {
   font: 600 14px var(--font-ui); cursor: pointer; white-space: nowrap;
 }
 
+@media (max-width: 760px) {
+  .gate-bar { flex-wrap: wrap; row-gap: 10px; }
+  .gate-hint { display: none; }
+  .gate-actions { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
+}
+
 /* ========================================
    CHAT PANEL
    ======================================== */
