@@ -10,10 +10,11 @@ React 19 + Vite 7 + Tailwind CSS 4 + Vercel Serverless Functions. Claude Sonnet 
 
 ## Design System
 
-- **Aesthetic**: Bold modern -- black/white/red, magazine editorial
-- **Typography**: Montserrat only (weights 400-700). No Roboto Condensed.
-- **Palette**: `#000000` bg/text, `#e30613` accent/CTAs/stars, `#00a3e0` category badges, `#fff2f3` starred bg, `#f5f5f5` surface
-- Paper grain disabled. Dark hero sections. Card-based layout.
+- **Aesthetic**: Editorial-calm, Miro-derived DNA -- white canvas, ink text, one salmon accent, one star-blue accent. Reduced palette; no black/white/red.
+- **Typography**: Hanken Grotesk only (weights 400-700; self-hosted variable font, Google Fonts as fallback source). No Montserrat, no Roboto Condensed.
+- **Palette**: `#FFFFFF` canvas, `#1C1C1E` ink (text, primary pill CTAs, dark surfaces), `#FFB5AB` accent/salmon ("the product speaking": brand mark, kickers/eyebrows, generating progress, Big Move numerals, done-step checks), `#ACD8FF` star ("the user's commitments," appears nowhere else: star buttons, starred-card borders, tray), `#C6453C` danger (destructive/error states ONLY, never decorative). Full token list lives in `src/index.css` (`@theme`) and the `C` object in `src/config/constants.js` -- see Pitfalls.
+- **Bones**: rail-focus-tray boards for Phase 2/3 (`BoardRail` + focus panel + `CommitmentTray`) -- one category/rule in focus at a time, starred items accumulate in an always-visible tray; a single shared `GateBar` is the ONLY home for primary actions on working screens ("the tray displays, the gate bar acts"); light checklist `GeneratingIndicator` screens (no dark interstitials mid-flow); a dark full-page poster ONLY on the Big Move (`SynthesisView`), with a light print variant for PDF/print export.
+- Paper grain disabled. Card-based layout, hairline borders over shadows (shadows reserved for overlays: modal, mobile tray bottom-sheet).
 
 ## Critical Constraints
 
@@ -30,22 +31,24 @@ React 19 + Vite 7 + Tailwind CSS 4 + Vercel Serverless Functions. Claude Sonnet 
 ## Pitfalls
 
 - Never use `transition: all` on `.canvas-rules` (breaks layout on chat panel close)
-- Never use Roboto Condensed or any font besides Montserrat
+- Never use any font besides Hanken Grotesk (no Montserrat, no Roboto Condensed)
 - Never change phase names back to "Discovery" or "Playbook"
 - Never break the 4-phase linear flow: Intake -> Use Cases -> Strategy -> Review
 - Keep state simple: Context + localStorage, no Redux
-- Keep animations subtle (0.3-0.5s, transform/opacity only)
+- Keep animations subtle (0.3-0.5s, transform/opacity only); `prefers-reduced-motion` must disable bloom/entrance/spinner/pulse animations
+- `GateBar` must stay a direct child of `.canvas-rules` (its sticky-to-viewport-bottom behavior depends on that position in the DOM)
+- Colors live in BOTH `src/index.css` (the `@theme` block) AND the `C` object in `src/config/constants.js` -- change them together or the two drift
 
 ## Component Layout
 
 ```
 src/components/views/       # IntakeView, PrimitivesView, PlaybookView, CommitmentView
-src/components/shared/      # Header, Toast, ConfirmModal, GeneratingIndicator, ChatDrawer, PhaseProgress
+src/components/shared/      # Header, GateBar, BoardRail, CommitmentTray, Toast, ConfirmModal, GeneratingIndicator, ChatDrawer, PhaseProgress
 src/components/primitives/  # IdeaCard, CategorySection, AddIdeaInput
 src/components/playbook/    # ActionCard, RuleSection
 src/config/                 # categories.js, rules.js, constants.js
 src/context/                # AppContext, ToastContext
-src/utils/                  # export.js (Word export), storage.js
+src/utils/                  # export.js (Word export), storage.js, text.js
 api/                        # primitives-generate.js, playbook-generate.js, chat.js
 lib/                        # workshop.js (canonical RULES + CATEGORIES shared by src AND api), apiGuard.js
 evals/                      # promptfoo configs + prompt snapshots for all 4 endpoints (keep snapshots in sync with api/ prompts)
@@ -57,7 +60,7 @@ evals/                      # promptfoo configs + prompt snapshots for all 4 end
 
 - Feature branches + PRs. Never push directly to `master`.
 - `npm run build` must pass before committing.
-- `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`
+- `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`
 - `master` auto-deploys to Vercel.
 
 ## AI Behavior (merged from `improving-ai` branch)
@@ -138,7 +141,7 @@ All four endpoints now use forced `tool_use` for structured output. User-provide
 
 ## Design History
 
-Current design is bold-modern (black/white/red editorial). The original design is preserved at tag `v1-original-design`.
+Current design is the white/ink/salmon/star-blue redesign (rail-focus-tray boards, gate bar, Hanken Grotesk; see Design System above). The prior bold-modern design (black/white/red editorial) is preserved at tag `pre-redesign`; the original v1 design is preserved at tag `v1-original-design`.
 
 ---
 
