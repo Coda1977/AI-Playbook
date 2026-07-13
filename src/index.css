@@ -590,7 +590,7 @@ body {
 }
 .header-role {
   color: var(--color-gray-400);
-  font-size: 13px;
+  font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -726,6 +726,9 @@ body {
   background: var(--color-accent);
   animation: pulseDot 1.2s ease-in-out infinite;
   flex-shrink: 0;
+}
+.phase-step-label {
+  font-size: 14px;
 }
 .phase-step-clickable {
   cursor: pointer !important;
@@ -991,7 +994,7 @@ body {
 /* Legacy: still used by CommitmentView's header eyebrow. */
 .intake-label {
   font-family: var(--font-ui);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
   color: var(--color-red);
   text-transform: uppercase;
@@ -1039,7 +1042,7 @@ body {
   box-shadow: 0 0 0 3px rgba(28, 28, 30, 0.08);
 }
 .input-hint {
-  font-size: 12px;
+  font-size: 12.5px;
   margin-top: 6px;
   color: var(--color-gray-500);
   transition: all 0.3s;
@@ -1248,7 +1251,7 @@ body {
   border-radius: 999px;
   background: var(--color-accent-surface);
   color: var(--color-accent-dark);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
   letter-spacing: 0.04em;
 }
@@ -1429,7 +1432,7 @@ body {
 .focus-kicker {
   display: block;
   margin-bottom: 6px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -1438,7 +1441,7 @@ body {
 .focus-head h2 {
   font-family: var(--font-heading);
   margin: 0 0 4px;
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 600;
   letter-spacing: -0.5px;
   color: var(--color-ink);
@@ -1611,7 +1614,7 @@ body {
   min-width: 0;
 }
 .action-text {
-  font-size: 16.5px;
+  font-size: 17px;
   font-weight: 500;
   line-height: 1.45;
   color: var(--color-ink);
@@ -1777,18 +1780,26 @@ body {
   border-top: 1px solid var(--color-border);
   background: var(--color-off-white);
 }
-.gate-left { font-size: 14px; color: var(--color-gray-500); }
+.gate-left { font-size: 15px; color: var(--color-gray-500); }
 .gate-left strong, .gate-left b { color: var(--color-ink); font-weight: 700; }
 /* Preserves the existing star-count pulse (PrimitivesView) now that the
    counter no longer has its own wrapper class. */
 .counter-pulse { animation: counterPulse 0.6s ease-out; }
-.gate-hint { margin: 0 auto; font-size: 14px; color: var(--color-gray-400); }
+.gate-hint { margin: 0 auto; font-size: 15px; color: var(--color-gray-400); }
 .gate-actions { display: flex; gap: 10px; margin-left: auto; }
 .gate-hint + .gate-actions { margin-left: 0; }
+.btn-pill,
+.btn-pill-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
 .btn-pill {
   padding: 11px 22px; border: 0; border-radius: 999px;
   background: var(--color-ink); color: var(--color-white);
-  font: 600 14px var(--font-ui); cursor: pointer; white-space: nowrap;
+  font: 600 15px var(--font-ui); cursor: pointer;
 }
 .btn-pill:hover { background: var(--color-ink-hover); }
 .btn-pill:disabled { background: var(--color-border); color: var(--color-gray-500); cursor: not-allowed; }
@@ -1798,7 +1809,7 @@ body {
 .btn-pill-ghost {
   padding: 11px 22px; border: 1px solid var(--color-border-strong); border-radius: 999px;
   background: transparent; color: var(--color-ink);
-  font: 600 14px var(--font-ui); cursor: pointer; white-space: nowrap;
+  font: 600 15px var(--font-ui); cursor: pointer;
 }
 .btn-pill-sm {
   padding: 8px 16px; border: 0; border-radius: 999px;
@@ -1905,7 +1916,7 @@ body {
   color: white;
 }
 .chat-rule-principle {
-  font-size: 12px;
+  font-size: 12.5px;
   color: rgba(255, 255, 255, 0.5);
   line-height: 1.4;
   display: block;
@@ -1980,7 +1991,7 @@ body {
   justify-content: center;
   padding: 8px 16px;
   margin-bottom: 4px;
-  font-size: 12px;
+  font-size: 12.5px;
   color: rgba(255, 255, 255, 0.4);
   font-style: italic;
 }
@@ -2050,7 +2061,7 @@ body {
 }
 .chat-ideas-divider span {
   font-family: var(--font-ui);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
   color: var(--color-red);
   text-transform: uppercase;
@@ -2088,7 +2099,7 @@ body {
   align-items: center;
   gap: 4px;
   font-family: var(--font-ui);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -2371,29 +2382,12 @@ body {
 .prow-src {
   flex: none;
   color: var(--color-gray-400);
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
-.prow-more {
-  display: block;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: 0;
-  padding: 10px 0 12px;
-  font-family: var(--font-ui);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-gray-500);
-  cursor: pointer;
-}
-.prow-more:hover {
-  color: var(--color-ink);
-}
-
 /* -- Actions row: back / more exports / download PDF --
    position+z-index (not just flex) so this row's stacking context wins over
    later no-print siblings that also carry .animate-fade-in -- a fade-in's
@@ -2488,7 +2482,7 @@ body {
 }
 .commitment-rule-number {
   font-family: var(--font-ui);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -2719,6 +2713,13 @@ body {
 /* ========================================
    BOARD3 LAYOUT + RAIL + COMMITMENT TRAY
    (BoardRail / CommitmentTray presentational components)
+
+   TYPE SCALE (2026-07 projection pass): base 16px, 1.2 ratio, 12.5px floor.
+   Deliberately one notch above Linear/Notion norms because these boards get
+   projected in bright workshop rooms -- small text that reads fine on a
+   laptop disappears on a screen from the back row. Nothing on these boards
+   (or in the app generally) should render below the 12.5px floor; decorative
+   single-character counters (e.g. the phase-step number badge) are exempt.
    ======================================== */
 .board3 {
   display: grid;
@@ -2728,7 +2729,7 @@ body {
 .board-title {
   font-family: var(--font-heading);
   margin: 0 0 4px;
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 600;
   letter-spacing: -0.4px;
   color: var(--color-ink);
@@ -2736,7 +2737,7 @@ body {
 .board-coach {
   margin: 0 0 26px;
   color: var(--color-gray-500);
-  font-size: 14.5px;
+  font-size: 16px;
 }
 
 /* -- Rail (left step nav) -- */
@@ -2748,7 +2749,7 @@ body {
 .rail-label {
   display: block;
   margin-bottom: 10px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -2764,7 +2765,7 @@ body {
   border-radius: 12px;
   background: transparent;
   color: var(--color-dark-gray);
-  font: 500 14px var(--font-sans);
+  font: 500 15px var(--font-sans);
   text-align: left;
   cursor: pointer;
   transition: background 0.15s ease;
@@ -2774,7 +2775,7 @@ body {
 }
 .rail-idx {
   width: 18px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--color-gray-400);
 }
@@ -2782,11 +2783,11 @@ body {
   flex: 1;
 }
 .rail-cnt {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-gray-400);
 }
 .rail-st {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--color-star-dark);
 }
@@ -2837,11 +2838,11 @@ body {
   color: var(--color-ink);
 }
 .tray-head b {
-  font-size: 15px;
+  font-size: 16px;
 }
 .tray-count {
   margin-left: auto;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--color-star-dark);
 }
@@ -2852,7 +2853,7 @@ body {
 }
 .tray-group {
   margin: 12px 0 4px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -2862,7 +2863,7 @@ body {
   display: flex;
   gap: 10px;
   padding: 9px 0;
-  font-size: 13.5px;
+  font-size: 14.5px;
   font-weight: 500;
   line-height: 1.4;
 }
@@ -2875,7 +2876,7 @@ body {
 }
 .tray-item small {
   display: block;
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 400;
   color: var(--color-gray-400);
 }
@@ -2893,7 +2894,7 @@ body {
 }
 .tray-status {
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-gray-500);
 }
 .tray-status b {
@@ -2928,6 +2929,69 @@ body {
 }
 .tray-sheet-handle {
   display: none;
+}
+
+/* ========================================
+   APP-SHELL BOARD (desktop only, >=1000px): the board becomes a fixed,
+   full-height frame with page scroll eliminated -- .canvas-rules stops being
+   the scroll container, and each column (rail / focus / tray) plus the gate
+   bar own their own height instead, scrolling internally only when their
+   own content overflows. Below 1000px this block does not apply at all;
+   the mobile layout (document scroll, chip rail, tray fab/sheet) is the
+   @media (max-width: 999px) block further down, unchanged.
+   ======================================== */
+@media (min-width: 1000px) {
+  .canvas-rules {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .canvas-inner-board {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .canvas-inner-board .board-title,
+  .canvas-inner-board .board-coach {
+    flex-shrink: 0;
+  }
+  .board3 {
+    flex: 1;
+    min-height: 0;
+  }
+  .rail {
+    position: static;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .board-focus {
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 12px;
+  }
+  .tray {
+    position: static;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .tray-head,
+  .tray-foot {
+    flex-shrink: 0;
+  }
+  .tray-body {
+    max-height: none;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  /* GateBar stays a direct child of .canvas-rules (sticky-footer contract);
+     on desktop it's simply the flex column's last row. position: sticky
+     is harmless here since the parent no longer scrolls. */
+  .gate-bar {
+    flex-shrink: 0;
+  }
 }
 
 @media (max-width: 999px) {
@@ -3101,7 +3165,7 @@ body {
     margin-top: 48px;
     padding-top: 16px;
     border-top: 1px solid var(--color-light-gray);
-    font-size: 12px;
+    font-size: 12.5px;
   }
   /* Big Move poster: ink page -> light page for print (spec section 7). */
   .synthesis-actions {
