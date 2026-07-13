@@ -5,10 +5,6 @@ import { RULES } from "../../config/rules";
 import { C } from "../../config/constants";
 import { exportPrimitivesDocx, exportPlaybookDocx } from "../../utils/export";
 
-// Priority columns collapse past this many rows (brief: "Past 5 rows per
-// column").
-const COLLAPSE_AT = 5;
-
 export default function CommitmentView({
   state,
   dispatch,
@@ -22,8 +18,6 @@ export default function CommitmentView({
     day: "numeric",
   });
 
-  const [showAllIdeas, setShowAllIdeas] = useState(false);
-  const [showAllActions, setShowAllActions] = useState(false);
   const [exportsOpen, setExportsOpen] = useState(false);
   const exportsRef = useRef(null);
 
@@ -74,13 +68,6 @@ export default function CommitmentView({
 
   const hasAnything = allPrimitiveIdeas.length > 0 || allActions.length > 0;
 
-  const visibleIdeas = showAllIdeas
-    ? starredPrimitives
-    : starredPrimitives.slice(0, COLLAPSE_AT);
-  const visibleActions = showAllActions
-    ? starredActions
-    : starredActions.slice(0, COLLAPSE_AT);
-
   return (
     <div className="commitment-container">
       <div className="commitment-header-print">
@@ -117,24 +104,13 @@ export default function CommitmentView({
               {starredPrimitives.length === 0 ? (
                 <p className="prior-empty">No starred use cases yet.</p>
               ) : (
-                <>
-                  {visibleIdeas.map((i) => (
-                    <div key={i.id} className="prow">
-                      <span className="prow-star">★</span>
-                      <p>{i.text}</p>
-                      <span className="prow-src">{i.category.title}</span>
-                    </div>
-                  ))}
-                  {!showAllIdeas && starredPrimitives.length > COLLAPSE_AT && (
-                    <button
-                      type="button"
-                      className="prow-more"
-                      onClick={() => setShowAllIdeas(true)}
-                    >
-                      Show all {starredPrimitives.length} ▾
-                    </button>
-                  )}
-                </>
+                starredPrimitives.map((i) => (
+                  <div key={i.id} className="prow">
+                    <span className="prow-star">★</span>
+                    <p>{i.text}</p>
+                    <span className="prow-src">{i.category.title}</span>
+                  </div>
+                ))
               )}
             </div>
             <div className="prior-card">
@@ -142,24 +118,13 @@ export default function CommitmentView({
               {starredActions.length === 0 ? (
                 <p className="prior-empty">No starred actions yet.</p>
               ) : (
-                <>
-                  {visibleActions.map((a) => (
-                    <div key={a.id} className="prow">
-                      <span className="prow-star">★</span>
-                      <p>{a.text}</p>
-                      <span className="prow-src">Rule {a.rule.number}</span>
-                    </div>
-                  ))}
-                  {!showAllActions && starredActions.length > COLLAPSE_AT && (
-                    <button
-                      type="button"
-                      className="prow-more"
-                      onClick={() => setShowAllActions(true)}
-                    >
-                      Show all {starredActions.length} ▾
-                    </button>
-                  )}
-                </>
+                starredActions.map((a) => (
+                  <div key={a.id} className="prow">
+                    <span className="prow-star">★</span>
+                    <p>{a.text}</p>
+                    <span className="prow-src">Rule {a.rule.number}</span>
+                  </div>
+                ))
               )}
             </div>
           </div>

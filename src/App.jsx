@@ -39,6 +39,15 @@ export default function App() {
     return () => window.removeEventListener(STORAGE_QUOTA_EVENT, onQuota);
   }, [showToast]);
 
+  // The SPA preserves window scroll position across phase switches by
+  // default (it's one document, not a route change), which left pages like
+  // Review->Big Move opening scrolled to wherever the triggering click was.
+  // Board panes (Primitives/Playbook) reset via remount already; this
+  // covers the document-scroll pages (Intake, Review, Big Move poster).
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [state.phase]);
+
   // Primitives generation
   const [primitivesReady, setPrimitivesReady] = useState(false);
   const [pendingPrimitives, setPendingPrimitives] = useState(null);
