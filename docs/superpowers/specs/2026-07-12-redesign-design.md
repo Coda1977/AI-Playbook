@@ -1,7 +1,7 @@
 # AI Playbook Redesign: Design Spec
 
 **Date:** 2026-07-12
-**Status:** Awaiting Yonatan's review
+**Status:** BUILT (see section 14 for post-build amendments; branch status in `docs/sessions/2026-07-13-redesign-branch-status.md`)
 **Reference mockup:** `Mock Ups/ai-playbook-miro-restructured-mockup.html` (the single source of visual truth; open it in a browser next to this doc)
 **Supersedes:** the bold-modern black/white/red design system described in CLAUDE.md (CLAUDE.md gets updated in the final phase; see "CLAUDE.md amendments")
 
@@ -171,3 +171,16 @@ Each phase: `npm run build` green, visual check against the mockup section, full
 
 1. PDF poster defaults to the light print variant (section 7).
 2. Delete-undo toast is in scope, built with the Primitives board phase and reused for actions (section 8).
+
+## 14. Post-build amendments (2026-07-13, from Yonatan's preview feedback; these supersede the sections above where they conflict)
+
+1. **Scroll model (supersedes parts of 5.2/5.4):** boards at >=1180px are app-shells: the page does not scroll; rail/focus/tray each fill the viewport height and scroll internally only on overflow; the tray's 44vh cap is desktop-obsolete (tray-body is flex:1); GateBar is the fixed bottom row. <=1179px keeps document scroll with the mobile pattern. Category/rule switches reset the focus pane scroll and focus the new heading. Rationale: the earlier hybrid (scrolling page + sticky scrolling islands) reshaped constantly and half-filled the screen.
+2. **Breakpoint:** the three-column board engages at 1180px (not 1000px) so the focus column never drops below ~500px.
+3. **Type scale:** 16px base, 1.2 ratio, 12.5px floor, one notch above product norms for projection. Secondary text gray-500 minimum; gray-400 decoration-only.
+4. **Review overflow (supersedes section 8's collapse rule):** both columns always show every starred item; no "Show all" expanders.
+5. **Gate-left text:** a single non-wrapping "★ {n} starred" on both boards (counts live in the rail/tray).
+6. **PDF button label:** "Print / Save as PDF" everywhere (the button opens the print dialog; user commit 79a8915 governs, superseding this spec's/plan's "Download" labels).
+7. **Big Move date:** synthesis is stamped with generatedAt at SET_SYNTHESIS; the poster and exports display that date, never "today".
+8. **Intake error navigation:** failed submit focuses and scrolls to the first invalid field after render (reduced-motion aware) with a role="alert" summary.
+9. **Accessibility hardening:** ConfirmModal has full dialog semantics; intake labels/radiogroup/aria-pressed wired; toasts in a polite live region; ErrorBanner role="alert"; chat messages aria-live; white focus ring on ink surfaces.
+10. **Deferred backlog (owner-approved deferrals):** "Jump to your Big Move" anchor on Review; cancel/escape during generation; URL history/deep links (ties into the three-modes plan); chat draft persistence; intake debounce flush on unload.

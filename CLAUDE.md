@@ -14,6 +14,9 @@ React 19 + Vite 7 + Tailwind CSS 4 + Vercel Serverless Functions. Claude Sonnet 
 - **Typography**: Hanken Grotesk only (weights 400-700; self-hosted variable font, Google Fonts as fallback source). No Montserrat, no Roboto Condensed.
 - **Palette**: `#FFFFFF` canvas, `#1C1C1E` ink (text, primary pill CTAs, dark surfaces), `#FFB5AB` accent/salmon ("the product speaking": brand mark, kickers/eyebrows, generating progress, Big Move numerals, done-step checks), `#ACD8FF` star ("the user's commitments," appears nowhere else: star buttons, starred-card borders, tray), `#C6453C` danger (destructive/error states ONLY, never decorative). Full token list lives in `src/index.css` (`@theme`) and the `C` object in `src/config/constants.js` -- see Pitfalls.
 - **Bones**: rail-focus-tray boards for Phase 2/3 (`BoardRail` + focus panel + `CommitmentTray`) -- one category/rule in focus at a time, starred items accumulate in an always-visible tray; a single shared `GateBar` is the ONLY home for primary actions on working screens ("the tray displays, the gate bar acts"); light checklist `GeneratingIndicator` screens (no dark interstitials mid-flow); a dark full-page poster ONLY on the Big Move (`SynthesisView`), with a light print variant for PDF/print export.
+- **Scroll model**: at >=1180px the boards are app-shells -- the page does NOT scroll; rail, focus column, and tray each fill the viewport height and scroll internally only on overflow, with GateBar as the fixed bottom row. At <=1179px boards use document scroll (horizontal chip rail, tray collapses to a floating fab + bottom sheet). Switching category/rule resets the focus pane's scroll and moves keyboard focus to the new heading.
+- **Type scale**: 16px base, 1.2 ratio, hard 12.5px floor (screens get projected in bright rooms; scale is documented in a comment in `src/index.css`). Secondary text uses gray-500+; gray-400 is decoration-only.
+- **Accessibility conventions**: ConfirmModal and the mobile tray sheet are real dialogs (focus trap, Escape, focus restore); toasts render in a polite live region (delete has a 6s Undo); ErrorBanner is `role="alert"`; intake fields have label/aria-invalid/describedby wiring; ink surfaces use a white `:focus-visible` ring.
 - Paper grain disabled. Card-based layout, hairline borders over shadows (shadows reserved for overlays: modal, mobile tray bottom-sheet).
 
 ## Critical Constraints
@@ -36,7 +39,9 @@ React 19 + Vite 7 + Tailwind CSS 4 + Vercel Serverless Functions. Claude Sonnet 
 - Never break the 4-phase linear flow: Intake -> Use Cases -> Strategy -> Review
 - Keep state simple: Context + localStorage, no Redux
 - Keep animations subtle (0.3-0.5s, transform/opacity only); `prefers-reduced-motion` must disable bloom/entrance/spinner/pulse animations
-- `GateBar` must stay a direct child of `.canvas-rules` (its sticky-to-viewport-bottom behavior depends on that position in the DOM)
+- `GateBar` must stay a direct child of `.canvas-rules` (desktop app-shell: it is the flex column's fixed bottom row; mobile: sticky bottom depends on that DOM position)
+- The app-shell flex chain relies on `min-height: 0` at every scrolling level (`.canvas-inner-board`, `.board3`, `.tray-body`) -- removing one silently kills pane scrolling
+- `AddIdeaInput`/`AddActionInput` must stay `key`ed by their category/rule id, or a draft typed in one container submits into another
 - Colors live in BOTH `src/index.css` (the `@theme` block) AND the `C` object in `src/config/constants.js` -- change them together or the two drift
 
 ## Component Layout
