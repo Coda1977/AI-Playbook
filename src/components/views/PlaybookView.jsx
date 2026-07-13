@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronRight, RotateCcw, Star } from "lucide-react";
 import { RULES } from "../../config/rules";
 import { CATEGORIES } from "../../config/categories";
@@ -14,11 +14,17 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
   const [focusedId, setFocusedId] = useState(RULES[0].id);
   const [activeRule, setActiveRule] = useState(null);
   const [chatExpanded, setChatExpanded] = useState(false);
+  const focusPaneRef = useRef(null);
+  const headingRef = useRef(null);
+  // Tracks the previously-focused rule so the switch effect below can tell
+  // an actual switch apart from the initial mount. A plain "is this the
+  // first run" boolean ref doesn't survive React StrictMode's dev-only
+  // double-invoke of mount effects (the flag flips on the first invocation,
+  // so the second invocation wrongly treats the mount as a "switch" and
+  // steals focus); comparing against the last-seen id is idempotent no
+  // matter how many times the effect fires for the same value.
+  const prevFocusedIdRef = useRef(focusedId);
 
-  const totalActions = RULES.reduce(
-    (sum, r) => sum + (state.plan[r.id] || []).length,
-    0,
-  );
   const starred = RULES.reduce(
     (sum, r) => sum + (state.plan[r.id] || []).filter((a) => a.starred).length,
     0,
@@ -47,10 +53,18 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
   const nextRule = RULES[(focusedIndex + 1) % RULES.length];
 
   // Switching rail rule closes any open chat instead of leaving it pinned to
-  // a rule that's no longer in focus.
+  // a rule that's no longer in focus, resets the focus pane's internal
+  // scroll to the top, and moves keyboard focus to the new focus panel
+  // heading (skipped on first mount so initial page load doesn't grab
+  // focus).
   useEffect(() => {
     setActiveRule(null);
     setChatExpanded(false);
+    if (prevFocusedIdRef.current !== focusedId) {
+      focusPaneRef.current?.scrollTo(0, 0);
+      headingRef.current?.focus({ preventScroll: true });
+    }
+    prevFocusedIdRef.current = focusedId;
   }, [focusedId]);
 
   return (
@@ -80,7 +94,7 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
                 note="10 actions across 5 research-backed rules. Star at least 3 to build your Big Move."
               />
 
-              <section className="board-focus">
+              <section className="board-focus" ref={focusPaneRef}>
                 <RuleSection
                   rule={focusedRule}
                   actions={state.plan[focusedId] || []}
@@ -90,6 +104,7 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
                   total={RULES.length}
                   onNext={() => setFocusedId(nextRule.id)}
                   nextName={nextRule.name}
+                  headingRef={headingRef}
                 />
 
                 {activeRule && activeRule.id === focusedId && (
@@ -143,7 +158,6 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
           <GateBar
             left={
               <>
-                <b>{totalActions}</b> actions · <b>{RULES.length}</b> rules ·{" "}
                 <Star
                   size={14}
                   fill={C.star}

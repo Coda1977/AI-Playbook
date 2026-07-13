@@ -179,7 +179,7 @@ export default function ChatDrawer({
         </div>
       </div>
 
-      <div className="chat-messages">
+      <div className="chat-messages" aria-live="polite" aria-busy={loading}>
         {messages.length > 0 && messages[0].role === "assistant" && (
           <div className="chat-system-note animate-fade-in">
             <Sparkles size={14} color={C.accent} />

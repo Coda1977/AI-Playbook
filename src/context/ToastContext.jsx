@@ -36,7 +36,7 @@ export function ToastProvider({ children }) {
     <ToastContext.Provider value={{ showToast }}>
       {children}
       {toast && (
-        <div className="toast-container">
+        <div className="toast-container" role="status" aria-live="polite">
           <Toast
             key={toast.id}
             message={toast.message}

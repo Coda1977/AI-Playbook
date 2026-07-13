@@ -257,7 +257,12 @@ function baseReducer(state, action) {
     case "SET_SYNTHESIS":
       return {
         ...state,
-        synthesis: action.synthesis,
+        synthesis: action.synthesis
+          ? {
+              ...action.synthesis,
+              generatedAt: action.synthesis.generatedAt || Date.now(),
+            }
+          : action.synthesis,
         synthesisVersion: state.contentVersion || 0,
         phase: "synthesis",
       };

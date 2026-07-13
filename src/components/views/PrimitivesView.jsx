@@ -22,6 +22,16 @@ export default function PrimitivesView({
   const [counterPulse, setCounterPulse] = useState(false);
   const prevStarredRef = useRef(0);
   const scrollRef = useRef(null);
+  const focusPaneRef = useRef(null);
+  const headingRef = useRef(null);
+  // Tracks the previously-focused category so the switch effect below can
+  // tell an actual switch apart from the initial mount. A plain "is this the
+  // first run" boolean ref doesn't survive React StrictMode's dev-only
+  // double-invoke of mount effects (the flag flips on the first invocation,
+  // so the second invocation wrongly treats the mount as a "switch" and
+  // steals focus); comparing against the last-seen id is idempotent no
+  // matter how many times the effect fires for the same value.
+  const prevFocusedIdRef = useRef(focusedId);
 
   const totalIdeas = CATEGORIES.reduce(
     (sum, c) => sum + (state.primitives[c.id] || []).length,
@@ -60,10 +70,18 @@ export default function PrimitivesView({
   }, [starredCount]);
 
   // Switching rail category closes any open chat instead of leaving it
-  // pinned to a category that's no longer in focus.
+  // pinned to a category that's no longer in focus, resets the focus pane's
+  // internal scroll to the top, and moves keyboard focus to the new focus
+  // panel heading (skipped on first mount so initial page load doesn't grab
+  // focus).
   useEffect(() => {
     setActiveCategory(null);
     setChatExpanded(false);
+    if (prevFocusedIdRef.current !== focusedId) {
+      focusPaneRef.current?.scrollTo(0, 0);
+      headingRef.current?.focus({ preventScroll: true });
+    }
+    prevFocusedIdRef.current = focusedId;
   }, [focusedId]);
 
   return (
@@ -94,7 +112,7 @@ export default function PrimitivesView({
                 note="12 ideas total. Visit every category; star freely."
               />
 
-              <section className="board-focus">
+              <section className="board-focus" ref={focusPaneRef}>
                 <CategorySection
                   category={focusedCategory}
                   ideas={state.primitives[focusedId] || []}
@@ -104,6 +122,7 @@ export default function PrimitivesView({
                   total={CATEGORIES.length}
                   onNext={() => setFocusedId(nextCategory.id)}
                   nextTitle={nextCategory.title}
+                  headingRef={headingRef}
                 />
 
                 {activeCategory && activeCategory.id === focusedId && (
@@ -160,10 +179,7 @@ export default function PrimitivesView({
                   color={C.star}
                   style={{ verticalAlign: "text-bottom" }}
                 />{" "}
-                <strong>{starredCount}</strong> of {totalIdeas} starred
-                {starredCount >= MIN_STARS_FOR_PLAYBOOK
-                  ? " · strategy unlocked"
-                  : ` · star at least ${MIN_STARS_FOR_PLAYBOOK} to unlock strategy`}
+                <strong>{starredCount}</strong> starred
               </span>
             }
             hint="Ready when you are"

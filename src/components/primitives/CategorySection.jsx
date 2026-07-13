@@ -14,6 +14,7 @@ export default function CategorySection({
   total,
   onNext,
   nextTitle,
+  headingRef,
 }) {
   const { flash } = useFlash();
   const isFlashing = flash === category.id;
@@ -42,7 +43,7 @@ export default function CategorySection({
           Category {String(focusIndex + 1).padStart(2, "0")} of{" "}
           {String(total).padStart(2, "0")}
         </span>
-        <h2>{category.title}</h2>
+        <h2 ref={headingRef} tabIndex={-1}>{category.title}</h2>
         <p className="focus-sub">{category.description}</p>
         <p className="focus-desc">{category.principle}</p>
       </div>
@@ -74,7 +75,7 @@ export default function CategorySection({
 
       <div className="rule-footer">
         <div className="rule-footer-add">
-          <AddIdeaInput categoryId={category.id} dispatch={dispatch} />
+          <AddIdeaInput key={category.id} categoryId={category.id} dispatch={dispatch} />
         </div>
         <button
           onClick={() => onGoDeeper(category)}

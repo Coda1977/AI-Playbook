@@ -5,6 +5,7 @@ import { FLUENCY_OPTIONS } from "../../config/rules";
 import GateBar from "../shared/GateBar";
 
 function TextareaWithGuide({
+  id,
   value,
   onChange,
   placeholder,
@@ -21,17 +22,21 @@ function TextareaWithGuide({
           ? "Good start - keep going for best results."
           : "Great detail - this will help create a strong plan.";
   const isGreat = words > 15;
+  const hintId = `${id}-hint`;
   return (
     <div>
       <textarea
+        id={id}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
         rows={rows}
         className={`input-textarea ${hasError ? "input-error" : ""}`}
+        aria-invalid={hasError ? "true" : undefined}
+        aria-describedby={hint ? hintId : undefined}
       />
       {hint && (
-        <p className={`input-hint ${isGreat ? "input-hint-great" : ""}`}>
+        <p id={hintId} className={`input-hint ${isGreat ? "input-hint-great" : ""}`}>
           {hint}
         </p>
       )}
@@ -39,9 +44,13 @@ function TextareaWithGuide({
   );
 }
 
-function FluencySelector({ value, onChange, type, hasError }) {
+function FluencySelector({ value, onChange, type, hasError, labelId }) {
   return (
-    <div className={`fluency-grid ${hasError ? "fluency-grid-error" : ""}`}>
+    <div
+      className={`fluency-grid ${hasError ? "fluency-grid-error" : ""}`}
+      role="radiogroup"
+      aria-labelledby={labelId}
+    >
       {FLUENCY_OPTIONS.map((o) => {
         const d = type === "manager" ? o.managerDesc : o.teamDesc;
         const v = `${o.label} -- ${d}`;
@@ -51,6 +60,8 @@ function FluencySelector({ value, onChange, type, hasError }) {
             key={o.level}
             onClick={() => onChange(v)}
             type="button"
+            role="radio"
+            aria-checked={sel}
             className={`fluency-option ${sel ? "fluency-selected" : ""}`}
           >
             <div className="fluency-check">
@@ -79,6 +90,7 @@ function HelpPills({ selected, onToggle, hasError }) {
             key={o.id}
             onClick={() => onToggle(o.id)}
             type="button"
+            aria-pressed={sel}
             className={`pill ${sel ? "on" : ""}`}
           >
             {sel && <Check size={14} />}
@@ -105,6 +117,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
     ...existing,
   }));
   const [attempted, setAttempted] = useState(false);
+  const [submitAttempt, setSubmitAttempt] = useState(0);
   const formRef = useRef(null);
 
   // Auto-save the draft as the user types. Answers used to live only in
@@ -145,16 +158,36 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
   const missing = (field) => attempted && !fieldOk[field];
   const missingArray = (field) => attempted && !fieldOk[field];
 
+  // The synchronous DOM query used to run in handleSubmit itself, before
+  // React had rendered the error classes triggered by setAttempted(true).
+  // Deferring the scroll/focus to an effect keyed off submitAttempt lets it
+  // run after the error state has actually painted.
+  useEffect(() => {
+    if (submitAttempt === 0) return;
+    const first = formRef.current?.querySelector(
+      ".input-error, .fluency-grid-error",
+    );
+    if (!first) return;
+    const control = first.matches("textarea, button")
+      ? first
+      : first.querySelector("textarea, button");
+    control?.focus({ preventScroll: true });
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    first.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      block: "center",
+    });
+  }, [submitAttempt]);
+
   const handleSubmit = () => {
     if (ok) {
       dispatch({ type: "SET_INTAKE", intake: f });
       onGenerate(f);
     } else {
       setAttempted(true);
-      const first = formRef.current?.querySelector(
-        ".input-error, .fluency-grid-error",
-      );
-      if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+      setSubmitAttempt((n) => n + 1);
     }
   };
 
@@ -179,7 +212,10 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
         <div className="intake-split">
           <div className="intake-main">
             {attempted && !ok && (
-              <div className="intake-validation-msg animate-fade-in">
+              <div
+                className="intake-validation-msg animate-fade-in"
+                role="alert"
+              >
                 Please complete the highlighted fields. Short answers need a
                 few more words; they drive everything the AI builds for you.
               </div>
@@ -191,11 +227,12 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                 className="panel animate-fade-in"
                 style={{ animationDelay: "0.06s" }}
               >
-                <label className="field-label">Your role and team</label>
+                <label className="field-label" htmlFor="intake-role">Your role and team</label>
                 <p className="field-desc">
                   What's your role, and what does your team do day-to-day?
                 </p>
                 <TextareaWithGuide
+                  id="intake-role"
                   value={f.role}
                   onChange={(e) => set("role", e.target.value)}
                   placeholder="e.g., VP of Customer Success leading a 12-person team across onboarding, support, and renewals"
@@ -225,13 +262,14 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                 className="panel animate-fade-in"
                 style={{ animationDelay: "0.14s" }}
               >
-                <label className="field-label">
+                <label className="field-label" htmlFor="intake-responsibilities">
                   Your main responsibilities
                 </label>
                 <p className="field-desc">
                   What do you spend most of your time on?
                 </p>
                 <TextareaWithGuide
+                  id="intake-responsibilities"
                   value={f.responsibilities}
                   onChange={(e) => set("responsibilities", e.target.value)}
                   placeholder="e.g., Campaign planning, team coordination, stakeholder reporting, client QBRs"
@@ -244,7 +282,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                 className="panel animate-fade-in"
                 style={{ animationDelay: "0.18s" }}
               >
-                <label className="field-label">Your own AI fluency</label>
+                <label className="field-label" id="intake-managerFluency-label">Your own AI fluency</label>
                 <p className="field-desc">
                   How would you describe your own AI usage right now?
                 </p>
@@ -253,6 +291,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                   onChange={(v) => set("managerFluency", v)}
                   type="manager"
                   hasError={missing("managerFluency")}
+                  labelId="intake-managerFluency-label"
                 />
               </article>
 
@@ -261,7 +300,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                 className="panel animate-fade-in"
                 style={{ animationDelay: "0.22s" }}
               >
-                <label className="field-label">Your team's AI fluency</label>
+                <label className="field-label" id="intake-teamFluency-label">Your team's AI fluency</label>
                 <p className="field-desc">
                   How would you describe your team's AI usage overall?
                 </p>
@@ -270,6 +309,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                   onChange={(v) => set("teamFluency", v)}
                   type="team"
                   hasError={missing("teamFluency")}
+                  labelId="intake-teamFluency-label"
                 />
               </article>
 
@@ -278,7 +318,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                 className="panel animate-fade-in"
                 style={{ animationDelay: "0.26s" }}
               >
-                <label className="field-label">
+                <label className="field-label" htmlFor="intake-failureRisks">
                   What would make AI adoption fail on your team?
                 </label>
                 <p className="field-desc">
@@ -286,6 +326,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                   likely reasons?
                 </p>
                 <TextareaWithGuide
+                  id="intake-failureRisks"
                   value={f.failureRisks}
                   onChange={(e) => set("failureRisks", e.target.value)}
                   placeholder="e.g., My two senior architects think AI-generated work is beneath them, and the rest of the team follows their lead"
@@ -298,7 +339,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                 className="panel animate-fade-in"
                 style={{ animationDelay: "0.3s" }}
               >
-                <label className="field-label">
+                <label className="field-label" htmlFor="intake-successVision">
                   What does success look like in 90 days?
                 </label>
                 <p className="field-desc">
@@ -306,6 +347,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                   like 3 months from now?
                 </p>
                 <TextareaWithGuide
+                  id="intake-successVision"
                   value={f.successVision}
                   onChange={(e) => set("successVision", e.target.value)}
                   placeholder="e.g., Every CSM uses AI to prep for client calls, and we've cut QBR prep time in half"

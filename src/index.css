@@ -225,7 +225,7 @@ body {
   }
   50% {
     transform: scale(1.08);
-    color: var(--color-red);
+    color: var(--color-star-dark);
   }
 }
 @keyframes starPop {
@@ -235,11 +235,11 @@ body {
   }
   30% {
     transform: scale(1.4) rotate(18deg);
-    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+    filter: drop-shadow(0 0 8px rgba(172, 216, 255, 0.6));
   }
   60% {
     transform: scale(0.9) rotate(-8deg);
-    filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.3));
+    filter: drop-shadow(0 0 4px rgba(172, 216, 255, 0.3));
   }
   100% {
     transform: scale(1) rotate(0deg);
@@ -385,7 +385,7 @@ body {
   justify-content: center;
   gap: 8px;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
   line-height: 1.3;
 }
 .btn-primary {
@@ -406,7 +406,7 @@ body {
   justify-content: center;
   gap: 8px;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
   line-height: 1.3;
 }
 .btn-primary:hover {
@@ -435,7 +435,7 @@ body {
   justify-content: center;
   gap: 8px;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
   line-height: 1.3;
 }
 .btn-secondary:hover {
@@ -456,7 +456,7 @@ body {
   font-family: var(--font-ui);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
   min-height: 44px;
   line-height: 1.3;
   border: 1px solid var(--color-charcoal);
@@ -670,7 +670,7 @@ body {
   gap: 7px;
   padding: 7px 14px;
   border-radius: 999px;
-  transition: all 0.2s;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
   border: 1px solid var(--color-border);
   background: none;
   color: var(--color-gray-500);
@@ -691,7 +691,7 @@ body {
   border: 1px solid currentColor;
   color: inherit;
   background: transparent;
-  transition: all 0.2s;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .phase-step-active {
   border-color: var(--color-ink);
@@ -1045,7 +1045,7 @@ body {
   font-size: 12.5px;
   margin-top: 6px;
   color: var(--color-gray-500);
-  transition: all 0.3s;
+  transition: color 0.3s, font-weight 0.3s;
 }
 .input-hint-great {
   color: var(--color-ink);
@@ -1072,7 +1072,7 @@ body {
   color: var(--color-charcoal);
   cursor: pointer;
   font-family: var(--font-sans);
-  transition: all 0.15s;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1115,7 +1115,7 @@ body {
   gap: 12px;
   border: 1.5px solid var(--color-light-gray);
   background: transparent;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 .fluency-option:hover {
   border-color: var(--color-gray-300);
@@ -1176,7 +1176,7 @@ body {
   gap: 8px;
   border: 1px solid var(--color-charcoal);
   background: transparent;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   font-size: 14px;
   color: var(--color-charcoal);
 }
@@ -1204,7 +1204,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   animation: fadeInUp 0.5s ease-out both;
-  transition: all 0.2s;
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1413,7 +1413,7 @@ body {
 .canvas-inner {
   width: min(100% - 24px, 900px);
   margin: 0 auto;
-  padding: 0 0 96px;
+  padding: 0 0 24px;
 }
 /* The board3 rail/focus/tray layout needs far more horizontal room than the
    old single-column card-stack it replaces (240px rail + 308px tray + 64px
@@ -1656,7 +1656,7 @@ body {
   padding: 8px;
   border-radius: 4px;
   color: var(--color-gray-400);
-  transition: all 0.15s;
+  transition: color 0.15s, background-color 0.15s;
   display: flex;
   align-items: center;
 }
@@ -1694,7 +1694,7 @@ body {
   cursor: pointer;
   width: 100%;
   font-family: inherit;
-  transition: all 0.2s;
+  transition: border-color 0.2s, color 0.2s, background-color 0.2s;
 }
 .add-action-btn:hover {
   border-color: var(--color-ink);
@@ -1710,7 +1710,7 @@ body {
   align-items: center;
   justify-content: center;
   color: var(--color-dark-gray);
-  transition: all 0.15s;
+  transition: background-color 0.15s;
 }
 .add-action-btn:hover .add-action-icon {
   background: var(--color-light-gray);
@@ -1749,7 +1749,7 @@ body {
   color: var(--color-ink);
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s;
+  transition: background-color 0.15s, border-color 0.15s;
   background: transparent;
 }
 .btn-go-deeper:hover {
@@ -1780,7 +1780,7 @@ body {
   border-top: 1px solid var(--color-border);
   background: var(--color-off-white);
 }
-.gate-left { font-size: 15px; color: var(--color-gray-500); }
+.gate-left { font-size: 15px; color: var(--color-gray-500); white-space: nowrap; }
 .gate-left strong, .gate-left b { color: var(--color-ink); font-weight: 700; }
 /* Preserves the existing star-count pulse (PrimitivesView) now that the
    counter no longer has its own wrapper class. */
@@ -1831,6 +1831,16 @@ body {
 .tray-fab:focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 2px;
+}
+
+/* Ink-background surfaces (Big Move poster, Big Move callout) need a light
+   ring instead -- the default ink outline is invisible against an ink
+   background. Placed after the selector list above (equal specificity: one
+   class + :focus-visible) so it wins the cascade for shared classes like
+   .btn-pill.on-dark that appear on these surfaces. */
+.synthesis-container :focus-visible,
+.bigmove-callout :focus-visible {
+  outline-color: var(--color-white);
 }
 
 /* Star buttons are already 44px at rest; this makes the floor an explicit,
@@ -1941,7 +1951,7 @@ body {
   align-items: center;
   justify-content: center;
   color: rgba(255, 255, 255, 0.5);
-  transition: all 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .chat-close-btn:hover {
   background: rgba(255, 255, 255, 0.08);
@@ -2057,13 +2067,13 @@ body {
   content: "";
   flex: 1;
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-border);
 }
 .chat-ideas-divider span {
   font-family: var(--font-ui);
   font-size: 12.5px;
   font-weight: 700;
-  color: var(--color-red);
+  color: var(--color-accent-dark);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   white-space: nowrap;
@@ -2104,7 +2114,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: rgba(255, 255, 255, 0.5);
-  transition: all 0.2s;
+  transition: border-color 0.2s, color 0.2s;
 }
 .chat-idea-btn:hover:not(:disabled) {
   border-color: var(--color-red);
@@ -2165,7 +2175,7 @@ body {
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.3);
   cursor: not-allowed;
-  transition: all 0.2s;
+  transition: background-color 0.2s, color 0.2s;
 }
 .chat-send-active {
   background: var(--color-red);
@@ -2932,15 +2942,15 @@ body {
 }
 
 /* ========================================
-   APP-SHELL BOARD (desktop only, >=1000px): the board becomes a fixed,
+   APP-SHELL BOARD (desktop only, >=1180px): the board becomes a fixed,
    full-height frame with page scroll eliminated -- .canvas-rules stops being
    the scroll container, and each column (rail / focus / tray) plus the gate
    bar own their own height instead, scrolling internally only when their
-   own content overflows. Below 1000px this block does not apply at all;
+   own content overflows. Below 1180px this block does not apply at all;
    the mobile layout (document scroll, chip rail, tray fab/sheet) is the
-   @media (max-width: 999px) block further down, unchanged.
+   @media (max-width: 1179px) block further down, unchanged.
    ======================================== */
-@media (min-width: 1000px) {
+@media (min-width: 1180px) {
   .canvas-rules {
     overflow: hidden;
     display: flex;
@@ -2951,6 +2961,11 @@ body {
     min-height: 0;
     display: flex;
     flex-direction: column;
+    /* The gate bar (a sticky child of .canvas-rules) provides the visual
+       bottom edge on this desktop layout, so the board's own bottom padding
+       (kept for the mobile document-scroll case above) would just be dead
+       space stacked on top of it. */
+    padding-bottom: 0;
   }
   .canvas-inner-board .board-title,
   .canvas-inner-board .board-coach {
@@ -2994,7 +3009,7 @@ body {
   }
 }
 
-@media (max-width: 999px) {
+@media (max-width: 1179px) {
   .board3 {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -3099,7 +3114,7 @@ body {
 
 /* Below 700px the gate bar itself wraps to 2-3 rows (status line, ghost
    pills, then the full-width primary), well past the 76px clearance that's
-   correct for its normal single-row height between 700-999px. Must come
+   correct for its normal single-row height between 700-1179px. Must come
    after the base .tray-fab rule above so the cascade (equal specificity)
    picks this one up at these narrower widths. */
 @media (max-width: 700px) {

@@ -14,6 +14,7 @@ export default function RuleSection({
   total,
   onNext,
   nextName,
+  headingRef,
 }) {
   const { flash } = useFlash();
   const isFlashing = flash === rule.id;
@@ -42,7 +43,7 @@ export default function RuleSection({
           Rule {String(focusIndex + 1).padStart(2, "0")} of{" "}
           {String(total).padStart(2, "0")}
         </span>
-        <h2>{rule.name}</h2>
+        <h2 ref={headingRef} tabIndex={-1}>{rule.name}</h2>
         <div className="rule-science">
           <p>{rule.principle}</p>
         </div>
@@ -75,7 +76,7 @@ export default function RuleSection({
 
       <div className="rule-footer">
         <div className="rule-footer-add">
-          <AddActionInput ruleId={rule.id} dispatch={dispatch} />
+          <AddActionInput key={rule.id} ruleId={rule.id} dispatch={dispatch} />
         </div>
         <button onClick={() => onGoDeeper(rule)} className="btn-go-deeper">
           <MessageCircle size={14} /> Go Deeper with AI
