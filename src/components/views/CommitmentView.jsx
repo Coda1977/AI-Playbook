@@ -89,7 +89,7 @@ export default function CommitmentView({
             onClick={() => dispatch({ type: "SET_PHASE", phase: "primitives" })}
             className="btn-ghost"
           >
-            <ArrowLeft size={14} /> Back to Discovery
+            <ArrowLeft size={14} /> Back to AI Use Cases
           </button>
         </div>
       ) : (
