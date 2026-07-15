@@ -167,7 +167,13 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
                 <b>{starred}</b> starred
               </>
             }
-            hint="Ready when you are"
+            hint={
+              starred === 0
+                ? "Star the actions you'll commit to"
+                : !canContinue
+                  ? `Star at least ${MIN_STARS_FOR_REVIEW} to continue`
+                  : "Ready when you are"
+            }
           >
             <button onClick={onStartOver} className="btn-pill-ghost">
               <RotateCcw size={12} /> Start over

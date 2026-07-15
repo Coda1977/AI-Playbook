@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Star, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "../../context/ToastContext";
+import { useApp } from "../../context/AppContext";
 
 export default function IdeaCard({ idea, categoryId, dispatch, isNew, index }) {
   const { showToast } = useToast();
+  const { state } = useApp();
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(idea.text);
   const [blooming, setBlooming] = useState(false);
@@ -18,6 +20,9 @@ export default function IdeaCard({ idea, categoryId, dispatch, isNew, index }) {
     setEditing(false);
   };
   const handleDelete = () => {
+    // Captured before the delete so an Undo can hand contentVersion back and
+    // leave the Big Move's freshness untouched (see AppContext's reducer).
+    const prevContentVersion = state.contentVersion || 0;
     dispatch({ type: "DELETE_PRIMITIVE", categoryId, ideaId: idea.id });
     showToast("Idea deleted", {
       actionLabel: "Undo",
@@ -29,6 +34,7 @@ export default function IdeaCard({ idea, categoryId, dispatch, isNew, index }) {
           containerId: categoryId,
           item: idea,
           index,
+          prevContentVersion,
         }),
     });
   };

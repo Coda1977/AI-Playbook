@@ -109,7 +109,7 @@ export default function PrimitivesView({
                 }))}
                 activeId={focusedId}
                 onSelect={setFocusedId}
-                note="12 ideas total. Visit every category; star freely."
+                note={`12 ideas total. Visit every category; star at least ${MIN_STARS_FOR_PLAYBOOK} to continue.`}
               />
 
               <section className="board-focus" ref={focusPaneRef}>
@@ -160,8 +160,10 @@ export default function PrimitivesView({
                 ]}
                 status={
                   <p className="tray-status">
-                    <b>{starredCount} starred</b> · every star enriches the
-                    plan.
+                    <b>{starredCount} starred</b> ·{" "}
+                    {canContinue
+                      ? "strategy unlocked."
+                      : `strategy unlocks at ${MIN_STARS_FOR_PLAYBOOK}.`}
                   </p>
                 }
                 emptyText="Star ideas and they collect here."
@@ -182,7 +184,13 @@ export default function PrimitivesView({
                 <strong>{starredCount}</strong> starred
               </span>
             }
-            hint="Ready when you are"
+            hint={
+              starredCount === 0
+                ? "Star the ideas that matter to you"
+                : !canContinue
+                  ? `Star at least ${MIN_STARS_FOR_PLAYBOOK} to continue`
+                  : "Ready when you are"
+            }
           >
             <button
               onClick={() => exportPrimitivesDocx(state)}

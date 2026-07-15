@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Star, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "../../context/ToastContext";
+import { useApp } from "../../context/AppContext";
 
 export default function ActionCard({ action, ruleId, dispatch, isNew, index }) {
   const { showToast } = useToast();
+  const { state } = useApp();
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(action.text);
   const [blooming, setBlooming] = useState(false);
@@ -18,6 +20,9 @@ export default function ActionCard({ action, ruleId, dispatch, isNew, index }) {
     setEditing(false);
   };
   const handleDelete = () => {
+    // Captured before the delete so an Undo can hand contentVersion back and
+    // leave the Big Move's freshness untouched (see AppContext's reducer).
+    const prevContentVersion = state.contentVersion || 0;
     dispatch({ type: "DELETE_ACTION", ruleId, actionId: action.id });
     showToast("Action deleted", {
       actionLabel: "Undo",
@@ -29,6 +34,7 @@ export default function ActionCard({ action, ruleId, dispatch, isNew, index }) {
           containerId: ruleId,
           item: action,
           index,
+          prevContentVersion,
         }),
     });
   };

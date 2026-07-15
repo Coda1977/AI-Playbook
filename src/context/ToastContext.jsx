@@ -4,47 +4,56 @@ import Toast from "../components/shared/Toast";
 
 const ToastContext = createContext(null);
 
+// Deleting is a single unconfirmed click, so its Undo toast is the only
+// safety net. A single-slot toast made that net unreliable: a second delete
+// replaced the first toast and stranded the first item permanently. Toasts
+// therefore stack, each with its own id and timer, so every delete stays
+// undoable for its full duration. Capped so a rapid burst can't paper over
+// the board.
+const MAX_TOASTS = 3;
+
 export function ToastProvider({ children }) {
-  const [toast, setToast] = useState(null);
+  const [toasts, setToasts] = useState([]);
   const idRef = useRef(0);
 
   // Backward compatible: showToast("plain string") still works. Callers that
   // want the action-button variant pass showToast(message, { actionLabel,
   // onAction, duration }).
-  //
-  // Each toast gets an incrementing id so <Toast key={toast.id}> remounts
-  // when a new toast replaces a still-visible one (e.g. back-to-back
-  // deletes): without a fresh key, React reuses the existing Toast instance
-  // and its auto-dismiss timer keeps counting down from the FIRST toast's
-  // mount instead of resetting for the new message.
   const showToast = useCallback((message, opts = {}) => {
     idRef.current += 1;
-    setToast({
+    const next = {
       id: idRef.current,
       message,
       actionLabel: opts.actionLabel,
       onAction: opts.onAction,
       duration: opts.duration,
-    });
+    };
+    setToasts((prev) => [...prev, next].slice(-MAX_TOASTS));
   }, []);
 
-  const hideToast = useCallback(() => {
-    setToast(null);
+  // Identity-stable so Toast's auto-dismiss effect doesn't re-run (and reset
+  // its countdown) every time the provider re-renders. Toast passes its own
+  // id back rather than us handing each one a fresh closure.
+  const hideToast = useCallback((id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      {toast && (
+      {toasts.length > 0 && (
         <div className="toast-container" role="status" aria-live="polite">
-          <Toast
-            key={toast.id}
-            message={toast.message}
-            actionLabel={toast.actionLabel}
-            onAction={toast.onAction}
-            duration={toast.duration}
-            onClose={hideToast}
-          />
+          {toasts.map((t) => (
+            <Toast
+              key={t.id}
+              id={t.id}
+              message={t.message}
+              actionLabel={t.actionLabel}
+              onAction={t.onAction}
+              duration={t.duration}
+              onClose={hideToast}
+            />
+          ))}
         </div>
       )}
     </ToastContext.Provider>

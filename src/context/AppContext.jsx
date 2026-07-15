@@ -64,7 +64,25 @@ const CONTENT_ACTIONS = new Set([
 
 function reducer(state, action) {
   const next = baseReducer(state, action);
-  if (next !== state && CONTENT_ACTIONS.has(action.type)) {
+  if (next === state) return next;
+
+  // Undoing a delete puts the exact item back at its exact index, so the
+  // content is byte-identical to what it was before the delete -- bumping
+  // contentVersion here would falsely age the Big Move and push the user to
+  // regenerate an identical plan. Hand the version back instead.
+  //
+  // Only when this restore is a true inverse: prevContentVersion + 1 is the
+  // version the delete itself produced, so if contentVersion still equals it,
+  // nothing else has touched the content in between. If something has (a
+  // second delete, an edit, a star), the restore is a genuine change on top
+  // of that and bumps like any other mutation.
+  if (action.type === "RESTORE_ITEM" && action.prevContentVersion != null) {
+    if ((state.contentVersion || 0) === action.prevContentVersion + 1) {
+      return { ...next, contentVersion: action.prevContentVersion };
+    }
+  }
+
+  if (CONTENT_ACTIONS.has(action.type)) {
     return { ...next, contentVersion: (state.contentVersion || 0) + 1 };
   }
   return next;

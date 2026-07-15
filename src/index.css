@@ -832,12 +832,19 @@ body {
 /* ========================================
    TOAST
    ======================================== */
+/* Toasts stack (see ToastContext): each delete keeps its own Undo for the
+   full 6s, so several can be live at once. Newest sits at the bottom,
+   nearest the gate bar the click came from. */
 .toast-container {
   position: fixed;
   bottom: 90px;
   right: 24px;
   z-index: 300;
   pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 .toast {
   display: flex;
@@ -1826,7 +1833,6 @@ body {
 .chat-input:focus-visible,
 .chat-send-btn:focus-visible,
 .chat-expand-btn:focus-visible,
-.chat-close-btn:focus-visible,
 .chat-close-btn-text:focus-visible,
 .tray-fab:focus-visible {
   outline: 2px solid var(--color-ink);
@@ -1855,7 +1861,12 @@ body {
 
 @media (max-width: 700px) {
   .gate-bar { flex-wrap: wrap; row-gap: 10px; }
-  .gate-hint { display: none; }
+  /* The hint carries the star requirement that gates the primary action, so
+     it has to survive the wrap -- hiding it here left mobile users with a
+     disabled button and no stated reason. It rides alongside the star count
+     on the first row rather than claiming a row of its own, which would eat
+     into the tray fab's clearance below. */
+  .gate-hint { margin: 0 0 0 12px; text-align: right; font-size: 13px; }
   .gate-actions { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
   /* The one ink primary pill always gets its own full-width row; ghost
      secondaries (Export, Start over) share whatever room is left above it. */
@@ -1904,60 +1915,6 @@ body {
   flex: 1;
   min-width: 0;
 }
-.chat-rule-badge {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-ui);
-  font-size: 14px;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-.chat-rule-name {
-  font-family: var(--font-heading);
-  font-size: 16px;
-  font-weight: 700;
-  display: block;
-  color: white;
-}
-.chat-rule-principle {
-  font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.5);
-  line-height: 1.4;
-  display: block;
-  margin-top: 3px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.chat-close-btn {
-  position: relative;
-  z-index: 1;
-  margin-top: 2px;
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.5);
-  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
-}
-.chat-close-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: white;
-}
 .chat-header-actions {
   display: flex;
   align-items: center;
@@ -1966,9 +1923,8 @@ body {
   z-index: 1;
   flex-shrink: 0;
 }
-/* Text-style Expand/Collapse + Close controls used only by the inline
-   (Primitives board) chat header; the overlay header keeps the icon
-   .chat-close-btn above untouched since isInline is false there. */
+/* Text-style Expand/Collapse + Close controls for the chat header, which
+   renders inline in the focus column on both boards. */
 .chat-expand-btn,
 .chat-close-btn-text {
   background: none;

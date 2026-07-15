@@ -294,13 +294,20 @@ export default function CommitmentView({
             style={{ animationDelay: "0.2s" }}
           >
             <div>
-              <h3>Your big move</h3>
+              <h3>
+                {synthesisStale
+                  ? "Your big move is out of date"
+                  : "Your big move"}
+              </h3>
+              {/* Each state describes what the button next to it will
+                  actually do: a fixed "open the narrative..." line promised a
+                  plan that doesn't exist yet in the Generate case, and left
+                  the Regenerate case unexplained. */}
               <p className="bigmove-callout-desc">
-                Open the narrative the AI synthesized from your starred
-                priorities.
-                {synthesisStale && (
+                {synthesisStale ? (
                   <>
-                    {" "}
+                    You changed ideas, actions, or stars since it was
+                    generated. Regenerate it from your current priorities, or{" "}
                     <button
                       type="button"
                       onClick={() =>
@@ -311,7 +318,12 @@ export default function CommitmentView({
                     >
                       view the previous version
                     </button>
+                    .
                   </>
+                ) : hasSynthesis ? (
+                  "Open the narrative the AI synthesized from your starred priorities."
+                ) : (
+                  "See the one big move that ties your starred priorities together, with concrete actions to start tomorrow."
                 )}
               </p>
             </div>

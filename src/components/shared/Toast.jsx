@@ -3,16 +3,20 @@ import { Star, X } from "lucide-react";
 import { C } from "../../config/constants";
 
 export default function Toast({
+  id,
   message,
   actionLabel,
   onAction,
   onClose,
   duration = 3000,
 }) {
+  // onClose is the provider's stable hideToast and takes the id, so every
+  // dependency here is identity-stable: the countdown starts once on mount
+  // and isn't restarted by unrelated re-renders.
   useEffect(() => {
-    const timer = setTimeout(onClose, duration);
+    const timer = setTimeout(() => onClose(id), duration);
     return () => clearTimeout(timer);
-  }, [duration, onClose]);
+  }, [duration, onClose, id]);
 
   return (
     <div className="toast animate-slide-up">
@@ -24,14 +28,14 @@ export default function Toast({
         <button
           onClick={() => {
             onAction();
-            onClose();
+            onClose(id);
           }}
           className="toast-action"
         >
           {actionLabel}
         </button>
       )}
-      <button onClick={onClose} className="toast-close" aria-label="Close">
+      <button onClick={() => onClose(id)} className="toast-close" aria-label="Close">
         <X size={14} />
       </button>
     </div>

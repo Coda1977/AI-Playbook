@@ -68,7 +68,7 @@ export default function CommitmentTray({ title, countLabel, groups, status, empt
 
   return (
     <>
-      {/* Desktop / tablet: always-visible sticky tray (hidden below 1000px). */}
+      {/* Desktop / tablet: always-visible tray (hidden below 1180px). */}
       <aside className="tray tray-desktop no-print">
         <div className="tray-head">
           <span className="tray-star-chip"><Star size={13} fill="currentColor" /></span>
@@ -78,8 +78,9 @@ export default function CommitmentTray({ title, countLabel, groups, status, empt
         {body}
       </aside>
 
-      {/* Mobile: floating fab (hidden at/above 1000px) opens a bottom sheet
-          with the identical tray content. */}
+      {/* Mobile: floating fab (hidden at/above 1180px) opens a bottom sheet
+          with the identical tray content. Both breakpoints live in the
+          @media (max-width: 1179px) block in index.css. */}
       <button
         type="button"
         ref={fabRef}
