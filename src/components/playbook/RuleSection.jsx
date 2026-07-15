@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Check, Sparkles, MessageCircle } from "lucide-react";
+import { MessageCircle, Sparkles } from "lucide-react";
 import { C } from "../../config/constants";
 import { useFlash } from "../../context/AppContext";
 import ActionCard from "./ActionCard";
@@ -9,9 +9,12 @@ export default function RuleSection({
   rule,
   actions,
   dispatch,
-  isActive,
   onGoDeeper,
-  delay,
+  focusIndex,
+  total,
+  onNext,
+  nextName,
+  headingRef,
 }) {
   const { flash } = useFlash();
   const isFlashing = flash === rule.id;
@@ -31,67 +34,59 @@ export default function RuleSection({
 
   return (
     <div
-      className={`rule-section ${isActive ? "rule-active" : ""} ${isFlashing ? "rule-flashing" : ""}`}
-      style={{
-        animationDelay: `${delay}s`,
-        "--rule-color": rule.color || C.accent,
-      }}
+      className={isFlashing ? "rule-flashing" : ""}
       id={`rule-${rule.id}`}
+      data-rule-id={rule.id}
     >
-      <div className="rule-content">
-        <div className="rule-header">
-          <div className="rule-number-label" style={{ color: C.red }}>
-            Rule {rule.number}
-            {hasActions && (
-              <span
-                className="rule-check"
-                style={{
-                  background: `${rule.color || C.accent}18`,
-                  color: rule.color || C.accent,
-                }}
-              >
-                <Check size={12} />
-              </span>
-            )}
-          </div>
-        </div>
-        <h2 className="rule-name">{rule.name}</h2>
-        <div className="rule-principle">
+      <div className="focus-head">
+        <span className="focus-kicker">
+          Rule {String(focusIndex + 1).padStart(2, "0")} of{" "}
+          {String(total).padStart(2, "0")}
+        </span>
+        <h2 ref={headingRef} tabIndex={-1}>{rule.name}</h2>
+        <div className="rule-science">
           <p>{rule.principle}</p>
         </div>
+      </div>
 
-        {hasActions ? (
-          <div className="rule-actions">
-            {actions.map((a) => (
-              <ActionCard
-                key={a.id}
-                action={a}
-                ruleId={rule.id}
-                dispatch={dispatch}
-                isNew={newActionIds.has(a.id)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="rule-empty">
-            <Sparkles
-              size={22}
-              color={rule.color || C.accent}
-              style={{ opacity: 0.5, marginBottom: 10 }}
+      {hasActions ? (
+        <div className="rule-actions">
+          {actions.map((a, i) => (
+            <ActionCard
+              key={a.id}
+              action={a}
+              ruleId={rule.id}
+              dispatch={dispatch}
+              isNew={newActionIds.has(a.id)}
+              index={i}
             />
-            <p className="rule-empty-title">No actions yet</p>
-            <p className="rule-empty-hint">{rule.emptyNudge}</p>
-          </div>
-        )}
-
-        <div className="rule-footer">
-          <div className="rule-footer-add">
-            <AddActionInput ruleId={rule.id} dispatch={dispatch} />
-          </div>
-          <button onClick={() => onGoDeeper(rule)} className="btn-go-deeper">
-            <MessageCircle size={14} /> Go Deeper with AI
-          </button>
+          ))}
         </div>
+      ) : (
+        <div className="use-card-empty">
+          <Sparkles
+            size={22}
+            color={C.accent}
+            style={{ opacity: 0.5, marginBottom: 10 }}
+          />
+          <p className="use-card-empty-title">No actions yet</p>
+          <p className="use-card-empty-hint">{rule.emptyNudge}</p>
+        </div>
+      )}
+
+      <div className="rule-footer">
+        <div className="rule-footer-add">
+          <AddActionInput key={rule.id} ruleId={rule.id} dispatch={dispatch} />
+        </div>
+        <button onClick={() => onGoDeeper(rule)} className="btn-go-deeper">
+          <MessageCircle size={14} /> Go Deeper with AI
+        </button>
+      </div>
+
+      <div className="focus-foot">
+        <button className="btn-pill-ghost" onClick={onNext}>
+          Next rule: {nextName} →
+        </button>
       </div>
     </div>
   );

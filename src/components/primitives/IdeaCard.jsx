@@ -1,36 +1,42 @@
 import { useState, useEffect, useRef } from "react";
 import { Star, Pencil, Trash2 } from "lucide-react";
-import { C } from "../../config/constants";
 import { useToast } from "../../context/ToastContext";
+import { useApp } from "../../context/AppContext";
 
-export default function IdeaCard({ idea, categoryId, dispatch, isNew }) {
+export default function IdeaCard({ idea, categoryId, dispatch, isNew, index }) {
   const { showToast } = useToast();
+  const { state } = useApp();
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(idea.text);
-  const [removing, setRemoving] = useState(false);
   const [blooming, setBlooming] = useState(false);
   const [popping, setPopping] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const ref = useRef(null);
-  const confirmTimer = useRef(null);
 
   useEffect(() => { setText(idea.text); }, [idea.text]);
   useEffect(() => { if (editing && ref.current) ref.current.focus(); }, [editing]);
-  useEffect(() => () => { if (confirmTimer.current) clearTimeout(confirmTimer.current); }, []);
 
   const save = () => {
     if (text.trim()) dispatch({ type: "UPDATE_PRIMITIVE", categoryId, ideaId: idea.id, text: text.trim() });
     setEditing(false);
   };
   const handleDelete = () => {
-    if (!confirmDelete) {
-      setConfirmDelete(true);
-      confirmTimer.current = setTimeout(() => setConfirmDelete(false), 3000);
-      return;
-    }
-    clearTimeout(confirmTimer.current);
-    setRemoving(true);
-    setTimeout(() => dispatch({ type: "DELETE_PRIMITIVE", categoryId, ideaId: idea.id }), 280);
+    // Captured before the delete so an Undo can hand contentVersion back and
+    // leave the Big Move's freshness untouched (see AppContext's reducer).
+    const prevContentVersion = state.contentVersion || 0;
+    dispatch({ type: "DELETE_PRIMITIVE", categoryId, ideaId: idea.id });
+    showToast("Idea deleted", {
+      actionLabel: "Undo",
+      duration: 6000,
+      onAction: () =>
+        dispatch({
+          type: "RESTORE_ITEM",
+          kind: "primitive",
+          containerId: categoryId,
+          item: idea,
+          index,
+          prevContentVersion,
+        }),
+    });
   };
   const handleStar = () => {
     setBlooming(true);
@@ -46,9 +52,9 @@ export default function IdeaCard({ idea, categoryId, dispatch, isNew }) {
   const isStarred = idea.starred;
 
   return (
-    <div className={`action-card ${isStarred ? "action-starred" : ""} ${removing ? "action-removing" : ""} ${blooming ? "action-blooming" : ""} ${isNew ? "action-entering" : ""}`}>
+    <div className={`action-card ${isStarred ? "action-starred" : ""} ${blooming ? "action-blooming" : ""} ${isNew ? "action-entering" : ""}`}>
       <button onClick={handleStar} className={`star-btn ${popping ? "star-popping" : ""}`} aria-label={isStarred ? "Unstar" : "Star"}>
-        <Star size={18} fill={isStarred ? C.accentGlow : "none"} color={isStarred ? C.accentGlow : C.muted} />
+        <Star size={18} fill={isStarred ? "currentColor" : "none"} />
       </button>
       <div className="action-text-area">
         {editing ? (
@@ -70,20 +76,12 @@ export default function IdeaCard({ idea, categoryId, dispatch, isNew }) {
       </div>
       {!editing && (
         <div className="action-inline-actions">
-          {confirmDelete ? (
-            <button onClick={handleDelete} className="action-confirm-delete" aria-label="Confirm delete">
-              <Trash2 size={13} /> Delete?
-            </button>
-          ) : (
-            <>
-              <button onClick={() => setEditing(true)} className="action-inline-btn" aria-label="Edit">
-                <Pencil size={16} />
-              </button>
-              <button onClick={handleDelete} className="action-inline-btn action-inline-delete" aria-label="Delete">
-                <Trash2 size={16} />
-              </button>
-            </>
-          )}
+          <button onClick={() => setEditing(true)} className="action-inline-btn" aria-label="Edit">
+            <Pencil size={16} />
+          </button>
+          <button onClick={handleDelete} className="action-inline-btn action-inline-delete" aria-label="Delete">
+            <Trash2 size={16} />
+          </button>
         </div>
       )}
     </div>

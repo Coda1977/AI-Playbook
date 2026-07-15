@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { Sparkles, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { HELP_OPTIONS } from "../../config/categories";
 import { FLUENCY_OPTIONS } from "../../config/rules";
-import { C } from "../../config/constants";
+import GateBar from "../shared/GateBar";
 
 function TextareaWithGuide({
+  id,
   value,
   onChange,
   placeholder,
@@ -20,18 +21,22 @@ function TextareaWithGuide({
         : words <= 15
           ? "Good start - keep going for best results."
           : "Great detail - this will help create a strong plan.";
-  const hintColor = words <= 15 ? "#b45309" : "#059669";
+  const isGreat = words > 15;
+  const hintId = `${id}-hint`;
   return (
     <div>
       <textarea
+        id={id}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
         rows={rows}
         className={`input-textarea ${hasError ? "input-error" : ""}`}
+        aria-invalid={hasError ? "true" : undefined}
+        aria-describedby={hint ? hintId : undefined}
       />
       {hint && (
-        <p className="input-hint" style={{ color: hintColor }}>
+        <p id={hintId} className={`input-hint ${isGreat ? "input-hint-great" : ""}`}>
           {hint}
         </p>
       )}
@@ -39,9 +44,13 @@ function TextareaWithGuide({
   );
 }
 
-function FluencySelector({ value, onChange, type, hasError }) {
+function FluencySelector({ value, onChange, type, hasError, labelId }) {
   return (
-    <div className={`fluency-grid ${hasError ? "fluency-grid-error" : ""}`}>
+    <div
+      className={`fluency-grid ${hasError ? "fluency-grid-error" : ""}`}
+      role="radiogroup"
+      aria-labelledby={labelId}
+    >
       {FLUENCY_OPTIONS.map((o) => {
         const d = type === "manager" ? o.managerDesc : o.teamDesc;
         const v = `${o.label} -- ${d}`;
@@ -51,6 +60,8 @@ function FluencySelector({ value, onChange, type, hasError }) {
             key={o.level}
             onClick={() => onChange(v)}
             type="button"
+            role="radio"
+            aria-checked={sel}
             className={`fluency-option ${sel ? "fluency-selected" : ""}`}
           >
             <div className="fluency-check">
@@ -79,6 +90,7 @@ function HelpPills({ selected, onToggle, hasError }) {
             key={o.id}
             onClick={() => onToggle(o.id)}
             type="button"
+            aria-pressed={sel}
             className={`pill ${sel ? "on" : ""}`}
           >
             {sel && <Check size={14} />}
@@ -105,6 +117,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
     ...existing,
   }));
   const [attempted, setAttempted] = useState(false);
+  const [submitAttempt, setSubmitAttempt] = useState(0);
   const formRef = useRef(null);
 
   // Auto-save the draft as the user types. Answers used to live only in
@@ -142,19 +155,31 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
   const ok = Object.values(fieldOk).every(Boolean);
   const doneCount = Object.values(fieldOk).filter(Boolean).length;
 
-  const RAIL_FIELDS = [
-    { key: "role", label: "Role" },
-    { key: "helpWith", label: "Focus", isArray: true },
-    { key: "responsibilities", label: "Tasks" },
-    { key: "managerFluency", label: "Your AI" },
-    { key: "teamFluency", label: "Team AI" },
-    { key: "failureRisks", label: "Risks" },
-    { key: "successVision", label: "Vision" },
-  ];
-  const fieldDone = (field) => fieldOk[field.key];
-
   const missing = (field) => attempted && !fieldOk[field];
   const missingArray = (field) => attempted && !fieldOk[field];
+
+  // The synchronous DOM query used to run in handleSubmit itself, before
+  // React had rendered the error classes triggered by setAttempted(true).
+  // Deferring the scroll/focus to an effect keyed off submitAttempt lets it
+  // run after the error state has actually painted.
+  useEffect(() => {
+    if (submitAttempt === 0) return;
+    const first = formRef.current?.querySelector(
+      ".input-error, .fluency-grid-error",
+    );
+    if (!first) return;
+    const control = first.matches("textarea, button")
+      ? first
+      : first.querySelector("textarea, button");
+    control?.focus({ preventScroll: true });
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    first.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      block: "center",
+    });
+  }, [submitAttempt]);
 
   const handleSubmit = () => {
     if (ok) {
@@ -162,55 +187,35 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
       onGenerate(f);
     } else {
       setAttempted(true);
-      const first = formRef.current?.querySelector(
-        ".input-error, .fluency-grid-error",
-      );
-      if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+      setSubmitAttempt((n) => n + 1);
     }
   };
 
   return (
     <div className="intake-container" ref={formRef}>
       <div className="intake-body">
-        <nav className="intake-rail" aria-label="Form progress">
-          {RAIL_FIELDS.map((field, i) => (
-            <div key={field.key} className="rail-segment">
-              {i > 0 && <div className="rail-line" />}
-              <div
-                className={`rail-dot ${fieldDone(field) ? "rail-dot-done" : ""}`}
-                title={field.label}
-              >
-                {fieldDone(field) && <Check size={10} strokeWidth={3} />}
-              </div>
-              <span className="rail-label">{field.label}</span>
-            </div>
-          ))}
-        </nav>
+        {/* Hero -- light, on the page background. Kept outside .intake-split
+            (rather than as .intake-main's first child) so the mobile
+            guidance-above-fields reorder can move the guidance card above
+            the fields without also displacing the page title. */}
+        <div className="intake-hero animate-fade-in">
+          <span className="eyebrow-badge">Personalized AI Playbook</span>
+          <h1 className="intake-title">
+            Map Your AI Potential & Build Your Change Strategy
+          </h1>
+          <p className="intake-subtitle">
+            Answer seven questions about your role and team. AI will
+            discover use cases tailored to you, then build a personalized
+            change strategy grounded in behavioral science.
+          </p>
+        </div>
         <div className="intake-split">
           <div className="intake-main">
-            {/* Hero panel -- dark */}
-            <div className="intake-hero animate-fade-in">
-              <div
-                className="intake-label"
-                style={{ color: "rgba(255,255,255,0.6)" }}
-              >
-                Personalized AI Playbook
-              </div>
-              <h1 className="intake-title" style={{ color: C.white }}>
-                Map Your AI Potential & Build Your Change Strategy
-              </h1>
-              <p
-                className="intake-subtitle"
-                style={{ color: "rgba(255,255,255,0.65)" }}
-              >
-                Answer seven questions about your role and team. AI will
-                discover use cases tailored to you, then build a personalized
-                change strategy grounded in behavioral science.
-              </p>
-            </div>
-
             {attempted && !ok && (
-              <div className="intake-validation-msg animate-fade-in">
+              <div
+                className="intake-validation-msg animate-fade-in"
+                role="alert"
+              >
                 Please complete the highlighted fields. Short answers need a
                 few more words; they drive everything the AI builds for you.
               </div>
@@ -222,11 +227,12 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                 className="panel animate-fade-in"
                 style={{ animationDelay: "0.06s" }}
               >
-                <label className="field-label">Your role and team</label>
+                <label className="field-label" htmlFor="intake-role">Your role and team</label>
                 <p className="field-desc">
                   What's your role, and what does your team do day-to-day?
                 </p>
                 <TextareaWithGuide
+                  id="intake-role"
                   value={f.role}
                   onChange={(e) => set("role", e.target.value)}
                   placeholder="e.g., VP of Customer Success leading a 12-person team across onboarding, support, and renewals"
@@ -256,13 +262,14 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                 className="panel animate-fade-in"
                 style={{ animationDelay: "0.14s" }}
               >
-                <label className="field-label">
+                <label className="field-label" htmlFor="intake-responsibilities">
                   Your main responsibilities
                 </label>
                 <p className="field-desc">
                   What do you spend most of your time on?
                 </p>
                 <TextareaWithGuide
+                  id="intake-responsibilities"
                   value={f.responsibilities}
                   onChange={(e) => set("responsibilities", e.target.value)}
                   placeholder="e.g., Campaign planning, team coordination, stakeholder reporting, client QBRs"
@@ -275,7 +282,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                 className="panel animate-fade-in"
                 style={{ animationDelay: "0.18s" }}
               >
-                <label className="field-label">Your own AI fluency</label>
+                <label className="field-label" id="intake-managerFluency-label">Your own AI fluency</label>
                 <p className="field-desc">
                   How would you describe your own AI usage right now?
                 </p>
@@ -284,6 +291,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                   onChange={(v) => set("managerFluency", v)}
                   type="manager"
                   hasError={missing("managerFluency")}
+                  labelId="intake-managerFluency-label"
                 />
               </article>
 
@@ -292,7 +300,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                 className="panel animate-fade-in"
                 style={{ animationDelay: "0.22s" }}
               >
-                <label className="field-label">Your team's AI fluency</label>
+                <label className="field-label" id="intake-teamFluency-label">Your team's AI fluency</label>
                 <p className="field-desc">
                   How would you describe your team's AI usage overall?
                 </p>
@@ -301,6 +309,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                   onChange={(v) => set("teamFluency", v)}
                   type="team"
                   hasError={missing("teamFluency")}
+                  labelId="intake-teamFluency-label"
                 />
               </article>
 
@@ -309,7 +318,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                 className="panel animate-fade-in"
                 style={{ animationDelay: "0.26s" }}
               >
-                <label className="field-label">
+                <label className="field-label" htmlFor="intake-failureRisks">
                   What would make AI adoption fail on your team?
                 </label>
                 <p className="field-desc">
@@ -317,6 +326,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                   likely reasons?
                 </p>
                 <TextareaWithGuide
+                  id="intake-failureRisks"
                   value={f.failureRisks}
                   onChange={(e) => set("failureRisks", e.target.value)}
                   placeholder="e.g., My two senior architects think AI-generated work is beneath them, and the rest of the team follows their lead"
@@ -329,7 +339,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                 className="panel animate-fade-in"
                 style={{ animationDelay: "0.3s" }}
               >
-                <label className="field-label">
+                <label className="field-label" htmlFor="intake-successVision">
                   What does success look like in 90 days?
                 </label>
                 <p className="field-desc">
@@ -337,6 +347,7 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
                   like 3 months from now?
                 </p>
                 <TextareaWithGuide
+                  id="intake-successVision"
                   value={f.successVision}
                   onChange={(e) => set("successVision", e.target.value)}
                   placeholder="e.g., Every CSM uses AI to prep for client calls, and we've cut QBR prep time in half"
@@ -348,52 +359,16 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
 
           <aside className="intake-aside">
             <div className="intake-aside-sticky">
-              <article
-                className="panel animate-fade-in"
-                style={{
-                  background: C.charcoal,
-                  color: C.white,
-                  borderColor: C.charcoal,
-                }}
-              >
-                <h3
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontWeight: 700,
-                    fontSize: 18,
-                    marginBottom: 12,
-                  }}
-                >
-                  Input Guidance
-                </h3>
-                <p
-                  style={{
-                    fontSize: 14,
-                    lineHeight: 1.6,
-                    color: "rgba(255,255,255,0.7)",
-                    marginBottom: 16,
-                  }}
-                >
+              <article className="intake-guidance animate-fade-in">
+                <h3 className="intake-guidance-heading">Input Guidance</h3>
+                <p className="intake-guidance-intro">
                   The more specific you are, the better AI can personalize your
                   use cases and change strategy.
                 </p>
-                <ul
-                  style={{
-                    fontSize: 13,
-                    lineHeight: 1.7,
-                    color: "rgba(255,255,255,0.6)",
-                    paddingLeft: 16,
-                  }}
-                >
-                  <li style={{ marginBottom: 8 }}>
-                    Name your actual role and team size
-                  </li>
-                  <li style={{ marginBottom: 8 }}>
-                    Describe real tasks, not categories
-                  </li>
-                  <li style={{ marginBottom: 8 }}>
-                    Be honest about resistance factors
-                  </li>
+                <ul className="intake-guidance-tips">
+                  <li>Name your actual role and team size</li>
+                  <li>Describe real tasks, not categories</li>
+                  <li>Be honest about resistance factors</li>
                   <li>Paint a concrete 90-day picture</li>
                 </ul>
               </article>
@@ -403,29 +378,28 @@ export default function IntakeView({ state, dispatch, onGenerate }) {
       </div>
 
       {/* Sticky gate bar */}
-      <footer className="gate-bar" aria-label="Phase progress and actions">
-        <div className="gate-counter">
-          <strong>{doneCount}</strong> of 7 fields
-        </div>
-        <div
-          className="gate-hint"
-          style={{
-            fontSize: 13,
-            color: "var(--color-dark-gray)",
-            textAlign: "center",
-          }}
-        >
-          {ok
+      <GateBar
+        left={
+          <>
+            <strong>{doneCount}</strong> of 7 fields
+          </>
+        }
+        hint={
+          ok
             ? "Ready to discover your use cases"
-            : "Complete all fields to continue"}
-        </div>
+            : "Complete all fields to continue"
+        }
+      >
+        {/* No `disabled` attribute: clicking while invalid is what flips
+            `attempted` to true, which drives the field-level error
+            highlighting, the validation banner, and this shake. */}
         <button
           onClick={handleSubmit}
-          className={`btn-gate ${ok ? "btn-gate-active" : "btn-gate-disabled"} ${attempted && !ok ? "btn-shake" : ""}`}
+          className={`btn-pill ${attempted && !ok ? "btn-shake" : ""}`}
         >
-          <Sparkles size={16} /> Discover Use Cases
+          Discover use cases
         </button>
-      </footer>
+      </GateBar>
     </div>
   );
 }

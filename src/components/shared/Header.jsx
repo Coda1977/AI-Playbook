@@ -1,11 +1,5 @@
 import PhaseProgress from "./PhaseProgress";
-
-function truncateRole(role, maxLen = 50) {
-  if (!role || role.length <= maxLen) return role;
-  const trimmed = role.slice(0, maxLen);
-  const lastSpace = trimmed.lastIndexOf(" ");
-  return lastSpace > 20 ? trimmed.slice(0, lastSpace) + "..." : trimmed + "...";
-}
+import { truncateRole } from "../../utils/text";
 
 export default function Header({ state, dispatch }) {
   const { phase, intake } = state;
@@ -19,6 +13,7 @@ export default function Header({ state, dispatch }) {
     <header className="header no-print">
       <div className="header-inner">
         <div className="header-left">
+          <span className="brand-mark" />
           <span className="header-title">AI Playbook</span>
           {showRole && (
             <>

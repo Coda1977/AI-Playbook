@@ -9,7 +9,15 @@ const CATEGORY_TITLES = Object.fromEntries(
   CATEGORIES.map((c) => [c.id, c.title]),
 );
 
-export default function ChatDrawer({ type, item, state, dispatch, onClose }) {
+export default function ChatDrawer({
+  type,
+  item,
+  state,
+  dispatch,
+  onClose,
+  expanded,
+  onToggleExpand,
+}) {
   const isPrimitive = type === "primitive";
   const { triggerFlash } = useFlash();
 
@@ -118,31 +126,39 @@ export default function ChatDrawer({ type, item, state, dispatch, onClose }) {
     }
   };
 
-  const badgeNumber = isPrimitive ? item.number : item.number;
   const badgeName = isPrimitive ? item.title : item.name;
-  const badgePrinciple = isPrimitive ? item.description : item.principle;
   const noteLabel = isPrimitive ? `Exploring ${item.title}...` : `Reviewing your actions for Rule ${item.number}...`;
   const placeholder = isPrimitive ? "Ask anything about this category..." : "Ask anything about this rule...";
 
   return (
-    <div className="chat-drawer" style={{ "--rule-color": item.color || C.accent }}>
+    <div className="chat-drawer" style={{ "--rule-color": C.accent }}>
       <div className="chat-header">
         <div className="chat-header-bg" />
         <div className="chat-header-content">
-          <div className="chat-rule-badge" style={{ borderColor: `${item.color || C.accent}40`, color: item.color || C.accent }}>
-            {badgeNumber}
-          </div>
-          <div>
-            <span className="chat-rule-name">{badgeName}</span>
-            <span className="chat-rule-principle">{badgePrinciple}</span>
-          </div>
+          <span className="chat-inline-title">
+            Brainstorm with AI · {badgeName}
+          </span>
         </div>
-        <button onClick={onClose} className="chat-close-btn" aria-label="Close chat">
-          <X size={18} />
-        </button>
+        <div className="chat-header-actions">
+          <button
+            onClick={onToggleExpand}
+            className="chat-expand-btn"
+            type="button"
+          >
+            {expanded ? "Collapse" : "⤢ Expand"}
+          </button>
+          <button
+            onClick={onClose}
+            className="chat-close-btn-text"
+            aria-label="Close chat"
+            type="button"
+          >
+            ✕ Close
+          </button>
+        </div>
       </div>
 
-      <div className="chat-messages">
+      <div className="chat-messages" aria-live="polite" aria-busy={loading}>
         {messages.length > 0 && messages[0].role === "assistant" && (
           <div className="chat-system-note animate-fade-in">
             <Sparkles size={14} color={C.accent} />
@@ -170,7 +186,7 @@ export default function ChatDrawer({ type, item, state, dispatch, onClose }) {
                 {msg.ideas.map((idea, ii) => (
                   <div key={ii} className={`chat-idea animate-fade-in ${idea.added ? "chat-idea-added" : ""}`}
                     style={{ animationDelay: `${ii * 0.12}s` }}>
-                    <Sparkles size={14} color={item.color || C.accent} style={{ flexShrink: 0, marginTop: 2, opacity: 0.7 }} />
+                    <Sparkles size={14} color={C.accent} style={{ flexShrink: 0, marginTop: 2, opacity: 0.7 }} />
                     <p className="chat-idea-text">{idea.text}</p>
                     <button onClick={() => addIdea(mi, ii, idea)} disabled={idea.added}
                       className={`chat-idea-btn ${idea.added ? "chat-idea-btn-added" : ""}`}>

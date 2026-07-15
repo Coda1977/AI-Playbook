@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { C } from "../../config/constants";
 
 const PHASES = [
   { id: "intake", label: "Intake", phase: "intake" },
@@ -47,7 +48,11 @@ export default function PhaseProgress({ phase, dispatch, isGenerating }) {
               aria-label={`${p.label}${isDone ? " (completed - click to return)" : isActive ? " (current)" : ""}`}
             >
               <span className="phase-step-number">
-                {isDone ? <Check size={11} strokeWidth={3} /> : i + 1}
+                {isDone ? (
+                  <Check size={11} strokeWidth={3} color={C.accent} />
+                ) : (
+                  i + 1
+                )}
               </span>
               {isGen && <span className="phase-step-pulse" />}
               <span className="phase-step-label">{p.label}</span>
