@@ -109,7 +109,7 @@ export default function PrimitivesView({
                 }))}
                 activeId={focusedId}
                 onSelect={setFocusedId}
-                note={`12 ideas total. Visit every category; star at least ${MIN_STARS_FOR_PLAYBOOK} to continue.`}
+                note={`${totalIdeas} ideas total. Visit every category; star at least ${MIN_STARS_FOR_PLAYBOOK} to continue.`}
               />
 
               <section className="board-focus" ref={focusPaneRef}>
