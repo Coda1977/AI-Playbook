@@ -25,6 +25,10 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
   // matter how many times the effect fires for the same value.
   const prevFocusedIdRef = useRef(focusedId);
 
+  const totalActions = RULES.reduce(
+    (sum, r) => sum + (state.plan[r.id] || []).length,
+    0,
+  );
   const starred = RULES.reduce(
     (sum, r) => sum + (state.plan[r.id] || []).filter((a) => a.starred).length,
     0,
@@ -91,7 +95,7 @@ export default function PlaybookView({ state, dispatch, onStartOver }) {
                 }))}
                 activeId={focusedId}
                 onSelect={setFocusedId}
-                note="10 actions across 5 research-backed rules. Star at least 3 to build your Big Move."
+                note={`${totalActions} actions across 5 research-backed rules. Star at least ${MIN_STARS_FOR_REVIEW} to build your Big Move.`}
               />
 
               <section className="board-focus" ref={focusPaneRef}>
