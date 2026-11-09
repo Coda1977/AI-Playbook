@@ -1,3 +1,5 @@
+import { HELP_OPTIONS } from "../config/categories";
+
 // Slightly longer than the Vercel function maxDuration (90s) so the server
 // has a chance to return a clean 5xx before the client aborts.
 const REQUEST_TIMEOUT_MS = 105_000;
@@ -27,14 +29,29 @@ async function postJson(path, body) {
   return res.json();
 }
 
+// The intake stores "What would help you most?" as option ids ("time",
+// "scale"), but every prompt prints the field verbatim. Send the full labels
+// so the model reads "Save time on repetitive work", not "time".
+function forApi(intake) {
+  if (!intake) return intake;
+  return {
+    ...intake,
+    helpWith: (intake.helpWith || []).map(
+      (h) => HELP_OPTIONS.find((o) => o.id === h)?.label || h,
+    ),
+  };
+}
+
 export async function generatePrimitives(intake) {
-  const data = await postJson("/api/primitives-generate", { intake });
+  const data = await postJson("/api/primitives-generate", {
+    intake: forApi(intake),
+  });
   return data.primitives;
 }
 
 export async function generatePlaybook(intake, starredPrimitives) {
   const data = await postJson("/api/playbook-generate", {
-    intake,
+    intake: forApi(intake),
     starredPrimitives,
   });
   return data.plan;
@@ -54,7 +71,7 @@ export async function sendChat({
 }) {
   return postJson("/api/chat", {
     mode,
-    intake,
+    intake: forApi(intake),
     category,
     rule,
     currentItems,
@@ -68,7 +85,7 @@ export async function sendChat({
 
 export async function generateSynthesis(intake, primitives, plan) {
   const data = await postJson("/api/synthesis-generate", {
-    intake,
+    intake: forApi(intake),
     primitives,
     plan,
   });

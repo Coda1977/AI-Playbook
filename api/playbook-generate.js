@@ -14,6 +14,17 @@ export default async function handler(req, res) {
 
   const helpLabels = (intake.helpWith || []).join(", ");
 
+  // The model has no clock: without these it writes finish lines like "by
+  // end of Q3" or "by October" that are already in the past on workshop day.
+  const fmtDate = (d) =>
+    d.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  const today = fmtDate(new Date());
+  const day90 = fmtDate(new Date(Date.now() + 90 * 24 * 60 * 60 * 1000));
+
   const rulesBlock = RULES.map(
     (r) =>
       `Rule ${r.number} (id: "${r.id}"): ${r.name}\nPrinciple: "${r.principle}"\n${r.promptHint}`,
@@ -46,6 +57,7 @@ CONTEXT, THIS SPECIFIC PERSON:
 </manager_profile>${starredBlock}
 
 IMPORTANT CONTEXT SIGNALS TO PAY ATTENTION TO:
+- Today is ${today}; the 90-day vision lands around ${day90}. Most actions need no calendar date; when one does name a date, month, or quarter, it must fall inside that window, and never invent the timing of the team's own cycles or events.
 - The gap between manager fluency and team fluency is critical. A Transformative manager with a Not Yet Started team needs to slow down and build safety. A Capable manager with a Capable team needs momentum and scripted steps.
 - If the manager is "Not yet started," their own AI learning is action #1 in Rule 1 (Start at the End), they must try it first before asking anyone else to.
 - If the failure risks mention senior people resisting, prioritize Rule 2 (Make It Safe), especially naming what those people personally stand to lose (expertise, identity, standing), not just their stated objection, and creating space for honest conversation.
