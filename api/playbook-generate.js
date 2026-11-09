@@ -1,5 +1,6 @@
-import { RULES } from "../lib/workshop.js";
+import { RULES, changeBaseline } from "../lib/workshop.js";
 import { rejectForeignOrigin } from "../lib/apiGuard.js";
+import { callTool } from "../lib/claude.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -67,6 +68,14 @@ IMPORTANT CONTEXT SIGNALS TO PAY ATTENTION TO:
 - All participants work in SaaS companies. Tailor examples and actions to SaaS contexts, product teams, customer success, engineering, marketing, sales, support.
 - Remember: the team is asking themselves five unspoken questions: (1) From what to what, specifics? (2) What does this mean for my daily work? (3) Will this actually make a difference? (4) How will success be measured? (5) Does my manager really believe in this? Help the manager address these questions through their actions.
 
+PAST THE STANDARD PLAYBOOK (the bar every action must clear):
+- ${changeBaseline(intake.teamFluency)}
+- Before writing any action, commit in the standardPlaybook field to the eight change moves this manager has certainly already heard or tried for a team like this. That list is the floor of this plan, never its content.
+- The article test: if an action could appear in any "how to drive AI adoption" article with only the nouns swapped, it is not finished. A classic lever (the leader going first, naming a loss, starting with the willing, making wins visible) earns its place only as a DESIGNED move: it names the exact mechanism (which existing ritual, artifact, default, role, or measure changes; what it replaces or retires; who holds the pen) so that something different actually happens in the room.
+- The rule descriptions at the end list each lever's classic moves. They tell you what the lever means; they are not a menu to copy. This manager knows the classic version; give the version only this intake makes possible.
+- One plan, one sequence: actions must not cancel each other out (a mandate under one rule and a volunteers-only pilot of the same thing under another). Where the plan both changes a default and starts small, say which comes first and for whom.
+- Design with what the intake gives you. Never invent specifics about the team (a ticket type, a meeting, a person, a tool) to sound concrete; when the manager must choose, say so in the action ("your highest-volume ticket type").
+
 MOVE PALETTE (a value preference, never a quota):
 - Five moves: a conversation (1:1, team discussion), a structural default (template, checklist, changed ownership, a step embedded in an existing workflow), a practice field (sandbox, rehearsal, pilot), social proof (a bright spot shared, a demo), or measurement and follow-up (a metric, a rhythm of asking).
 - Pick the move with the highest probability of changing behavior per unit of manager effort. When a default or template can carry the intent, prefer it over an announcement. Reserve meetings for what only conversation can do: naming fears, hearing people.
@@ -124,8 +133,24 @@ Use the submit_change_plan tool to return your actions for each rule.`;
       "Submit the personalized change strategy. prioritizedRules names the 1-2 rules that get a third action; every other rule gets exactly 2 actions (11-12 total). Each action is under 25 words and starts with a concrete verb.",
     input_schema: {
       type: "object",
-      required: ["prioritizedRules", "boldMoves", ...RULES.map((r) => r.id)],
+      required: [
+        "standardPlaybook",
+        "prioritizedRules",
+        "boldMoves",
+        ...RULES.map((r) => r.id),
+      ],
       properties: {
+        // Declared first so the model writes out the stock moves before any
+        // action; the plan is then generated against them. Logged, never
+        // sent to the client.
+        standardPlaybook: {
+          type: "array",
+          minItems: 8,
+          maxItems: 8,
+          items: { type: "string" },
+          description:
+            "Write this FIRST. The eight change moves this manager has certainly already heard or tried for a team like this (a few words each). No action may be one of these with the nouns swapped.",
+        },
         // Declared first so the model commits to its priorities before
         // writing actions; without this commitment it hands 3 actions to
         // most rules and overshoots the 11-12 total.
@@ -151,44 +176,14 @@ Use the submit_change_plan tool to return your actions for each rule.`;
   };
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 4096,
-        tools: [planTool],
-        tool_choice: { type: "tool", name: planTool.name },
-        messages: [{ role: "user", content: prompt }],
-      }),
+    const result = await callTool({
+      label: "playbook",
+      tool: planTool,
+      fallbackMaxTokens: 4096,
+      messages: [{ role: "user", content: prompt }],
     });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Claude API error:", response.status, errText);
-      return res
-        .status(502)
-        .json({ error: `Claude API returned ${response.status}` });
-    }
-
-    const data = await response.json();
-    const toolBlock = data.content?.find((b) => b.type === "tool_use");
-    if (!toolBlock?.input) {
-      console.error(
-        "Expected tool_use block missing. stop_reason:",
-        data.stop_reason,
-        "| content types:",
-        data.content?.map((b) => b.type).join(",") || "none",
-        "| raw response:",
-        JSON.stringify(data).slice(0, 1000),
-      );
-      return res
-        .status(500)
-        .json({ error: "Model did not return structured plan" });
+    if (!result.ok) {
+      return res.status(result.status).json({ error: result.error });
     }
     // prioritizedRules is the model's self-commitment, not plan content;
     // leaking it into the response would become a bogus sixth rule in state.
@@ -197,11 +192,15 @@ Use the submit_change_plan tool to return your actions for each rule.`;
     // express "3 only for the rules named in prioritizedRules". Enforce the
     // lighter-output contract deterministically: 2 actions per rule, 3 for
     // the 1-2 prioritized rules, 10-12 total.
-    const { prioritizedRules, boldMoves, ...plan } = toolBlock.input;
+    const { prioritizedRules, boldMoves, standardPlaybook, ...plan } =
+      result.input;
     // Observability: which three actions the model committed as bold moves
     // (Vercel logs only; never reaches the client).
     if (Array.isArray(boldMoves) && boldMoves.length) {
       console.log("boldMoves:", boldMoves.join(" | "));
+    }
+    if (Array.isArray(standardPlaybook) && standardPlaybook.length) {
+      console.log("standardPlaybook:", standardPlaybook.join(" | "));
     }
     const prioritized = Array.isArray(prioritizedRules)
       ? prioritizedRules.slice(0, 2)

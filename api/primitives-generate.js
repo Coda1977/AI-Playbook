@@ -1,5 +1,10 @@
-import { CATEGORIES, teamFluencyFloor } from "../lib/workshop.js";
+import {
+  CATEGORIES,
+  teamFluencyFloor,
+  useCaseBaseline,
+} from "../lib/workshop.js";
 import { rejectForeignOrigin } from "../lib/apiGuard.js";
+import { callTool } from "../lib/claude.js";
 
 // Phase 2 generation is a single call. A two-call diverge/converge pipeline
 // was built and A/B-tested on 2026-07-03 (Opus judge, order-swapped pairwise,
@@ -11,10 +16,14 @@ import { rejectForeignOrigin } from "../lib/apiGuard.js";
 // commitment fields with a deterministic server trim, and forced modality
 // coverage.
 
-const MODEL = "claude-sonnet-4-6";
 
 function buildPrompt(intake, categoriesBlock) {
   const helpLabels = (intake.helpWith || []).join(", ");
+  // A preloaded assistant needs someone able to set it up. When both manager
+  // and team have not started, say so instead of leaving the model to infer it.
+  const nobodyCanPreload =
+    /^not yet/i.test(intake.managerFluency || "") &&
+    /^not yet/i.test(intake.teamFluency || "");
 
   return `You are helping a manager brainstorm how to use AI. Generate the 12 highest-value AI use cases for this specific person.
 
@@ -36,8 +45,15 @@ WHAT COUNTS AS A USE CASE (strict):
 - NEVER suggest ideas about the AI adoption effort itself: no AI adoption plans, no AI training sessions or exercises, no rollout strategies, no prompt libraries, no "teach the team to use AI" ideas. Driving adoption is a later phase of this workshop.
 - The 90-day vision tells you WHICH work matters most, not what to plan. If the vision says "every CSM uses AI to prep QBRs," the use case is AI-assisted QBR prep, never a plan for getting CSMs to use AI.
 
+PAST THE OBVIOUS (the bar every idea must clear):
+- ${useCaseBaseline(intake.managerFluency, intake.teamFluency)}
+- Before writing any idea, commit in the alreadyObvious field to the eight AI uses a manager in this exact role has certainly already tried, seen demoed, or thought of. That list is the floor of this workshop, never its content: no final idea may be one of them, a narrower version of one, or one of them dressed in this team's vocabulary.
+- The test for every final idea: the manager reads it and thinks "I had not thought of using it that way," then sees at once how they would run it. An idea they could have written themselves before the workshop is worth nothing here.
+- Freshness comes from the angle, never from tooling. Look in three places: what AI is asked to DO (judge against a standard, find what is missing, challenge, compare two things nobody lays side by side, simulate one specific person, interview someone to pull out what only they know, teach), what it is FED (the team's own accumulated material that nobody has time to read end to end), and WHERE it enters the work (before the decision, as the last check before something ships, as the keeper of a standard). Producing a first draft and summarizing a pile are where everyone starts; go where they have not been.
+- Fresh never means exotic or vague. Every idea still clears every floor below, runs with what this team has today, and names its input and its output.
+
 THINK AT TWO ALTITUDES:
-- ACCELERATORS: the same deliverable, produced better or faster. Eight of the 12 ideas are accelerators.
+- SHARPENERS: eight of the 12 ideas make work this team already does better in a way plain drafting and summarizing cannot: a mistake caught, a decision made on evidence, a standard held, a skill built, a blind spot exposed. Getting the same deliverable out faster does not qualify on its own.
 - BIG SWINGS: FOUR of the 12 ideas must transform how the work itself happens, INSIDE realms the manager already named: replace a deliverable with something better, turn a periodic event into a continuous practice, invert who does the work, or make something possible the team never had capacity for. A big swing is not a new realm of work; it is a bigger destination for work the manager already wrote about. Each fits one 15-20 word sentence that states or implies its first probe, and each clears the floors. Commit all four in the bigSwings field.
 
 FLOORS (every idea must clear all of them):
@@ -47,15 +63,16 @@ FLOORS (every idea must clear all of them):
 - When the valuable version of an idea exceeds the team's fluency, offer the version this team could run today (an automated digest becomes a weekly paste-into-chat habit); the feasible version is the idea's first probe.
 - The floor constrains an idea's FIRST PROBE, never its destination's size. A Capable team can adopt a transformative reshape whose probe is one preloaded assistant or one paste-into-chat habit. Fluency limits how an idea starts, not how big it is allowed to be.
 - This team could absorb it within a quarter.
+- Nothing scores, monitors, or impersonates the manager's own people; that reads as surveillance and feeds the resistance. AI may check a piece of work against a standard the team owns, and may simulate outsiders (a customer, an executive, a regulator, a competitor).
 
 CHOOSE BY EXPECTED VALUE for this manager:
 - Recurrence and reach of the pain it relieves; pain intensity; proximity to the 90-day vision; adoption probability given fluency and the named resistance.
-- Within each altitude, let value decide; when two ideas are equal on value, keep the more surprising one. Never fill a big-swing slot with a dressed-up accelerator, and never pad an accelerator slot with a vague ambition.
+- Within each altitude, let value decide; when two ideas are equal on value, keep the more surprising one. Never fill a big-swing slot with a dressed-up sharpener, and never pad a sharpener slot with a vague ambition or a faster first draft.
 
 PORTFOLIO (structural constraints on the 12):
-- 12 ideas total, every category gets at least 1. The one or two categories that best fit the role, responsibilities, help-with, and vision get 3 each; the category that is the biggest stretch for this role gets 1; the rest get 2. Commit your choices in the focusCategories and stretchCategory fields; the counts are enforced from that commitment.
+- 12 ideas total, every category gets at least 1. The stretch category is where stock filler creeps in (a formula, a template, a dashboard): give it the least obvious honest idea, never the most typical one. The one or two categories that best fit the role, responsibilities, help-with, and vision get 3 each; the category that is the biggest stretch for this role gets 1; the rest get 2. Commit your choices in the focusCategories and stretchCategory fields; the counts are enforced from that commitment.
 - At least one idea directly serves the work the 90-day vision names.
-- Anti-monoculture minimums, all of which run in plain chat when the floor requires it: at least one preloaded-assistant idea (skip this family if neither the manager nor the team could set one up yet), one critique or red-team idea, one role-play or rehearsal idea, and one transcription-or-meeting-synthesis idea. Prove it in the modalityCoverage fields: each names the final idea that covers that family. At most six of the 12 may be paste-an-artifact, get-an-output transformations.
+- Spread the AI's job across the list: no more than three of the 12 may give AI the same job (drafting, summarizing, critiquing, simulating a person, interviewing, comparing, monitoring, teaching).${nobodyCanPreload ? " Nobody here can set up a preloaded assistant yet, so no idea may depend on one." : ""} Name each idea's job in the jobSpread field.
 - No near-duplicates.
 
 IDEA FORMAT (strict):
@@ -86,10 +103,6 @@ export default async function handler(req, res) {
   const categoriesBlock = CATEGORIES.map(
     (c) => `${c.number}. ${c.title} (${c.description})`,
   ).join("\n");
-  const canPreloadAssistant =
-    !/^not yet/i.test(intake.managerFluency || "") ||
-    !/^not yet/i.test(intake.teamFluency || "");
-
   const properties = {};
   for (const c of CATEGORIES) {
     properties[c.id] = {
@@ -108,12 +121,25 @@ export default async function handler(req, res) {
     input_schema: {
       type: "object",
       required: [
+        "alreadyObvious",
         ...CATEGORIES.map((c) => c.id),
         "focusCategories",
         "stretchCategory",
         "bigSwings",
+        "jobSpread",
       ],
       properties: {
+        // Declared first so the model writes out the obvious list before any
+        // idea; the ideas are then generated against it. Logged, never sent
+        // to the client.
+        alreadyObvious: {
+          type: "array",
+          minItems: 8,
+          maxItems: 8,
+          items: { type: "string" },
+          description:
+            "Write this FIRST. The eight AI uses a manager in this exact role has certainly already tried, seen demoed, or thought of (a few words each). No final idea may be one of these, a narrower version of one, or one of these in this team's vocabulary.",
+        },
         ...properties,
         focusCategories: {
           type: "array",
@@ -137,87 +163,29 @@ export default async function handler(req, res) {
           description:
             "The four final ideas (quoted verbatim) that transform how the work happens inside realms the manager named, each with its first probe stated or implied",
         },
-        modalityCoverage: {
-          type: "object",
-          // A preloaded assistant needs someone able to set it up; when both
-          // manager and team are not yet started, forcing that family
-          // produces exactly the floor-violating ideas the floor bans.
-          required: [
-            ...(canPreloadAssistant ? ["preloadedAssistant"] : []),
-            "critique",
-            "rolePlay",
-            "transcription",
-          ],
-          properties: {
-            preloadedAssistant: {
-              type: "string",
-              description:
-                "The final idea (quoted verbatim) where someone chats with an assistant preloaded with the team's context",
-            },
-            critique: {
-              type: "string",
-              description:
-                "The final idea (quoted verbatim) where AI critiques, red-teams, or pressure-tests something",
-            },
-            rolePlay: {
-              type: "string",
-              description:
-                "The final idea (quoted verbatim) where someone rehearses or role-plays with AI",
-            },
-            transcription: {
-              type: "string",
-              description:
-                "The final idea (quoted verbatim) where a meeting or conversation is transcribed and synthesized",
-            },
-          },
+        jobSpread: {
+          type: "array",
+          minItems: 12,
+          maxItems: 13,
+          items: { type: "string" },
           description:
-            "Proof of modality spread: name the final idea covering each family",
+            "One word per final idea, in order: the job AI does in it (draft, summarize, critique, simulate, interview, compare, monitor, teach, or another single verb). No job may appear more than three times.",
         },
       },
     },
   };
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 2048,
-        tools: [useCasesTool],
-        tool_choice: { type: "tool", name: useCasesTool.name },
-        messages: [
-          { role: "user", content: buildPrompt(intake, categoriesBlock) },
-        ],
-      }),
+    const result = await callTool({
+      label: "primitives",
+      tool: useCasesTool,
+      fallbackMaxTokens: 2048,
+      messages: [
+        { role: "user", content: buildPrompt(intake, categoriesBlock) },
+      ],
     });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Claude API error:", response.status, errText);
-      return res
-        .status(502)
-        .json({ error: `Claude API returned ${response.status}` });
-    }
-
-    const data = await response.json();
-    const toolBlock = data.content?.find((b) => b.type === "tool_use");
-    if (!toolBlock?.input) {
-      console.error(
-        "Expected tool_use block missing. stop_reason:",
-        data.stop_reason,
-        "| content types:",
-        data.content?.map((b) => b.type).join(",") || "none",
-        "| raw response:",
-        JSON.stringify(data).slice(0, 1000),
-      );
-      return res
-        .status(500)
-        .json({ error: "Model did not return structured ideas" });
+    if (!result.ok) {
+      return res.status(result.status).json({ error: result.error });
     }
 
     // Enforce the committed distribution by trimming, the same contract as
@@ -225,11 +193,14 @@ export default async function handler(req, res) {
     // hold, the commitment fields + deterministic trim do. Also strips the
     // commitment fields so the response shape stays exactly what the client
     // has always consumed.
-    const raw = toolBlock.input;
+    const raw = result.input;
     // Observability: which four ideas the model committed as big swings
     // (verifiable in Vercel logs; the field never reaches the client).
     if (Array.isArray(raw.bigSwings) && raw.bigSwings.length) {
       console.log("bigSwings:", raw.bigSwings.join(" | "));
+    }
+    if (Array.isArray(raw.alreadyObvious) && raw.alreadyObvious.length) {
+      console.log("alreadyObvious:", raw.alreadyObvious.join(" | "));
     }
     const focus = Array.isArray(raw.focusCategories)
       ? raw.focusCategories.slice(0, 2)
