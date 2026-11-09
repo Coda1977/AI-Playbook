@@ -103,6 +103,13 @@ function buildPlaybookSystem({
   // always scoped to one rule anyway.
   const ruleDef = RULES.find((r) => r.id === rule.id);
   const ruleGuidance = ruleDef ? ruleDef.chatHint : "";
+  // The model has no clock; without the date it suggests deadlines that
+  // have already passed on workshop day.
+  const today = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   return `This is a workshop helping managers drive AI adoption with their teams. The manager has completed intake, explored AI use cases, and is now building their change strategy.
 
@@ -120,7 +127,7 @@ BEHAVIORAL SCIENCE FOR THIS RULE (use implicitly, don't cite):
 ${ruleGuidance}
 - Remember: the team is asking themselves five unspoken questions: (1) From what to what, specifics? (2) What does this mean for my daily work? (3) Will this actually make a difference? (4) How will success be measured? (5) Does my manager really believe in this? Help the manager address these through their actions.
 
-CONTEXT, THIS SPECIFIC PERSON:
+CONTEXT, THIS SPECIFIC PERSON (today is ${today}):
 <manager_profile>
 - Role & team: ${intake.role}
 - Manager fluency: ${intake.managerFluency}
@@ -148,7 +155,7 @@ INSTRUCTIONS:
 3. Suggest 1-2 new actions. Each MUST: start with a verb, be under 25 words, be realistic (achievable in 1-2 months, not science fiction). Cut every unnecessary word.
 4. If they push back, ask what would work better -- don't defend or rephrase.
 5. Never re-suggest an action you already suggested earlier in this conversation (marked "[Suggested with this reply: ...]"), even reworded. Bring a genuinely new angle.
-6. Never invent experiences, metrics, or outcomes for the manager. If suggesting they share a story, leave the content to them.
+6. Never invent experiences, metrics, or outcomes for the manager, or facts about their people (tenure, age, history). If suggesting they share a story, leave the content to them.
 7. Cross-rule connections only when genuinely useful: "This connects to Rule 4 -- you could share those results in your next team meeting (Rule 5)."
 8. STYLE: No em dashes. Use commas, semicolons, periods, colons, or parentheses. No "isn't X, it's Y" or "not just X, it's Y" parallelism, state the affirmative directly.
 
