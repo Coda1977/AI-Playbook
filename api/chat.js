@@ -2,10 +2,13 @@ import { RULES, CATEGORIES } from "../lib/workshop.js";
 import { rejectForeignOrigin } from "../lib/apiGuard.js";
 import { callTool } from "../lib/claude.js";
 
-// "Go bigger" is a spoken move in the workshop room: any request containing
-// big/bold flips this turn's suggestions to transformative reshapes. Detected
-// server-side because asking the model to notice is unreliable.
-const BIG_ASK = /\b(big|bigger|biggest|bold|bolder|boldest|huge)\b/i;
+// "Go bigger" is a spoken move in the workshop room, and so is "get more
+// creative": a manager saying either wants a less predictable idea, so both
+// flip the same one-turn mode. Detected server-side because asking the model
+// to notice is unreliable. "different" is left out on purpose; it turns up in
+// ordinary sentences ("a different meeting").
+const BIG_ASK =
+  /\b(big|bigger|biggest|bold|bolder|boldest|huge|creative|fresh|fresher|wider|surprise|surprising)\b/i;
 
 function buildPrimitivesSystem({
   intake,
@@ -166,7 +169,7 @@ INSTRUCTIONS:
 
 ${
     wantsBig
-      ? `THE MANAGER JUST ASKED FOR BOLDER. This turn, suggest moves that take an operating default this team runs on today (a routine, a process, a deliverable's form, who owns an outcome) and CHANGE it, accepting bounded but genuine risk, rather than adding something optional beside the old way. The team should be likely to talk about the move at dinner, and it should make the manager slightly nervous because something real could wobble. Still concrete, startable within two weeks, under 25 words.
+      ? `THE MANAGER JUST ASKED FOR BIGGER OR LESS EXPECTED. This turn, hold on to what this rule is for and reach it by a route its usual techniques do not cover: suggest moves that take an operating default this team runs on today (a routine, a process, a deliverable's form, who owns an outcome) and CHANGE it, accepting bounded but genuine risk, rather than adding something optional beside the old way. The team should be likely to talk about the move at dinner, and it should make the manager slightly nervous because something real could wobble. Still concrete, startable within two weeks, under 25 words.
 
 `
       : ""
