@@ -1,5 +1,6 @@
 import { RULES, CATEGORIES } from "../lib/workshop.js";
 import { rejectForeignOrigin } from "../lib/apiGuard.js";
+import { callTool } from "../lib/claude.js";
 
 // "Go bigger" is a spoken move in the workshop room: any request containing
 // big/bold flips this turn's suggestions to transformative reshapes. Detected
@@ -56,6 +57,8 @@ YOUR STYLE:
 - Reference their actual role and responsibilities. NO generic advice.
 - Each idea is a SINGLE ACTION SENTENCE, 15 to 20 words. Start with a verb. No benefit explanations.
 - Calibrate sophistication to their fluency. Don't suggest basics to advanced users or advanced moves to beginners.
+- Answer what they actually asked. If they ask how to make something, suggest how to make it; never answer a making question only with ways to check a draft they do not have yet.
+- Assume the obvious version (a first draft, a summary, a rewrite, a brainstormed list) is already in place or on the board; give the version of their ask they would not have thought of themselves. Across the whole conversation, at most one suggestion may be a simulation or role-play.
 - Pasting prompts into a chatbot is only ONE way to use AI. Where their fluency allows, also reach for: persistent assistants preloaded with their frameworks, AI critiquing or red-teaming a design, role-play practice for hard conversations, meeting transcription plus synthesis, AI inside tools they already use, and (for adoptive+ teams) automated multi-step workflows.
 - Suggestions may be accelerators (the same deliverable, better or faster) or transformative (they change how the work happens). A transformative suggestion must state or imply its first small probe within the sentence.
 - If they push back, change the angle entirely: a different task from their responsibilities, a different modality, or a different altitude. Never a variation of the rejected idea.
@@ -117,6 +120,8 @@ You are a direct, practical AI expert coaching a manager through one rule of the
 
 YOUR COACHING STYLE:
 - Be specific, not motivational. "Have a 1:1 with your senior designer about what AI means for their role" beats "Make sure to address concerns."
+- They know the standard playbook (a demo, a champion, a pilot, celebrating wins). Suggest designed moves: name what changes, in which existing ritual or artifact, and what it replaces.
+- When they say they have already done something, believe them and leave that ground at once. Never offer another way to do the same thing; go to what usually stalls next: who gains or loses standing, what the old way still rewards, what was never retired.
 - Reach for the whole move palette: conversations, structural defaults (templates, checklists, ownership changes), practice fields, social proof, and measurement rhythms. When a default can carry the intent, prefer it over another meeting.
 - When they push back ("that won't work because..."), adapt immediately. Ask what WOULD work for their specific situation. Never defend a suggestion.
 - Connect the dots across rules when natural. If their Rule 4 (Start Small) actions mention a pilot, reference that in Rule 5 (Make Progress Visible) coaching.
@@ -290,48 +295,20 @@ export default async function handler(req, res) {
   };
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 500,
-        system: sys,
-        tools: [chatTool],
-        tool_choice: { type: "tool", name: chatTool.name },
-        messages,
-      }),
+    const result = await callTool({
+      label: "chat",
+      tool: chatTool,
+      system: sys,
+      fallbackMaxTokens: 500,
+      messages,
     });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Claude API error:", response.status, errText);
-      return res
-        .status(502)
-        .json({ error: `Claude API returned ${response.status}` });
+    if (!result.ok) {
+      return res.status(result.status).json({ error: result.error });
     }
 
-    const data = await response.json();
-    const toolBlock = data.content?.find((b) => b.type === "tool_use");
-    if (!toolBlock?.input) {
-      console.error(
-        "Expected tool_use block missing. stop_reason:",
-        data.stop_reason,
-        "| content types:",
-        data.content?.map((b) => b.type).join(",") || "none",
-        "| raw response:",
-        JSON.stringify(data).slice(0, 1000),
-      );
-      return res.status(500).json({ error: "Model did not return reply" });
-    }
-
-    const content = toolBlock.input.content || "";
-    const ideas = Array.isArray(toolBlock.input.ideas)
-      ? toolBlock.input.ideas
+    const content = result.input.content || "";
+    const ideas = Array.isArray(result.input.ideas)
+      ? result.input.ideas
       : [];
     return res.status(200).json({
       content,

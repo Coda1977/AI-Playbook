@@ -1,5 +1,6 @@
 import { RULE_NAMES, CATEGORY_NAMES } from "../lib/workshop.js";
 import { rejectForeignOrigin } from "../lib/apiGuard.js";
+import { callTool } from "../lib/claude.js";
 
 function buildItemsBlock(items, nameMap) {
   const lines = [];
@@ -110,49 +111,19 @@ Use the submit_one_page_plan tool to return the big move.`;
   };
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 4096,
-        tools: [planTool],
-        tool_choice: { type: "tool", name: planTool.name },
-        messages: [{ role: "user", content: prompt }],
-      }),
+    const result = await callTool({
+      label: "synthesis",
+      tool: planTool,
+      fallbackMaxTokens: 4096,
+      messages: [{ role: "user", content: prompt }],
     });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Claude API error:", response.status, errText);
-      return res
-        .status(502)
-        .json({ error: `Claude API returned ${response.status}` });
-    }
-
-    const data = await response.json();
-    const toolBlock = data.content?.find((b) => b.type === "tool_use");
-    if (!toolBlock?.input) {
-      console.error(
-        "Expected tool_use block missing. stop_reason:",
-        data.stop_reason,
-        "| content types:",
-        data.content?.map((b) => b.type).join(",") || "none",
-        "| raw response:",
-        JSON.stringify(data).slice(0, 1000),
-      );
-      return res
-        .status(500)
-        .json({ error: "Model did not return structured plan" });
+    if (!result.ok) {
+      return res.status(result.status).json({ error: result.error });
     }
 
     // leftOut is the model's self-commitment to a single thread, not plan
     // content; log it for observability, keep it out of the response.
-    const { leftOut, ...move } = toolBlock.input;
+    const { leftOut, ...move } = result.input;
     if (Array.isArray(leftOut) && leftOut.length) {
       console.log("Big Move leftOut:", leftOut.join(" | "));
     }
