@@ -16,7 +16,6 @@ import { callTool } from "../lib/claude.js";
 // commitment fields with a deterministic server trim, and forced modality
 // coverage.
 
-
 function buildPrompt(intake, categoriesBlock) {
   const helpLabels = (intake.helpWith || []).join(", ");
   // A preloaded assistant needs someone able to set it up. When both manager
@@ -58,7 +57,7 @@ THINK AT TWO ALTITUDES:
 
 FLOORS (every idea must clear all of them):
 - It serves an outcome this manager owns and can act on within their own authority.
-- Hard constraints in the failure risks are generation constraints. If veterans reject AI-written customer emails, nothing sends AI-written customer emails (drafting that a human rewrites is fine, and say so). If employee data must stay in approved tools, nothing feeds individual employee data to AI. An idea that brushes a named failure risk has near-zero adoption probability: its sentence must name the safe input form (anonymized, aggregated, no individual records), or drop it. When the named risk is about perception ("anything that smells like AI reading employee data"), mitigation is not enough; keep AI away from that data entirely.
+- Hard constraints in the failure risks are generation constraints. If veterans reject AI-written customer emails, nothing sends AI-written customer emails (drafting that a human rewrites is fine, and say so). If employee data must stay in approved tools, nothing feeds individual employee data to AI. When the named risk is about perception ("anything that smells like AI reading employee data"), mitigation is not enough; keep AI away from that data entirely.
 - Ideas the TEAM runs must be feasible for THIS team: ${teamFluencyFloor(intake.teamFluency)} An idea only the manager runs personally may use the manager's fluency instead, and a tool the manager sets up once that the team then uses by simple chat counts as team-feasible.
 - When the valuable version of an idea exceeds the team's fluency, offer the version this team could run today (an automated digest becomes a weekly paste-into-chat habit); the feasible version is the idea's first probe.
 - The floor constrains an idea's FIRST PROBE, never its destination's size. A Capable team can adopt a transformative reshape whose probe is one preloaded assistant or one paste-into-chat habit. Fluency limits how an idea starts, not how big it is allowed to be.

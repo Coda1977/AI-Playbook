@@ -1,4 +1,4 @@
-# Session Log: 2026-11-09/10, past the obvious (PRs #11 to #14)
+# Session Log: 2026-11-09/10, past the obvious (PRs #11 to #16)
 
 Full record of the November session: pre-workshop fixes, the "past the obvious" work for an experienced audience, a review of Yonatan's own change-management material, and a run of small tested changes. Everything listed under "Shipped" is merged to `master` and live. The detailed numbers also sit in `CLAUDE.md` (November section and Key learnings).
 
@@ -12,6 +12,39 @@ Full record of the November session: pre-workshop fixes, the "past the obvious" 
 | #14 | The plan gets a rough finish date ("early February 2027") instead of the exact day 90 days out | Exact-day dates in 9 of 18 saved plans before, 0 of 12 after. Live check: four plans, none |
 
 Cost, measured on token counts from the API: about $0.29 per participant for use cases + change plan + Big Move + six chat messages (about $0.14 on the Sonnet 4.6 fallback path).
+
+After the table above was written, one more change shipped the same day:
+
+| PR | What | Checked how |
+|---|---|---|
+| #16 | The use-case prompt no longer tells the model to "name the safe input form (anonymized, aggregated, no individual records)". That sentence stamped "anonymized" on ideas whenever an intake mentioned sensitive data | Yonatan's own intake, 5 runs per version: the word in 18 of 65 ideas before, 2 of 61 after. Removing only the bracketed words did nothing (14 of 52). HR persona, 4 runs: ideas still used aggregated or name-stripped inputs |
+
+## Yonatan's manual journey (account managers)
+
+He ran a full journey by hand in his own browser: 14 use cases (5 starred), 16 plan actions, 14 chat suggestions in the strategy chat (5 taken), the Big Move. What it showed:
+
+- The plan hangs together: the living account plan he starred returns as a plan step, as the dashboard measure and as the Big Move.
+- "Go bigger" in the strategy chat became "riskier". He took 0 of 6 suggestions in Script the Steps and wrote "those are just wierd ideas, i want you to be creative but realistic". Contained moves were taken, all-or-nothing moves were not. Open, his call.
+- Four of five bigger replies repeated nearly the same sentence about risk.
+- "Anonymized" on 5 of 14 use cases: traced to one prompt sentence and removed (PR #16).
+- About 6 of 16 plan actions were about call prep, and he had to tell the chat "you are focusing on calls". Traced to the intake, not the prompt (below).
+- The plan mentions "the two pilot AMs" but no action chooses them; one action says "never blame" and another shows results "by name".
+
+## Why the plan fixated on call prep
+
+His hypothesis: the plan follows the first clause of the success vision, and the prompt has too many lines pointing it there. Tested on his exact intake by removal only, 5 runs of 12 actions per version. Actions about prep, calls or QBRs:
+
+| Version | Count |
+|---|---|
+| Live | 30 of 60 |
+| Vision written in reverse order (prep last) | 26 of 60 |
+| The three vision-pull phrases removed from the prompt | 27 of 60 |
+| The "QBR-prep experiment" example removed | 31 of 60 |
+| No starred use cases | 30 of 60 |
+| Vision without "Prep time is cut by about half" | 17 of 60 |
+| The number moved to churn ("flagged a month earlier") | 20 of 60 |
+
+The first five rows are within run-to-run variation. The rules each want a yardstick (Definition of Done, expand-when, hours saved), and the only number in the vision becomes it. With the number on churn, the plan reorganised around "flagged a month earlier". Nothing was changed: the plan is doing what the vision asked. The use cases showed no such concentration, and the chat was not tested separately.
 
 ## Tested and not shipped
 
@@ -51,5 +84,6 @@ They were written in the session scratchpad, which is temporary, and are not in 
 - `clarity.mjs`: first-read clarity. The reader is the manager themself, one read on a shared screen: CLEAR / REREAD / UNCLEAR, with a cause.
 - `cue-ab.mjs` and variants: strategy-chat before/after on 3 personas x 3 rules x 3 messages.
 - `date-check2.mjs`, `cost.mjs`, `tryq.mjs`: exact-date count, cost per participant, the intake-question run.
+- `mkablate.cjs`, `ablate.mjs`, `ablcount.cjs`: trial copies of the prompts with one piece removed each, the runs on Yonatan's account-manager intake (plus two vision probes and the HR check), and the topic and word counts.
 
 One trap worth knowing: a shell heredoc silently collapsed the backslashes in a regular expression, and the first date count reported zero for both before and after. Patterns belong in a file written directly, checked against a phrase known to match.
