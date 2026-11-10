@@ -5,7 +5,7 @@ Workshop tool for managers: answer 7 intake questions, then AI helps discover pe
 ## Tech stack
 
 - **Frontend**: React 19, Vite 7, Tailwind CSS 4
-- **API**: Vercel Serverless Functions (Node) calling the Claude API (Sonnet 4.6)
+- **API**: Vercel Serverless Functions (Node) calling the Claude API (Opus 5.5 at low effort, with automatic fallback to Sonnet 4.6)
 - **State**: React Context + `localStorage` (no database)
 - **Export**: `docx` + `file-saver` for Word output
 - **Hosting**: Vercel (auto-deploys from `master`)
