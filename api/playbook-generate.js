@@ -24,7 +24,15 @@ export default async function handler(req, res) {
       day: "numeric",
     });
   const today = fmtDate(new Date());
-  const day90 = fmtDate(new Date(Date.now() + 90 * 24 * 60 * 60 * 1000));
+  // A rough landing point on purpose: handed the exact day, the model stamped
+  // it on every plan's finish line ("by February 8"), the same oddly precise
+  // date for everyone in the room.
+  const d90 = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+  const d90Part =
+    d90.getDate() <= 10 ? "early " : d90.getDate() <= 20 ? "mid-" : "late ";
+  const day90 =
+    d90Part +
+    d90.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
   const rulesBlock = RULES.map(
     (r) =>
@@ -58,7 +66,7 @@ CONTEXT, THIS SPECIFIC PERSON:
 </manager_profile>${starredBlock}
 
 IMPORTANT CONTEXT SIGNALS TO PAY ATTENTION TO:
-- Today is ${today}; the 90-day vision lands around ${day90}. Most actions need no calendar date; when one does name a date, month, or quarter, it must fall inside that window, and never invent the timing of the team's own cycles or events.
+- Today is ${today}; the 90-day vision lands around ${day90}. Most actions need no calendar date; when one does name a month or quarter, it must fall inside that window. Write the 90-day finish line as "in 90 days" or by its month, never as an exact day. Never invent the timing of the team's own cycles or events.
 - The gap between manager fluency and team fluency is critical. A Transformative manager with a Not Yet Started team needs to slow down and build safety. A Capable manager with a Capable team needs momentum and scripted steps.
 - If the manager is "Not yet started," their own AI learning is action #1 in Rule 1 (Start at the End), they must try it first before asking anyone else to.
 - If the failure risks mention senior people resisting, prioritize Rule 2 (Make It Safe), especially naming what those people personally stand to lose (expertise, identity, standing), not just their stated objection, and creating space for honest conversation.
