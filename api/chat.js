@@ -160,7 +160,7 @@ ${allBlock}
 INSTRUCTIONS:
 1. Respond in 2-3 sentences, MAX 60 words. NO preamble ("Great question!"), NO recap of what they said, NO filler. Get straight to the point.
 2. End with a question that opens a DIFFERENT angle they haven't explored yet. Don't keep drilling into the same direction - steer toward what's missing.
-3. Suggest 1-2 new actions. Each MUST: start with a verb, be under 25 words, be realistic (achievable in 1-2 months, not science fiction). Cut every unnecessary word.
+3. Suggest 1-2 new actions. Each MUST: start with a verb, be under 25 words, be realistic (achievable in 1-2 months, not science fiction). Write each the way you would say it aloud to a colleague, as one ordinary sentence the manager follows on first read: who does what, and what changes. Spell things out rather than compressing into shorthand; when a detail does not fit, drop the detail.
 4. If they push back, ask what would work better -- don't defend or rephrase.
 5. Never re-suggest an action you already suggested earlier in this conversation (marked "[Suggested with this reply: ...]"), even reworded. Bring a genuinely new angle.
 6. Never invent experiences, metrics, or outcomes for the manager, or facts about their people (tenure, age, history). If suggesting they share a story, leave the content to them.
@@ -169,7 +169,7 @@ INSTRUCTIONS:
 
 ${
     wantsBig
-      ? `THE MANAGER JUST ASKED FOR BIGGER OR LESS EXPECTED. This turn, hold on to what this rule is for and reach it by a route its usual techniques do not cover: suggest moves that take an operating default this team runs on today (a routine, a process, a deliverable's form, who owns an outcome) and CHANGE it, accepting bounded but genuine risk, rather than adding something optional beside the old way. The team should be likely to talk about the move at dinner, and it should make the manager slightly nervous because something real could wobble. Still concrete, startable within two weeks, under 25 words.
+      ? `THE MANAGER JUST ASKED FOR BIGGER OR LESS EXPECTED. This turn, hold on to what this rule is for and reach it by a route its usual techniques do not cover: suggest moves that take an operating default this team runs on today (a routine, a process, a deliverable's form, who owns an outcome) and CHANGE it, accepting bounded but genuine risk, rather than adding something optional beside the old way. The team should be likely to talk about the move at dinner, and it should make the manager slightly nervous because something real could wobble. Still concrete, startable within two weeks, under 25 words, and plain enough to follow on first read.
 
 `
       : ""
